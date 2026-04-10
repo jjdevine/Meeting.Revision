@@ -1,6 +1,9 @@
 (function () {
   "use strict";
 
+  // ── Cache version — bump this when pushing deck changes ─────────
+  const CACHE_VERSION = "2";
+
   // ── State ──────────────────────────────────────────────────────
   const STORAGE_KEY = "meetingprep";
   let manifest = null;
@@ -41,14 +44,14 @@
 
   // ── Data loading ───────────────────────────────────────────────
   async function loadManifest() {
-    const resp = await fetch("data/manifest.json");
+    const resp = await fetch("data/manifest.json?v=" + CACHE_VERSION);
     manifest = await resp.json();
   }
 
   async function loadDeck(id) {
     if (decks[id]) return decks[id];
     const entry = manifest.decks.find((d) => d.id === id);
-    const resp = await fetch("data/" + entry.file);
+    const resp = await fetch("data/" + entry.file + "?v=" + CACHE_VERSION);
     decks[id] = await resp.json();
     return decks[id];
   }
