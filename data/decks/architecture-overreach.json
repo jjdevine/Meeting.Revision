@@ -203,6 +203,20 @@
       "question": "Someone proposes a complex pattern. What's the quickest way to test if it's justified?",
       "answer": "Ask two questions:\n1. \"What exact problem are we solving that the simpler option does not solve?\"\n2. \"Who owns it after launch?\"",
       "notes": "These two questions cover the most common failure modes of overreach. The first demands a concrete deficiency in the simple option. The second demands operational ownership — architecture that nobody owns degrades quickly. If the proposer can't name the problem or the owner, the pattern is probably unjustified."
+    },
+    {
+      "id": "ao-18",
+      "type": "scenario",
+      "category": "Container Hosting",
+      "question": "Someone says: 'We need AKS for our containerised services.' How do you evaluate this?",
+      "answer": "\"Azure Container Apps gives us container hosting with auto-scaling, Dapr integration, and KEDA-based scaling without managing clusters. AKS is justified when we need custom networking, service mesh, advanced scheduling, or platform standardisation around Kubernetes. For ordinary business services in containers, Container Apps is the simpler default. What specific AKS capability do we need that Container Apps doesn't provide?\"",
+      "notes": "Azure Container Apps is Kubernetes under the hood but abstracts away cluster management. It supports HTTP/event-driven scaling, Dapr for microservices patterns, managed ingress, and revision-based deployments. AKS requires managing the cluster, networking, upgrades, and security patches. The decision: do you need the control plane (AKS) or just the container runtime (Container Apps)? Most business services need the runtime, not the control plane.",
+      "followUps": [
+        {
+          "question": "When is AKS clearly the right choice over Container Apps?",
+          "answer": "AKS wins when you need: custom CNI networking, service mesh (Istio, Linkerd), GPU scheduling, Windows containers, direct Kubernetes API access, advanced pod configuration, or organisation-wide Kubernetes platform standardisation. Container Apps wins for: standard HTTP/event services, Dapr-based microservices, job-style batch processing, and teams without Kubernetes expertise."
+        }
+      ]
     }
   ]
 }

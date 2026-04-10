@@ -90,13 +90,18 @@
       "type": "scenario",
       "category": "Just Use Kubernetes",
       "question": "Someone says: 'Just use Kubernetes.' What do you say?",
-      "answer": "• \"Which problem are we solving that simpler Azure hosting doesn't solve?\"\n• \"Kubernetes is a platform choice with a permanent ops tax.\"\n• \"Default should be the simplest runtime that meets the control, scale, and isolation requirements.\"",
+      "answer": "• \"Which problem are we solving that simpler Azure hosting doesn't solve?\"\n• \"Azure Container Apps gives us containers without cluster management — do we actually need the cluster?\"\n• \"Kubernetes is a platform choice with a permanent ops tax.\"\n• \"Default should be the simplest runtime that meets the control, scale, and isolation requirements.\"",
       "notes": "Kubernetes (AKS in Azure) is a powerful container orchestration platform, but it comes with significant operational overhead: cluster management, networking, security patching, monitoring, and a skilled platform team. For many standard business services, Azure Functions, App Service, or Container Apps provide sufficient hosting without the operational tax. Kubernetes is justified when you need complex container orchestration, custom networking, service mesh, advanced scheduling, or strong platform standardisation around containers.",
       "followUps": [
         {
           "question": "When IS Kubernetes the right choice?",
           "answer": "When you have:\n• Complex container workloads needing orchestration\n• Strong platform standardisation around containers\n• Advanced operational controls (service mesh, custom networking)\n• Team capability to own cluster complexity\n\nThe line: 'I'm happy to use Kubernetes when the workload needs Kubernetes. I don't want to buy cluster complexity for ordinary services.'",
           "notes": "The alternative Azure hosting options are: Functions (event-driven, serverless), App Service (managed web hosting), Container Apps (simplified container hosting with Kubernetes under the hood but without cluster management). Each is simpler than raw AKS."
+        },
+        {
+          "question": "What is Azure Container Apps and when is it the right middle ground?",
+          "answer": "Container Apps is Kubernetes under the hood but abstracts away cluster management. It supports HTTP and event-driven auto-scaling, Dapr integration, managed ingress, and revision-based deployments. Use it when you need containers but don't need the Kubernetes control plane. It's the default for containerised business services that don't require custom networking, service mesh, or advanced pod configuration.",
+          "notes": "Container Apps fills the gap between App Service (managed web hosting) and AKS (full Kubernetes). It's increasingly the right answer when the team says 'we want containers' without the operational overhead of AKS."
         }
       ]
     },
@@ -200,6 +205,20 @@
       "question": "What single line is the most useful in the entire objection handlers pack?",
       "answer": "\"What requirement eliminates the simple option?\"",
       "notes": "This line kills a lot of nonsense without sounding political. It works against every cliché: single pane, golden source, real-time, AI, Kubernetes, shared platform. If the proposer can name a concrete requirement, you have a real discussion. If they can't, the simple option wins."
+    },
+    {
+      "id": "oh-17",
+      "type": "scenario",
+      "category": "Security & Compliance",
+      "question": "Someone says: 'We need to make sure this is compliant.' What do you say?",
+      "answer": "• \"Compliant with what specifically: GDPR, SOC 2, ISO 27001, or a regional regulation?\"\n• \"Compliance is a set of specific controls, not a general feeling of safety.\"\n• \"Let's identify the specific controls: data residency, encryption, access audit, retention, and deletion capability.\"",
+      "notes": "'Compliant' without a named framework is a slogan, not a requirement. The response forces specificity: which regulation, which controls, which data classification? Once named, compliance becomes a set of concrete architecture constraints: data must reside in region X, access must be audited, PII must be encrypted, retention must be limited, deletion must be possible. Those are actionable design inputs.",
+      "followUps": [
+        {
+          "question": "What are the most common compliance requirements for HR/payroll platforms?",
+          "answer": "1. Data residency — PII stored in specific regions\n2. Encryption — at rest and in transit\n3. Access control — RBAC with audit logging\n4. Data retention — defined periods with automated cleanup\n5. Right to erasure — ability to delete individual records\n6. Subject access requests — ability to export all data for an individual\n7. Separation of duties — payroll preparers vs approvers\n8. Breach notification — processes and timelines"
+        }
+      ]
     }
   ]
 }

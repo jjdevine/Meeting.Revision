@@ -181,6 +181,98 @@
       "question": "What are the four payroll-specific lines worth memorising?",
       "answer": "1. \"For payroll, correctness and replay matter more than architectural elegance.\"\n2. \"Any dynamic rules story needs versioning, testability, and audit by effective date.\"\n3. \"A shared platform decision is only justified if multiple domains truly need the same capability.\"\n4. \"For payroll and HR, business ownership of change is a stronger signal than technical preference.\"",
       "notes": "These lines work because they demonstrate domain awareness. 'Correctness and replay' shows you understand payroll's primary concern. 'Versioning and effective date' shows you know payroll is time-sensitive. 'Business ownership of change' shows you think about who maintains the system, not just how it's built."
+    },
+    {
+      "id": "dc-21",
+      "type": "flashcard",
+      "category": "Talent / Recruitment",
+      "question": "What is the default technical approach for talent/recruitment architecture?",
+      "answer": "Treat as workflow-heavy with heavy SaaS integration. Candidate pipelines are typically event-driven state machines. Use Logic Apps for ATS/SaaS connector integration, Event Grid for pipeline stage change notifications, and service-owned domain logic for offer decisioning and eligibility rules.",
+      "notes": "Talent/recruitment has distinctive patterns: candidate pipelines move through states (applied, screened, interviewed, offered, hired), most organisations use third-party ATS (Applicant Tracking Systems) heavily, and the handoff from 'candidate' to 'employee' crosses a major bounded context boundary. Candidates are NOT employees — they have different data models, different lifecycle events, and different owners. The candidate-to-employee transition is an integration event, not a simple status change."
+    },
+    {
+      "id": "dc-22",
+      "type": "scenario",
+      "category": "Talent / Recruitment",
+      "question": "Someone says: 'The candidate and employee should be the same record.' Is this right?",
+      "answer": "\"No. A candidate is a different bounded context from an employee. Candidates have pipeline states, interview feedback, offer terms, and recruitment-specific data. Employees have org assignments, payroll profiles, and absence entitlements. When a candidate is hired, that's an integration event — create an employee record from the offer data. Don't collapse two different lifecycle models into one record.\"",
+      "notes": "This is the canonical model anti-pattern applied to talent. Merging candidate and employee records creates a bloated entity that serves neither domain well. The recruitment team needs pipeline management; HR needs workforce management. The hire event is the boundary — keep the models separate and translate at the transition.",
+      "followUps": [
+        {
+          "question": "What questions should you ask about a talent/recruitment system?",
+          "answer": "1. Which ATS/SaaS tools are involved?\n2. Is the pipeline state machine owned by the ATS or by us?\n3. What data flows from recruitment into the employee record at hire?\n4. Are there compliance requirements around candidate data retention and deletion?\n5. How are interview feedback and offer approvals managed?"
+        }
+      ]
+    },
+    {
+      "id": "dc-23",
+      "type": "flashcard",
+      "category": "Compensation",
+      "question": "What is the default technical approach for compensation/merit cycle architecture?",
+      "answer": "Treat as correctness-critical batch processing with effective dating. Keep comp calculation logic code-first in the owning service. Use batch processing for merit cycles and annual reviews. Expect Excel-based input from HR/managers. Publish results as events for downstream systems (payroll, finance).",
+      "notes": "Compensation planning shares payroll's concern for correctness and effective dating but is typically batch-oriented: annual merit cycles, off-cycle adjustments, and equity grants happen in planning windows, not real-time. Common patterns: managers submit recommendations (often via Excel or a planning UI), comp team reviews and adjusts, approvals cascade, and approved changes feed into payroll effective on a future date. The effective date matters — comp changes are prospective, and payroll must pick them up at the right time."
+    },
+    {
+      "id": "dc-24",
+      "type": "scenario",
+      "category": "Compensation",
+      "question": "Someone says: 'The comp planning tool should update payroll in real-time as managers approve changes.' Is this right?",
+      "answer": "\"Comp changes are effective-dated and usually go through a review cycle before being final. Pushing approved-but-not-final changes to payroll in real-time risks incorrect pay. The pattern should be: accumulate approved changes during the planning window, finalise the cycle, then publish a batch of confirmed changes to payroll with their effective dates. Payroll picks them up when they become effective.\"",
+      "notes": "This is the 'everything real-time' anti-pattern applied to compensation. Comp cycles are inherently batch: they have a planning window, a review period, and a finalisation step. Real-time push to payroll creates risk of paying on unapproved changes. The safe pattern is batch finalisation with effective-dated events."
+    },
+    {
+      "id": "dc-25",
+      "type": "flashcard",
+      "category": "Security & Compliance",
+      "question": "What security and compliance concerns should you raise in HR/payroll architecture discussions?",
+      "answer": "1. Data sovereignty — where is PII stored and processed?\n2. Encryption — at rest (Azure Storage Service Encryption, TDE) and in transit (TLS)\n3. Data protection — GDPR right to erasure, data minimisation, retention policies\n4. Compliance frameworks — SOC 2, ISO 27001, regional requirements\n5. Access audit — who accessed what sensitive data and when?\n6. Separation of duties — payroll preparers vs approvers",
+      "notes": "HR/payroll data is some of the most sensitive in any organisation: salaries, bank details, tax IDs, medical/disability information, disciplinary records. Every architecture decision should consider: where is this data stored (data sovereignty), who can access it (RBAC + audit), how long is it retained (retention policies), and can we prove compliance (audit trails). These questions come up in every serious architecture review and you should be ready for them."
+    },
+    {
+      "id": "dc-26",
+      "type": "scenario",
+      "category": "Security & Compliance",
+      "question": "Someone asks: 'Where is the employee data stored? Is it GDPR-compliant?' What do you say?",
+      "answer": "\"GDPR compliance is not just about where data is stored — it's about the full lifecycle. We need to answer: where is PII at rest and in transit? What's our lawful basis for processing? Can we fulfil right-to-erasure and subject access requests? What's the retention policy? Who has access and is it audited? Data sovereignty determines the Azure region, but compliance requires the full picture.\"",
+      "notes": "A common mistake is reducing GDPR to 'store it in the EU.' Compliance requires: lawful basis for processing, data minimisation (don't collect what you don't need), retention limits (don't keep it forever), right to erasure (can you actually delete all of someone's data?), subject access requests (can you produce all data held on a person?), and breach notification processes. Architecture must support all of these — they're not just legal concerns."
+    },
+    {
+      "id": "dc-27",
+      "type": "flashcard",
+      "category": "Observability",
+      "question": "What is the default approach for observability in an Azure HR/payroll platform?",
+      "answer": "1. Structured logging → Application Insights / Azure Monitor\n2. Distributed tracing → Application Insights with correlation IDs across services\n3. Metrics and alerting → Azure Monitor metrics and alert rules\n4. Health checks → service-level liveness and readiness probes\n5. Dashboards → Azure Dashboards or Grafana for operational visibility",
+      "notes": "Observability is cross-cutting infrastructure — a legitimate platform concern. Every service should emit structured logs, participate in distributed tracing, and expose health endpoints. Application Insights provides the unified APM layer in Azure. The key meeting question to ask about any new architecture proposal: 'What's the observability story? How will we know if this is working, and how will we debug it when it isn't?'"
+    },
+    {
+      "id": "dc-28",
+      "type": "scenario",
+      "category": "Observability",
+      "question": "Someone proposes a new event-driven architecture but doesn't mention monitoring. What do you say?",
+      "answer": "\"How do we know if messages are being processed? What's the alerting story for dead-letter queues, processing lag, and failed consumers? Event-driven architectures need more observability, not less — the flow is invisible by default. We need correlation IDs across publishers and consumers, dead-letter monitoring, and processing latency dashboards before this goes live.\"",
+      "notes": "Event-driven systems are harder to observe than synchronous ones because the flow is asynchronous and distributed. Critical observability requirements: dead-letter queue monitoring (messages that failed processing), consumer lag (how far behind is the consumer), end-to-end correlation (trace an event from publisher through all consumers), and processing failure alerts. 'How will we debug this at 2am?' is a legitimate architecture question."
+    },
+    {
+      "id": "dc-29",
+      "type": "flashcard",
+      "category": "Reporting / Analytics",
+      "question": "How does data get from operational services to the analytical store?",
+      "answer": "Use Azure Data Factory or Synapse Pipelines for ETL/ELT. Services publish curated datasets (not raw database dumps) on a schedule or triggered by events. Data Factory orchestrates extraction, transformation, and loading into the analytical store (Data Lake, Synapse, SQL). From there, Power BI semantic models provide governed access.",
+      "notes": "The reporting cards describe the target (curated store + Power BI + RLS) but someone will ask 'how does the data get there?' Azure Data Factory is the managed ETL/ELT orchestration service — it handles scheduling, data movement, transformation, and monitoring. Key principles: services own what they publish (don't scrape their databases), transformations should be explicit and versioned, and pipeline failures need alerting and retry logic. The pipeline is owned by the analytics/data team, not the service teams."
+    },
+    {
+      "id": "dc-30",
+      "type": "scenario",
+      "category": "Cross-Domain",
+      "question": "An employee transfers between legal entities. This affects HR (org assignment), payroll (tax profile, pay elements), benefits (plan eligibility), identity (access rights), and reporting (headcount). How do you coordinate this?",
+      "answer": "\"This is an event-driven coordination problem, not a single orchestrated transaction. HR owns the transfer event (EmployeeTransferred). Payroll, benefits, identity, and reporting each subscribe and handle their own domain logic independently. Each consumer is idempotent and owns its own reaction. Don't try to build one orchestration that touches all five domains synchronously.\"",
+      "notes": "Cross-domain coordination is where the framework gets tested. The transfer event is published once; each domain reacts independently. Payroll updates the tax profile and pay elements. Benefits checks plan eligibility for the new entity. Identity adjusts access rights. Reporting updates headcount. Each domain owns its timeline and error handling. If benefits processing fails, it doesn't block payroll. This is the event fan-out pattern (Event Grid or Service Bus topics) with domain-owned consumers.",
+      "followUps": [
+        {
+          "question": "What if one domain's processing fails? How do you handle partial completion?",
+          "answer": "Each domain owns its own retry and error handling. Use dead-letter queues for failed messages, alerting for processing failures, and domain-specific compensation logic. Don't build a distributed transaction across five domains — accept eventual consistency and design each consumer to be independently recoverable."
+        }
+      ]
     }
   ]
 }

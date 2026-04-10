@@ -181,6 +181,30 @@
       "question": "An architect says: 'Let's use Confluent Kafka for all our messaging.' How do you respond without sounding dismissive?",
       "answer": "\"I'm not against Kafka. I want the requirement that justifies it over the simpler options we already have in Azure. Are we dealing with commands, events, or streams? For business commands, Service Bus is the native option. For event fan-out, Event Grid. For high-throughput stream ingestion, Event Hubs — which is Kafka-compatible. What specific capability does Confluent Kafka provide that these don't cover?\"",
       "notes": "This response demonstrates the pattern: don't attack the product, ask for the requirement. It also shows Azure awareness (Event Hubs has Kafka compatibility). The response classifies the messaging pattern (command/event/stream) and maps to Azure defaults before discussing alternatives."
+    },
+    {
+      "id": "mr-21",
+      "type": "scenario",
+      "category": "Observability",
+      "question": "Someone proposes a new architecture but doesn't mention how it will be monitored. What do you say?",
+      "answer": "• \"How will we know if this is working?\"\n• \"What's the alerting story for failures, latency, and resource exhaustion?\"\n• \"The architecture diagram shows the happy path. What does the 2am debugging experience look like?\"\n• \"We need observability designed in, not bolted on after go-live.\"",
+      "notes": "Observability is a legitimate counter to any architecture proposal. It's not obstructive — it's practical. Event-driven systems need dead-letter monitoring. Microservices need distributed tracing. Batch processes need completion and failure alerting. If the proposer hasn't thought about observability, the architecture isn't ready."
+    },
+    {
+      "id": "mr-22",
+      "type": "scenario",
+      "category": "Security & Compliance",
+      "question": "Someone asks 'Where is the data stored?' or 'Is this GDPR-compliant?' How do you respond?",
+      "answer": "• \"Data sovereignty determines the Azure region, but compliance is the full lifecycle: collection, processing, storage, access, retention, and deletion.\"\n• \"For HR/payroll data, we need to answer: what's the lawful basis, who has access (audited), what's the retention policy, and can we fulfil erasure and subject access requests?\"\n• \"Compliance is an architecture constraint, not an afterthought.\"",
+      "notes": "These questions come up in every serious architecture review for HR/payroll systems. Don't hand-wave with 'we're in the EU region.' Show you understand the full picture: data minimisation, lawful basis for processing, audited access logs, retention and deletion policies, and breach notification processes. The meeting line: 'Compliance is a design constraint. Let's make sure the architecture supports it, not just the storage location.'"
+    },
+    {
+      "id": "mr-23",
+      "type": "scenario",
+      "category": "Cost",
+      "question": "Someone proposes an expensive or heavyweight solution. How do you bring cost into the discussion without sounding cheap?",
+      "answer": "• \"What's the monthly run cost of this option vs the simpler alternative?\"\n• \"Cost includes infrastructure, licensing, skills, and operational support — not just the Azure bill.\"\n• \"The simpler option is usually the cheaper option. What's the requirement that justifies the cost difference?\"\n• \"Who owns the budget for this after go-live?\"",
+      "notes": "Cost is a powerful and concrete argument. Infrastructure cost (Azure consumption), licensing cost (third-party tools), skills cost (do we need to hire or train?), and operational support cost (who maintains it?) all count. The question 'What's the monthly run cost?' forces specifics and often deflates enthusiasm for heavyweight options. Don't be afraid to ask it early — it's not being cheap, it's being responsible."
     }
   ]
 }

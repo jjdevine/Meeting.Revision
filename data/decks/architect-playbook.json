@@ -296,7 +296,7 @@
       "id": "ap-28",
       "type": "multi-choice",
       "category": "Eventing & Messaging",
-      "question": "A payroll adjustment command needs reliable, exactly-once processing by a single consumer. Which service?",
+      "question": "A payroll adjustment command needs reliable, at-least-once processing by a single consumer. Which service?",
       "options": [
         "Event Grid",
         "Event Hubs",
@@ -305,7 +305,7 @@
       ],
       "correctOption": 2,
       "answer": "Service Bus.",
-      "notes": "This is a command (directed instruction to one processor) that needs durable, reliable delivery. Azure Service Bus is the enterprise broker for high-value business messaging — it supports queues (one consumer), topics (pub/sub), sessions, dead-lettering, and transactions. Event Grid is for reactive event fan-out. Event Hubs is for high-throughput stream ingestion. Storage Queues are simpler/cheaper but lack the enterprise features needed for payroll-critical processing."
+      "notes": "This is a command (directed instruction to one processor) that needs durable, reliable delivery. Service Bus provides at-least-once delivery — the consumer must be idempotent (able to safely process the same message twice). True exactly-once delivery is not achievable in distributed messaging without application-level idempotency. Azure Service Bus is the enterprise broker for high-value business messaging — it supports queues (one consumer), topics (pub/sub), sessions, dead-lettering, and transactions. Event Grid is for reactive event fan-out. Event Hubs is for high-throughput stream ingestion. Storage Queues are simpler/cheaper but lack the enterprise features needed for payroll-critical processing."
     },
     {
       "id": "ap-29",
@@ -322,6 +322,36 @@
       "question": "Someone says: 'Just send all the data to the data lake and we'll report from there.' What do you say?",
       "answer": "\"A data lake is not a substitute for service ownership and clean boundaries. Before picking the storage target, we need to define the business metrics and ownership model. Is this operational reporting — which should come from service-owned read models — or cross-domain analytics? If it's analytics, we need curated data, not a dump of raw service data.\"",
       "notes": "The 'dump everything in the lake' approach creates a data swamp with no governance. Operational reporting should use service-owned read models (each service handles its own queries). Cross-domain analytics needs curated, owned datasets with clear metric definitions. The data lake is a tool, not a strategy."
+    },
+    {
+      "id": "ap-31",
+      "type": "flashcard",
+      "category": "Eventing & Messaging",
+      "question": "When should you use Service Bus topics instead of Event Grid for fan-out to multiple consumers?",
+      "answer": "Use Service Bus topics when you need: sessions (ordered message groups), dead-letter queues, message deferral, transactions, scheduled delivery, or complex subscription filters. Use Event Grid when you need simple reactive fan-out with push delivery and low latency.",
+      "notes": "Event Grid is a lightweight event router — push-based, low latency, simple subscriptions. Service Bus topics are a full-featured broker — they support ordered sessions, dead-lettering for failed messages, deferred processing, transactions across queues and topics, scheduled messages, and advanced subscription filters with SQL-like expressions. The question is whether you need broker semantics. If consumers just need to react to a notification, Event Grid wins. If you need reliable, ordered, transactional message processing with advanced routing, Service Bus topics are the right tool."
+    },
+    {
+      "id": "ap-32",
+      "type": "flashcard",
+      "category": "Core Framework",
+      "question": "Why should cost be treated as a 6th decision criterion alongside volatility, ownership, audit, latency, and reuse?",
+      "answer": "Cost determines where a solution lands on the complexity spectrum in practice. A rules engine may be architecturally justified but not cost-justified for the scale of the problem. Monthly operational cost, licensing, team capability (skills cost), and migration cost all factor into which tier is appropriate.",
+      "notes": "In meetings, cost is a powerful and concrete argument. 'What's the monthly run cost of Option B vs Option A?' forces specifics and often deflates enthusiasm for heavyweight options. Don't forget the full picture: infrastructure cost (Azure consumption), licensing cost (third-party tools), skills cost (do we need to hire or train?), and operational support cost (who maintains it after go-live?). The principle: the simple option is usually the cheapest option. When someone proposes a heavier option, the cost burden shifts to them to justify."
+    },
+    {
+      "id": "ap-33",
+      "type": "scenario",
+      "category": "Cross-Domain",
+      "question": "A payroll run completes. Finance needs the journal, absence balances need updating, employees need payslips, and the analytics team needs updated data. How do you design this?",
+      "answer": "\"PayrollRunCompleted is a business event — fan it out via Event Grid. Finance journal generation is a command to one processor — route it through Service Bus. Payslip generation and delivery is a workflow — Logic Apps or Durable Functions depending on complexity. The analytics update is a data pipeline concern — publish curated data to the analytical store via Data Factory. Each consumer owns its own reaction; the payroll service just publishes the event.\"",
+      "notes": "This is a multi-domain scenario that crosses eventing (Event Grid for fan-out), messaging (Service Bus for the finance command), workflow (payslip generation), and data pipeline (analytics). The key principle: the producing service publishes one event; each consuming domain decides how to handle it. Don't build one giant orchestration that does everything — let each domain own its reaction.",
+      "followUps": [
+        {
+          "question": "What if the finance team says they need the journal synchronously as part of the payroll run?",
+          "answer": "Push back. Tight coupling between payroll and finance means a finance outage blocks payroll completion. Publish the event, let finance consume it asynchronously with Service Bus for reliable delivery, and provide an SLA for journal generation. If they need it within minutes, near-real-time messaging gives them that without synchronous coupling."
+        }
+      ]
     }
   ]
 }
