@@ -35,5 +35,31 @@
       "file": "decks/architecture-overreach.json",
       "icon": "⚖️"
     }
+  ],
+  "scenarios": [
+    {
+      "id": "rp-platform-consolidation",
+      "title": "Platform Consolidation Meeting",
+      "description": "Navigate a VP-led meeting about consolidating five regional payroll engines into one platform. Handle scope creep, stakeholder translation, and architecture overreach.",
+      "file": "scenarios/platform-consolidation.json",
+      "icon": "🏢",
+      "questions": 6
+    },
+    {
+      "id": "rp-golden-source-debate",
+      "title": "The Golden Source Debate",
+      "description": "Counter the push for a canonical data model across 14 systems. Separate operational consistency from reporting needs and establish domain ownership.",
+      "file": "scenarios/golden-source-debate.json",
+      "icon": "🗄️",
+      "questions": 5
+    },
+    {
+      "id": "rp-realtime-everything",
+      "title": "The Real-Time Everything Request",
+      "description": "Decompose a sweeping 'make everything real-time' demand into right-sized solutions. Handle Kafka hype, competitive anxiety, and UX vs infrastructure confusion.",
+      "file": "scenarios/realtime-everything.json",
+      "icon": "⚡",
+      "questions": 5
+    }
   ]
 }

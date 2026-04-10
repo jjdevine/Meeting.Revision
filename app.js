@@ -2,7 +2,7 @@
   "use strict";
 
   // ── Cache version — bump this when pushing deck changes ─────────
-  const CACHE_VERSION = "2";
+  const CACHE_VERSION = "3";
 
   // ── State ──────────────────────────────────────────────────────
   const STORAGE_KEY = "meetingprep";
@@ -16,13 +16,23 @@
   let mode = "study";   // "study" | "quiz"
   let quizRevealed = false;
 
+  // ── Role Play state ────────────────────────────────────────────
+  let scenarios = {};       // id -> scenario data
+  let currentScenarioId = null;
+  let currentScenario = null;
+  let rpQuestionIndex = 0;
+  let rpScore = 0;
+  let rpAnswers = [];       // { questionId, chosenIndex, correct }
+
   // ── DOM refs ───────────────────────────────────────────────────
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => document.querySelectorAll(sel);
 
   const homeScreen = $("#home-screen");
   const deckScreen = $("#deck-screen");
+  const roleplayScreen = $("#roleplay-screen");
   const deckGrid = $("#deck-grid");
+  const scenarioGrid = $("#scenario-grid");
   const deckTitle = $("#deck-title");
   const deckDescription = $("#deck-description");
   const categoryFilter = $("#category-filter");
@@ -56,6 +66,14 @@
     return decks[id];
   }
 
+  async function loadScenario(id) {
+    if (scenarios[id]) return scenarios[id];
+    const entry = manifest.scenarios.find((s) => s.id === id);
+    const resp = await fetch("data/" + entry.file + "?v=" + CACHE_VERSION);
+    scenarios[id] = await resp.json();
+    return scenarios[id];
+  }
+
   // ── Home screen ────────────────────────────────────────────────
   function renderHome() {
     deckGrid.innerHTML = "";
@@ -85,6 +103,34 @@
       `;
       el.addEventListener("click", () => openDeck(entry.id));
       deckGrid.appendChild(el);
+    }
+
+    // Render scenario cards
+    scenarioGrid.innerHTML = "";
+    for (const entry of manifest.scenarios) {
+      const bestKey = "rp_best_" + entry.id;
+      const best = progress[bestKey];
+      const bestText = best != null
+        ? `Best: ${best}/${entry.questions}`
+        : "Not attempted";
+
+      const el = document.createElement("div");
+      el.className = "scenario-card";
+      el.dataset.scenarioId = entry.id;
+      el.innerHTML = `
+        <div class="scenario-card-top">
+          <span class="deck-icon">${entry.icon}</span>
+          <span class="scenario-card-title">${esc(entry.title)}</span>
+          <span class="scenario-badge">Role Play</span>
+        </div>
+        <div class="scenario-card-desc">${esc(entry.description)}</div>
+        <div class="scenario-card-meta">
+          <span>${entry.questions} questions</span>
+          <span>${bestText}</span>
+        </div>
+      `;
+      el.addEventListener("click", () => openScenario(entry.id));
+      scenarioGrid.appendChild(el);
     }
   }
 
@@ -124,6 +170,7 @@
   function showScreen(name) {
     homeScreen.classList.toggle("active", name === "home");
     deckScreen.classList.toggle("active", name === "deck");
+    roleplayScreen.classList.toggle("active", name === "roleplay");
   }
 
   // ── Mode switching ─────────────────────────────────────────────
@@ -372,6 +419,184 @@
     return el.innerHTML;
   }
 
+  // ── Role Play ──────────────────────────────────────────────────
+  async function openScenario(id) {
+    currentScenarioId = id;
+    currentScenario = await loadScenario(id);
+    const entry = manifest.scenarios.find((s) => s.id === id);
+    $("#rp-title").textContent = entry.title;
+    $("#rp-context-text").textContent = currentScenario.context;
+
+    // Reset state
+    rpQuestionIndex = 0;
+    rpScore = 0;
+    rpAnswers = [];
+
+    // Show context, hide question area and results
+    $("#rp-context").classList.remove("hidden");
+    $("#rp-question-area").classList.add("hidden");
+    $("#rp-results").classList.add("hidden");
+
+    showScreen("roleplay");
+  }
+
+  function startScenario() {
+    $("#rp-context").classList.add("hidden");
+    $("#rp-question-area").classList.remove("hidden");
+    renderRpQuestion();
+  }
+
+  function renderRpQuestion() {
+    const q = currentScenario.questions[rpQuestionIndex];
+    const total = currentScenario.questions.length;
+
+    // Counter and score
+    $("#rp-q-counter").textContent = `Question ${rpQuestionIndex + 1} of ${total}`;
+    $("#rp-score").textContent = `Score: ${rpScore}/${rpQuestionIndex}`;
+
+    // Progress bar
+    const pct = Math.round((rpQuestionIndex / total) * 100);
+    $("#rp-progress-bar").style.width = pct + "%";
+
+    // Prompt
+    $("#rp-prompt").textContent = q.prompt;
+
+    // Options
+    const optionsEl = $("#rp-options");
+    optionsEl.innerHTML = "";
+    const labels = ["A", "B", "C", "D", "E"];
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement("button");
+      btn.className = "rp-option";
+      btn.innerHTML = `<span class="rp-option-label">${labels[i]}.</span> ${esc(opt.text)}`;
+      btn.addEventListener("click", () => handleRpOptionClick(i));
+      optionsEl.appendChild(btn);
+    });
+
+    // Hide feedback
+    $("#rp-feedback").classList.add("hidden");
+  }
+
+  function handleRpOptionClick(chosenIndex) {
+    const q = currentScenario.questions[rpQuestionIndex];
+    const options = $$(".rp-option");
+
+    // Disable all options
+    options.forEach((o) => o.classList.add("disabled"));
+
+    // Mark correct/wrong
+    const correctIndex = q.options.findIndex((o) => o.correct);
+    if (chosenIndex === correctIndex) {
+      options[chosenIndex].classList.add("correct");
+      rpScore++;
+    } else {
+      options[chosenIndex].classList.add("wrong");
+      options[correctIndex].classList.add("correct");
+    }
+
+    // Record answer
+    rpAnswers.push({
+      questionId: q.id,
+      chosenIndex,
+      correct: chosenIndex === correctIndex,
+    });
+
+    // Show feedback
+    const feedback = $("#rp-feedback");
+    feedback.classList.remove("hidden");
+
+    const header = $("#rp-feedback-header");
+    header.className = "rp-feedback-header";
+    if (chosenIndex === correctIndex) {
+      header.classList.add("correct");
+      header.textContent = "✓ Correct";
+    } else {
+      header.classList.add("wrong");
+      header.textContent = "✗ Incorrect";
+    }
+
+    // Show the explanation for the chosen option
+    $("#rp-feedback-text").textContent = q.options[chosenIndex].explanation;
+
+    // Update next button text
+    const isLast = rpQuestionIndex === currentScenario.questions.length - 1;
+    $("#rp-next-btn").textContent = isLast ? "View Results" : "Next Question";
+  }
+
+  function advanceRpQuestion() {
+    rpQuestionIndex++;
+    if (rpQuestionIndex >= currentScenario.questions.length) {
+      showRpResults();
+    } else {
+      renderRpQuestion();
+    }
+  }
+
+  function showRpResults() {
+    $("#rp-question-area").classList.add("hidden");
+    $("#rp-results").classList.remove("hidden");
+
+    const total = currentScenario.questions.length;
+    const pct = Math.round((rpScore / total) * 100);
+
+    const scoreEl = $("#rp-final-score");
+    scoreEl.textContent = `${rpScore} / ${total} (${pct}%)`;
+    scoreEl.className = "rp-final-score";
+    if (pct >= 80) scoreEl.classList.add("good");
+    else if (pct >= 50) scoreEl.classList.add("ok");
+    else scoreEl.classList.add("poor");
+
+    // Save best score
+    const bestKey = "rp_best_" + currentScenarioId;
+    const prevBest = progress[bestKey];
+    if (prevBest == null || rpScore > prevBest) {
+      progress[bestKey] = rpScore;
+      saveProgress();
+    }
+
+    // Breakdown
+    const breakdown = $("#rp-results-breakdown");
+    breakdown.innerHTML = "";
+    currentScenario.questions.forEach((q, i) => {
+      const answer = rpAnswers[i];
+      const icon = answer.correct ? "✓" : "✗";
+      const iconClass = answer.correct ? "color: var(--green)" : "color: var(--red)";
+      const chosenOpt = q.options[answer.chosenIndex];
+      const correctOpt = q.options.find((o) => o.correct);
+
+      let detail = "";
+      if (answer.correct) {
+        detail = chosenOpt.explanation;
+      } else {
+        detail = `You chose: "${truncate(chosenOpt.text, 80)}"\nCorrect: "${truncate(correctOpt.text, 80)}"\n\n${chosenOpt.explanation}`;
+      }
+
+      const item = document.createElement("div");
+      item.className = "rp-result-item";
+      item.innerHTML = `
+        <span class="rp-result-icon" style="${iconClass}">${icon}</span>
+        <div class="rp-result-text">
+          <strong>Q${i + 1}: ${esc(truncate(q.prompt, 100))}</strong>
+          ${esc(detail)}
+        </div>
+      `;
+      breakdown.appendChild(item);
+    });
+  }
+
+  function retryScenario() {
+    rpQuestionIndex = 0;
+    rpScore = 0;
+    rpAnswers = [];
+    $("#rp-results").classList.add("hidden");
+    $("#rp-question-area").classList.remove("hidden");
+    renderRpQuestion();
+  }
+
+  function truncate(str, len) {
+    return str.length > len ? str.slice(0, len) + "…" : str;
+  }
+
   // ── Event binding ──────────────────────────────────────────────
   function bindEvents() {
     // Back
@@ -459,6 +684,19 @@
       }
     });
 
+    // Role Play events
+    $("#rp-back-btn").addEventListener("click", () => {
+      showScreen("home");
+      renderHome();
+    });
+    $("#rp-start-btn").addEventListener("click", startScenario);
+    $("#rp-next-btn").addEventListener("click", advanceRpQuestion);
+    $("#rp-retry-btn").addEventListener("click", retryScenario);
+    $("#rp-home-btn").addEventListener("click", () => {
+      showScreen("home");
+      renderHome();
+    });
+
     // Keyboard navigation
     document.addEventListener("keydown", (e) => {
       if (!deckScreen.classList.contains("active")) return;
@@ -497,6 +735,8 @@
     await loadManifest();
     // Pre-load all decks for card counts on home screen
     await Promise.all(manifest.decks.map((d) => loadDeck(d.id)));
+    // Pre-load all scenarios
+    await Promise.all(manifest.scenarios.map((s) => loadScenario(s.id)));
     renderHome();
     bindEvents();
   }

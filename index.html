@@ -15,6 +15,9 @@
         <p class="subtitle">Architecture meeting practice exercises</p>
       </header>
       <div id="deck-grid" class="deck-grid"></div>
+      <h2 class="section-heading">Role Play Scenarios</h2>
+      <p class="section-subtitle">Practice responding to realistic meeting situations</p>
+      <div id="scenario-grid" class="deck-grid"></div>
       <footer class="app-footer">
         <button id="reset-progress-btn" class="btn-text">Reset all progress</button>
       </footer>
@@ -162,6 +165,59 @@
           <span>Mark yourself:</span>
           <button class="btn-score" data-score="correct">Got it ✓</button>
           <button class="btn-score" data-score="wrong">Missed it ✗</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Role Play Screen -->
+    <div id="roleplay-screen" class="screen">
+      <header class="deck-header">
+        <button id="rp-back-btn" class="btn-back" aria-label="Back to home">&larr;</button>
+        <div class="deck-header-text">
+          <h2 id="rp-title"></h2>
+        </div>
+      </header>
+
+      <!-- Context Panel -->
+      <div id="rp-context" class="rp-context">
+        <h3>Scenario</h3>
+        <p id="rp-context-text"></p>
+        <button id="rp-start-btn" class="btn-primary">Begin Scenario</button>
+      </div>
+
+      <!-- Question Area -->
+      <div id="rp-question-area" class="rp-question-area hidden">
+        <div class="rp-progress-header">
+          <span id="rp-q-counter" class="rp-q-counter"></span>
+          <div class="rp-score-display">
+            <span id="rp-score"></span>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div id="rp-progress-bar" class="progress-bar"></div>
+        </div>
+
+        <div id="rp-prompt" class="rp-prompt"></div>
+
+        <div id="rp-options" class="rp-options"></div>
+
+        <div id="rp-feedback" class="rp-feedback hidden">
+          <div id="rp-feedback-header" class="rp-feedback-header"></div>
+          <div id="rp-feedback-text" class="rp-feedback-text"></div>
+          <button id="rp-next-btn" class="btn-primary">Next Question</button>
+        </div>
+      </div>
+
+      <!-- Results Panel -->
+      <div id="rp-results" class="rp-results hidden">
+        <div class="rp-results-card">
+          <h3>Scenario Complete</h3>
+          <div id="rp-final-score" class="rp-final-score"></div>
+          <div id="rp-results-breakdown" class="rp-results-breakdown"></div>
+          <div class="rp-results-actions">
+            <button id="rp-retry-btn" class="btn-primary">Try Again</button>
+            <button id="rp-home-btn" class="btn-nav">Back to Home</button>
+          </div>
         </div>
       </div>
     </div>

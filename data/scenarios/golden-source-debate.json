@@ -1,0 +1,112 @@
+{
+  "id": "rp-golden-source-debate",
+  "title": "The Golden Source Debate",
+  "context": "You're in a cross-team architecture forum. The Head of Data has proposed building a 'Golden Source' — a single canonical data model for all employee data across HR, payroll, benefits, and talent management. She's prepared a slide deck showing data inconsistencies across systems and argues that a canonical model will eliminate integration headaches. The CTO is on the call and has expressed frustration about duplicate data and conflicting employee records. You're the solution architect representing the platform team.",
+  "questions": [
+    {
+      "id": "rp-gs-1",
+      "prompt": "The Head of Data presents her slide: \"We have employee data in 14 different systems, each with its own schema. When HR updates an employee's department, it takes 3 days to propagate everywhere. We need one golden source of truth — a canonical employee model that every system reads from.\" The CTO adds: \"This is exactly right. I'm tired of every team maintaining their own copy. Let's build it.\" How should you respond?",
+      "options": [
+        {
+          "text": "I agree that data inconsistency is a real problem. A canonical model makes sense — let's define the master schema and have all systems consume from it.",
+          "correct": false,
+          "explanation": "You've accepted the solution without questioning the problem framing. A canonical model for all employee data across 14 systems is an enormous undertaking that rarely succeeds. The real issue is propagation delay and inconsistency — those have simpler solutions. By agreeing, you've committed the platform team to building and maintaining the hardest possible thing."
+        },
+        {
+          "text": "The data inconsistency problem is real, but I want to separate two things: the propagation delay problem and the 'one model' ambition. For propagation, we can fix the 3-day delay with domain events — when HR updates a department, publish an event and subscribed systems update within minutes. For the canonical model question: which specific fields actually need to be consistent across all 14 systems? I suspect it's a much smaller surface than the full employee record.",
+          "correct": true,
+          "explanation": "You've correctly separated the urgent operational problem (3-day propagation delay) from the strategic ambition (canonical model). The propagation fix is simple — domain events via a message broker. The canonical model question is reframed to scope: you're asking which data actually needs global consistency versus which data is legitimately domain-specific. This prevents the team from trying to canonicalize everything when only a subset matters."
+        },
+        {
+          "text": "Canonical data models don't work in practice. Each domain has its own bounded context and its own view of what 'employee' means. Payroll cares about tax codes and bank details, talent management cares about skills and development plans. Trying to unify these into one model will create a monster.",
+          "correct": false,
+          "explanation": "While this is technically sound (bounded contexts are real), you're lecturing rather than solving. The CTO has expressed frustration and the Head of Data has a real problem. Dismissing the approach without acknowledging the pain and offering an alternative makes you look like you're defending the status quo. Lead with empathy for the problem, then reframe the solution."
+        }
+      ]
+    },
+    {
+      "id": "rp-gs-2",
+      "prompt": "The Head of Data responds: \"OK, I hear you on the propagation fix. But we still need a canonical model for reporting. Finance needs a single consistent view of headcount, compensation, and org structure for board reports. We can't have five different answers to 'how many employees do we have?'\" How should you respond?",
+      "options": [
+        {
+          "text": "For reporting specifically, you don't need a canonical model across all operational systems — you need a reporting data store that aggregates and reconciles. That's a different architecture: a read-optimised projection built from domain events, not a shared write model that every system must conform to. Finance gets one answer to headcount, but the operational systems keep their own schemas.",
+          "correct": true,
+          "explanation": "This is the key architectural insight. Reporting consistency doesn't require operational model consistency. A CQRS-style read projection — built from events published by operational systems — gives Finance their 'single answer' without forcing every operational system to change its data model. You've addressed the real need (consistent reporting) with the simplest viable architecture."
+        },
+        {
+          "text": "That's a valid use case. Let's start with the reporting canonical model and expand from there. We can define the core entity model for headcount and compensation first.",
+          "correct": false,
+          "explanation": "You've conceded to the canonical model framing and proposed starting small. But 'start small and expand' with canonical data models is how they become unmanageable. The reporting need is real but it doesn't require a canonical model — it requires a reporting projection. By accepting the framing, you'll end up building and governing a shared schema that will become a bottleneck."
+        },
+        {
+          "text": "The 'how many employees do we have' problem is usually a data quality issue, not a data model issue. We should focus on cleaning up the source data in each system rather than building a new aggregation layer.",
+          "correct": false,
+          "explanation": "While data quality is often a factor, you're dismissing a legitimate architectural need. Finance genuinely needs reconciled headcount figures, and 'clean up each system' is neither actionable nor sufficient — different systems legitimately count differently (contractors, pending starters, etc.). You need to offer a concrete architecture that solves the reconciliation problem."
+        }
+      ]
+    },
+    {
+      "id": "rp-gs-3",
+      "prompt": "The CTO is warming to the event-driven approach but asks: \"If we go this route, who owns the employee events? Who decides what an 'employee created' event looks like? Don't we still need a canonical event schema?\" The Head of Data adds: \"This is exactly my point — you still end up needing a shared model.\" How should you respond?",
+      "options": [
+        {
+          "text": "They have a point. We'll need a governance process to define and version the canonical event schema. I'd suggest a data architecture working group that reviews all event definitions.",
+          "correct": false,
+          "explanation": "You've walked into the canonical model trap through the back door. A governance committee that reviews all event schemas will become a bottleneck that slows every team. Event schemas should be owned by the publishing domain, not governed centrally. Consumers transform events into their own model — that's the whole point of domain events."
+        },
+        {
+          "text": "The publishing domain owns its events. HR defines what 'employee department changed' looks like because HR is the authority on department assignments. Payroll publishes 'pay run completed' because payroll owns that process. Consumers subscribe to the events they care about and transform them into their own model. There's no central schema — each domain publishes its own facts. The reporting projection is where reconciliation happens, not at the event level.",
+          "correct": true,
+          "explanation": "This is clean domain-driven design. Each domain publishes its own events in its own language. There's no central 'employee event schema' because 'employee' means different things in different contexts. The reporting store is the single place where these facts get reconciled into a consistent view. You've avoided the governance bottleneck while still delivering the CTO's goal of consistency where it matters — in reporting."
+        },
+        {
+          "text": "We could use a schema registry to manage event versions. Each team publishes events to the registry and consumers can discover and validate against the schemas. It's a lightweight form of governance.",
+          "correct": false,
+          "explanation": "A schema registry is a reasonable tool, but you've skipped the more fundamental question of who defines the schemas. If you introduce a registry without establishing domain ownership, you'll get pressure to 'align' schemas across domains — which is the canonical model by another name. Address the ownership question first."
+        }
+      ]
+    },
+    {
+      "id": "rp-gs-4",
+      "prompt": "A senior engineer in the chat asks: \"What about the onboarding flow? When a new employee starts, 8 different systems need to be provisioned — AD account, payroll setup, benefits enrollment, equipment request, etc. Currently the HR team manually enters data into each system. Shouldn't we have a single onboarding orchestration that reads from one employee record?\" How should you respond?",
+      "options": [
+        {
+          "text": "Yes, onboarding orchestration is a great use case for the canonical employee model. The onboarding workflow reads from the golden source and provisions each system.",
+          "correct": false,
+          "explanation": "You've been pulled back into the canonical model framing. Onboarding orchestration doesn't require a canonical model — it requires a workflow that reacts to an 'employee onboarded' event and fans out provisioning commands to each system. Each system receives only the data it needs in its own format, not the full canonical record."
+        },
+        {
+          "text": "That's a workflow problem, not a data model problem. It sits in our 'workflow/orchestration' domain. The solution is: HR creates the employee and publishes an 'employee onboarded' event with the core facts. An onboarding workflow subscribes to that event and triggers provisioning tasks for each system — AD, payroll, benefits, equipment — each receiving only the fields it needs. No shared model required, just a well-designed event and a workflow engine.",
+          "correct": true,
+          "explanation": "You've correctly classified this as a workflow/orchestration problem using the 6-domain framework, not a data model problem. The onboarding flow is a choreography of provisioning tasks triggered by an event. Each downstream system receives a tailored command, not a dump of the full employee record. This is simpler to build, easier to modify, and doesn't require every system to agree on a schema."
+        },
+        {
+          "text": "We should map out all 8 systems and understand what data each one needs. Then we can design the integration layer. This is too complex to solve in this meeting.",
+          "correct": false,
+          "explanation": "While mapping the systems is useful, you're deferring when you could be framing the solution pattern right now. The room is looking for architectural direction. You have enough information to state that it's a workflow problem, propose the event-driven approach, and then take the detailed mapping as a follow-up action."
+        }
+      ]
+    },
+    {
+      "id": "rp-gs-5",
+      "prompt": "The Head of Data, looking somewhat deflated, says: \"So you're saying we don't need a canonical model at all? Then what about data governance? Who ensures that 'department' means the same thing in HR and Finance? We can't just let every team define things independently.\" How should you respond?",
+      "options": [
+        {
+          "text": "You're right, we do need some governance. Let's establish a data dictionary that defines the shared business terms, with a review committee for changes.",
+          "correct": false,
+          "explanation": "A data dictionary and review committee are governance theatre. They create the illusion of alignment without the enforcement mechanism. In practice, teams will define fields that technically match the dictionary but diverge in meaning. You need to acknowledge the real governance need but solve it architecturally, not with process."
+        },
+        {
+          "text": "You're raising a real concern and I don't want to dismiss it. There are a small number of genuinely shared concepts — like org hierarchy, cost centres, and legal entity — that do need cross-domain alignment. My proposal is: identify those shared reference data sets, own them in one place, and publish them as reference data events. But the vast majority of employee attributes are domain-specific and should be governed by their owning domain. Full canonical model for 5 shared concepts, domain ownership for everything else.",
+          "correct": true,
+          "explanation": "This is a mature architectural response. You've acknowledged the valid concern, identified the small set of genuinely shared concepts, and proposed a concrete ownership model for each. The key insight is that only a handful of reference data items (org hierarchy, cost centres, legal entities) truly need cross-domain consistency. Everything else is legitimately domain-specific. You've given the Head of Data a win on the concepts that matter while avoiding the trap of canonicalizing everything."
+        },
+        {
+          "text": "Data governance and data architecture are separate concerns. I'm responsible for the architecture — the governance process is something the data team should define independently. I'd suggest you work with each domain team to align on definitions.",
+          "correct": false,
+          "explanation": "You've abdicated responsibility for a problem that has an architectural solution. Data governance isn't purely a process problem — it requires architectural decisions about what's shared and what's domain-specific. By pushing it to the data team, you're leaving a vacuum that will likely be filled by the canonical model you just argued against."
+        }
+      ]
+    }
+  ]
+}
