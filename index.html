@@ -15,9 +15,7 @@
         <p class="subtitle">Architecture meeting practice exercises</p>
       </header>
       <div id="deck-grid" class="deck-grid"></div>
-      <h2 class="section-heading">Role Play Scenarios</h2>
-      <p class="section-subtitle">Practice responding to realistic meeting situations</p>
-      <div id="scenario-grid" class="deck-grid"></div>
+      <div id="scenario-entry" class="deck-grid" style="margin-top:1.25rem"></div>
       <footer class="app-footer">
         <button id="reset-progress-btn" class="btn-text">Reset all progress</button>
       </footer>
@@ -167,6 +165,18 @@
           <button class="btn-score" data-score="wrong">Missed it ✗</button>
         </div>
       </div>
+    </div>
+
+    <!-- Scenario List Screen -->
+    <div id="scenario-list-screen" class="screen">
+      <header class="deck-header">
+        <button id="sl-back-btn" class="btn-back" aria-label="Back to home">&larr;</button>
+        <div class="deck-header-text">
+          <h2>Role Play Scenarios</h2>
+          <p class="subtitle">Practice responding to realistic meeting situations</p>
+        </div>
+      </header>
+      <div id="scenario-grid" class="deck-grid"></div>
     </div>
 
     <!-- Role Play Screen -->

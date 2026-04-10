@@ -2,7 +2,7 @@
   "use strict";
 
   // ── Cache version — bump this when pushing deck changes ─────────
-  const CACHE_VERSION = "3";
+  const CACHE_VERSION = "4";
 
   // ── State ──────────────────────────────────────────────────────
   const STORAGE_KEY = "meetingprep";
@@ -30,8 +30,10 @@
 
   const homeScreen = $("#home-screen");
   const deckScreen = $("#deck-screen");
+  const scenarioListScreen = $("#scenario-list-screen");
   const roleplayScreen = $("#roleplay-screen");
   const deckGrid = $("#deck-grid");
+  const scenarioEntry = $("#scenario-entry");
   const scenarioGrid = $("#scenario-grid");
   const deckTitle = $("#deck-title");
   const deckDescription = $("#deck-description");
@@ -105,7 +107,32 @@
       deckGrid.appendChild(el);
     }
 
-    // Render scenario cards
+    // Render single scenario entry card
+    const totalScenarios = manifest.scenarios.length;
+    const attempted = manifest.scenarios.filter(
+      (s) => progress["rp_best_" + s.id] != null
+    ).length;
+    scenarioEntry.innerHTML = "";
+    const se = document.createElement("div");
+    se.className = "scenario-card";
+    se.innerHTML = `
+      <div class="scenario-card-top">
+        <span class="deck-icon">🎭</span>
+        <span class="scenario-card-title">Role Play Scenarios</span>
+        <span class="scenario-badge">Role Play</span>
+      </div>
+      <div class="scenario-card-desc">Practice responding to realistic meeting situations with multi-choice role play exercises.</div>
+      <div class="scenario-card-meta">
+        <span>${totalScenarios} scenarios</span>
+        <span>${attempted}/${totalScenarios} attempted</span>
+      </div>
+    `;
+    se.addEventListener("click", openScenarioList);
+    scenarioEntry.appendChild(se);
+  }
+
+  // ── Scenario list screen ───────────────────────────────────────
+  function openScenarioList() {
     scenarioGrid.innerHTML = "";
     for (const entry of manifest.scenarios) {
       const bestKey = "rp_best_" + entry.id;
@@ -121,7 +148,6 @@
         <div class="scenario-card-top">
           <span class="deck-icon">${entry.icon}</span>
           <span class="scenario-card-title">${esc(entry.title)}</span>
-          <span class="scenario-badge">Role Play</span>
         </div>
         <div class="scenario-card-desc">${esc(entry.description)}</div>
         <div class="scenario-card-meta">
@@ -132,6 +158,7 @@
       el.addEventListener("click", () => openScenario(entry.id));
       scenarioGrid.appendChild(el);
     }
+    showScreen("scenario-list");
   }
 
   // ── Open deck ──────────────────────────────────────────────────
@@ -170,6 +197,7 @@
   function showScreen(name) {
     homeScreen.classList.toggle("active", name === "home");
     deckScreen.classList.toggle("active", name === "deck");
+    scenarioListScreen.classList.toggle("active", name === "scenario-list");
     roleplayScreen.classList.toggle("active", name === "roleplay");
   }
 
@@ -686,13 +714,17 @@
 
     // Role Play events
     $("#rp-back-btn").addEventListener("click", () => {
-      showScreen("home");
-      renderHome();
+      openScenarioList();
     });
     $("#rp-start-btn").addEventListener("click", startScenario);
     $("#rp-next-btn").addEventListener("click", advanceRpQuestion);
     $("#rp-retry-btn").addEventListener("click", retryScenario);
     $("#rp-home-btn").addEventListener("click", () => {
+      openScenarioList();
+    });
+
+    // Scenario list back
+    $("#sl-back-btn").addEventListener("click", () => {
       showScreen("home");
       renderHome();
     });

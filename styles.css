@@ -335,6 +335,8 @@ body {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
   padding: 0.85rem 1rem; cursor: pointer; font-size: 0.95rem; text-align: left;
   transition: all var(--transition); line-height: 1.5; position: relative;
+  color: var(--text);
+  font-family: inherit;
 }
 .rp-option:hover { border-color: var(--accent); background: var(--surface-hover); }
 .rp-option.correct { border-color: var(--green); background: rgba(76, 175, 124, 0.15); color: var(--green); }
