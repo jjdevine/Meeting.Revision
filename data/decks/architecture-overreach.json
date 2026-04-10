@@ -1,0 +1,208 @@
+{
+  "id": "architecture-overreach",
+  "title": "Architecture Overreach",
+  "cards": [
+    {
+      "id": "ao-1",
+      "type": "flashcard",
+      "category": "Core Technique",
+      "question": "What is the universal opener for any architecture overreach discussion?",
+      "answer": "\"I'm not against it. I want the requirement that makes it cheaper or safer than the simpler option.\"",
+      "notes": "Then do three things: (1) Name the overreach, (2) Ask for the forcing condition, (3) Pull the discussion back to scope, ownership, and reversibility. This keeps you collaborative — you're not blocking the idea, you're asking for the justification."
+    },
+    {
+      "id": "ao-2",
+      "type": "scenario",
+      "category": "Event Sourcing",
+      "question": "An architect says: 'We should use event sourcing for the employee lifecycle.' What do you say?",
+      "answer": "• \"What exact requirement needs full event reconstruction rather than durable messaging plus audit history?\"\n• \"If replay is not a first-class requirement, event sourcing is usually ceremony.\"\n• \"Immutable business events make sense. Making the whole write model event-sourced is a separate decision.\"",
+      "notes": "Event sourcing means storing state as an immutable sequence of events and rebuilding current state by replaying them. It has significant costs: event versioning (what happens when event schemas change?), eventual consistency (read models may lag), query complexity (you can't just query the current state efficiently), and conceptual overhead. For HR/payroll, the question is whether you genuinely need replay and temporal reconstruction, or whether you need durable messaging plus an audit trail — which is much simpler and usually sufficient.",
+      "followUps": [
+        {
+          "question": "When would event sourcing actually be justified in HR/payroll?",
+          "answer": "When you need:\n• Full temporal reconstruction (replay the state at any point in time)\n• Event-first aggregate modelling (the events ARE the domain model)\n• Immutable audit with replay capability\n• Multiple read models derived from the same event stream\n\nPayroll effective dating might benefit from event-like patterns, but that's not the same as full event sourcing.",
+          "notes": "Most HR/payroll systems need audit history and effective dating, not full event sourcing. Effective dating (knowing what rules/data were in effect at a given time) can be implemented with versioned records without rebuilding state from events."
+        },
+        {
+          "question": "What anti-patterns should you watch for with event sourcing proposals?",
+          "answer": "1. People using 'event sourcing' when they mean 'put events on the bus'\n2. No plan for event versioning or upcasting (what happens when event schemas change)\n3. Reporting and query pain being ignored\n4. Payroll correctness being exposed to fancy architecture",
+          "notes": "The most common confusion: publishing domain events (EmployeeCreated, PayChanged) is NOT event sourcing. Event sourcing is a specific persistence pattern where events are the source of truth. Publishing events to a bus for other systems to consume is just messaging."
+        }
+      ]
+    },
+    {
+      "id": "ao-3",
+      "type": "scenario",
+      "category": "Canonical Model",
+      "question": "Someone proposes: 'We need a canonical data model across HR, payroll, and talent.' What do you say?",
+      "answer": "• \"Canonical for which bounded context?\"\n• \"A universal model usually becomes a compromise that satisfies nobody.\"\n• \"Shared vocabulary is good. A single universal schema across domains is usually not.\"",
+      "notes": "A canonical model is a single, shared data schema that all systems agree on. In theory it reduces translation cost between systems. In practice, it creates a lowest-common-denominator model that doesn't accurately represent any single domain. 'Employee' means different things in HR (person with org assignment), payroll (worker with tax profile and pay elements), and talent (candidate or hire). Forcing these into one schema loses important domain distinctions.",
+      "followUps": [
+        {
+          "question": "What's the alternative to a canonical model?",
+          "answer": "Domain-owned models with explicit contracts at boundaries and translation where needed. Plus a shared glossary (agreed definitions) — not a universal enterprise object model.\n\nThe line: 'I want common language, not a pretend universal truth model that every team fights over.'",
+          "notes": "Each domain owns its own model. When domains communicate, they define explicit contracts (APIs, events) with clear translation. A shared glossary ensures people use the same terms consistently, but doesn't force a single schema."
+        },
+        {
+          "question": "What should you watch for with canonical model proposals?",
+          "answer": "1. 'Employee' meaning five different things across domains and nobody acknowledging it\n2. Endless schema committees that slow delivery\n3. One central model becoming a delivery bottleneck (every team waits for model changes)\n4. Lowest-common-denominator APIs that serve no domain well",
+          "notes": "The canonical model anti-pattern often manifests as a committee that owns the schema and becomes a bottleneck for every team. Each domain has to request changes to the shared model, wait for approval, and compromise with other domains' needs."
+        }
+      ]
+    },
+    {
+      "id": "ao-4",
+      "type": "scenario",
+      "category": "One Workflow Engine",
+      "question": "Someone says: 'Let's use one workflow engine for everything.' What do you say?",
+      "answer": "• \"One engine for which class of problem: approvals, integrations, or domain sagas?\"\n• \"A single tool for every process usually means at least one team is using the wrong tool.\"\n• \"Standardising on one engine is attractive until it starts owning domain logic it shouldn't.\"",
+      "notes": "Different process types have different needs: connector/integration workflows (Logic Apps), human approvals (could be Logic Apps or a purpose-built tool), long-running domain sagas (Durable Functions), and simple in-service flows (just code). A single engine forced across all these types means at least one pattern is a poor fit. The push for one engine is usually about operational convenience (one tool to support), but the trade-off is domain fit.",
+      "followUps": [
+        {
+          "question": "What's your default position on workflow engine standardisation?",
+          "answer": "Use the right pattern for the problem:\n• Integration-heavy → workflow/integration platform (Logic Apps)\n• Domain-owned long-running process → code orchestration (Durable Functions)\n• Simple synchronous flow → keep it in the service\n\nThe line: 'I support one governance model. I do not support one engine pretending all process types are the same.'",
+          "notes": "Governance can be standardised (how we monitor, alert, audit workflows) without forcing one engine. Each team can use the tool that fits their problem while following common operational standards."
+        }
+      ]
+    },
+    {
+      "id": "ao-5",
+      "type": "scenario",
+      "category": "Standardise Now",
+      "question": "An architect says: 'We should standardise this approach now before teams go in different directions.' What do you say?",
+      "answer": "• \"What problem are we solving today that requires standardisation before we have usage patterns?\"\n• \"Premature standardisation locks in guesses.\"\n• \"Two or three real implementations usually teach us more than one abstract standard.\"",
+      "notes": "Premature standardisation is a common enterprise anti-pattern. It feels responsible ('let's align before we diverge') but actually codifies assumptions before you have evidence. After 2-3 real implementations, you can see what actually repeats, what's genuinely painful, and what abstractions are worth standardising. Standardise guardrails early (security, observability, API conventions), but standardise abstractions later.",
+      "followUps": [
+        {
+          "question": "When IS standardisation the right call?",
+          "answer": "Standardise when you have:\n• At least a few real use cases (not hypothetical)\n• Evidence of repeated pain (not theoretical risk)\n• A clear support/ownership model\n\nStandardise the guardrails early (security, observability, CI/CD). Standardise the abstraction later (after patterns emerge).",
+          "notes": "The timing matters: guardrails (non-negotiable standards like security posture, logging requirements) should be established early. Abstractions (shared libraries, common patterns, platform capabilities) should wait until you've seen the actual use cases. The line: 'I'm happy to standardise once we know what repeats. I don't want to standardise our guesses.'"
+        }
+      ]
+    },
+    {
+      "id": "ao-6",
+      "type": "scenario",
+      "category": "Make It Generic",
+      "question": "Someone says: 'Make it generic so other teams can use it too.' What do you say?",
+      "answer": "• \"Generic for which second use case that already exists?\"\n• \"Generic usually means less clear, less safe, and slower to deliver.\"\n• \"Let's not generalise from a single example.\"",
+      "notes": "Premature generalisation adds complexity for hypothetical consumers that may never materialise. Configuration explosion, unclear ownership, and weakened domain fit are common results. The test is concrete: is there a second consumer that exists right now (or is 90% certain to exist soon)? If not, build for the current bounded context with reasonable extension points.",
+      "followUps": [
+        {
+          "question": "When would you build something generic?",
+          "answer": "Build for:\n• The current bounded context\n• One likely adjacent use case at most\n• Extension points only where there's a clear reason\n\nGeneralise when the second consumer is real, not imagined.",
+          "notes": "The 'Rule of Three' from software engineering: don't abstract until you've seen the same pattern three times. Two occurrences might be coincidence. Three is a pattern worth abstracting."
+        }
+      ]
+    },
+    {
+      "id": "ao-7",
+      "type": "scenario",
+      "category": "Future-Proof It",
+      "question": "Someone says: 'We need to future-proof it.' What do you say?",
+      "answer": "• \"Which future are we protecting against?\"\n• \"Future-proofing without a named risk usually means overengineering.\"\n• \"I'd rather design for change than for fantasy.\"",
+      "notes": "'Future-proofing' is often used to justify complexity without evidence. The counter is to demand specificity: which future risks? Scale growth? Regulatory change? Vendor swap? Org restructure? Product expansion? Each is a different design response. The cost of premature future-proofing is real (complexity, slower delivery, harder maintenance) while the future event may never happen.",
+      "followUps": [
+        {
+          "question": "What should you do instead of vague future-proofing?",
+          "answer": "1. Isolate hard-to-reverse decisions (make them swappable)\n2. Keep contracts clear (clean API boundaries)\n3. Avoid unnecessary coupling (loose integration)\n4. Choose replaceable components where swaps are plausible\n5. Leave the rest simple\n\nThe line: 'Let's protect the irreversible decisions, not overbuild every reversible one.'",
+          "notes": "The principle: make irreversible decisions carefully, and keep reversible decisions simple. Database choice, public API contracts, and core domain models are hard to reverse — invest care there. Library choices, internal implementation details, and deployment patterns are easier to change — don't over-invest in flexibility."
+        }
+      ]
+    },
+    {
+      "id": "ao-8",
+      "type": "flashcard",
+      "category": "Fast Counters",
+      "question": "What are the 8 fast counter lines for any architecture overreach?",
+      "answer": "1. \"What requirement makes the heavier option the cheaper option?\"\n2. \"What are we protecting, exactly?\"\n3. \"What is the irreversible decision here?\"\n4. \"Is this solving a real second use case or a hypothetical one?\"\n5. \"What breaks if we keep it domain-specific for now?\"\n6. \"I want the operational model, not just the pattern name.\"\n7. \"Who owns it after launch?\"\n8. \"What is the rollback plan if this abstraction is wrong?\"",
+      "notes": "Use these when you need a quick, sharp response. Each one probes a different dimension: #1 cost, #2 specificity, #3 reversibility, #4 reality, #5 pragmatism, #6 operational readiness, #7 ownership, #8 risk management."
+    },
+    {
+      "id": "ao-9",
+      "type": "flashcard",
+      "category": "Domain-Specific Responses",
+      "question": "What are the domain-specific overreach responses for Payroll, HR, and Talent?",
+      "answer": "Payroll:\n• \"If replay, effective dating, and audit are the drivers, say that directly. Otherwise we may be dressing up ordinary logic as advanced architecture.\"\n• \"Payroll needs correctness more than pattern purity.\"\n\nHR / Absence / Onboarding:\n• \"We should not centralise policy or process just because several teams use the word workflow.\"\n• \"Shared tooling is fine. Shared business logic is not automatically fine.\"\n\nTalent:\n• \"Candidate, employee, and payroll worker are related concepts, not interchangeable enterprise objects.\"\n• \"A canonical model here will likely blur real domain differences.\"",
+      "notes": "These lines show you understand the specific domains. Payroll's priority is correctness and reproducibility. HR's risk is over-centralisation of business logic. Talent's risk is pretending candidates and employees are the same entity. Each domain has different architectural priorities."
+    },
+    {
+      "id": "ao-10",
+      "type": "flashcard",
+      "category": "Closing Lines",
+      "question": "What are the 4 strongest closing lines for any overreach discussion?",
+      "answer": "1. \"I'm not blocking the heavy option. I'm asking for the requirement that forces it.\"\n2. \"Let's make the simplest decision that is still hard to regret.\"\n3. \"I'd rather delay the abstraction than lock in the wrong one.\"\n4. \"We can always add weight later. Removing it is harder.\"",
+      "notes": "#1 is collaborative — you're not saying no. #2 is the pragmatic principle. #3 acknowledges uncertainty — better to wait than commit to the wrong abstraction. #4 is an asymmetry argument — adding complexity later is easier than removing it. These work as meeting closers because they're reasonable and hard to argue against."
+    },
+    {
+      "id": "ao-11",
+      "type": "flashcard",
+      "category": "Core Technique",
+      "question": "What is the single best line in the architecture overreach pack?",
+      "answer": "\"What exact problem are we solving that the simpler option does not solve?\"",
+      "notes": "This line kills a lot of nonsense without sounding political. It forces the proposer to name a concrete deficiency in the simple option. If they can, you have a real discussion about trade-offs. If they can't, the overreach is unjustified."
+    },
+    {
+      "id": "ao-12",
+      "type": "multi-choice",
+      "category": "Event Sourcing",
+      "question": "Publishing EmployeeCreated events to a Service Bus topic is:",
+      "options": [
+        "Event sourcing",
+        "Just messaging — not event sourcing",
+        "CQRS",
+        "Stream processing"
+      ],
+      "correctOption": 1,
+      "answer": "Just messaging — not event sourcing.",
+      "notes": "This is the most common confusion in eventing discussions. Publishing domain events (EmployeeCreated, PayChanged) to a message bus for other systems to consume is messaging/event notification. Event sourcing is a specific persistence pattern where the event log IS the source of truth and current state is rebuilt by replaying events. They are fundamentally different patterns with very different costs and benefits."
+    },
+    {
+      "id": "ao-13",
+      "type": "multi-choice",
+      "category": "Standardise Now",
+      "question": "When should you standardise an architecture pattern?",
+      "options": [
+        "Before anyone implements it, to prevent divergence",
+        "After 2-3 real implementations show what actually repeats",
+        "When an architecture committee designs it",
+        "When a vendor provides a reference implementation"
+      ],
+      "correctOption": 1,
+      "answer": "After 2-3 real implementations show what actually repeats.",
+      "notes": "Real implementations reveal actual pain points, true requirements, and genuine patterns. Abstract standards designed before implementation codify guesses. The exception is guardrails (security, observability, CI/CD conventions) which should be established early because they're non-negotiable. Abstractions should standardise later."
+    },
+    {
+      "id": "ao-14",
+      "type": "scenario",
+      "category": "Canonical Model",
+      "question": "An enterprise architect shows a diagram with a 'Universal Employee Object' shared across HR, Payroll, and Talent. What's wrong with this?",
+      "answer": "\"Candidate, employee, and payroll worker are related concepts but not interchangeable. In HR, an employee is a person with an org assignment. In payroll, a worker has tax profiles, pay elements, and deduction schedules. In talent, a candidate becomes a hire. Forcing these into one universal object means every domain compromises, and every change to the model requires negotiation across all three domains. I'd prefer domain-owned models with explicit contracts and translation at the boundaries.\"",
+      "notes": "This is the canonical model anti-pattern applied to the HR domain. The 'Universal Employee Object' will inevitably become: too large (carrying attributes for all domains), too rigid (changes need cross-domain consensus), and too vague (using generic fields to accommodate different meanings). Domain-driven design says each bounded context should have its own model of the concepts it cares about."
+    },
+    {
+      "id": "ao-15",
+      "type": "scenario",
+      "category": "Make It Generic",
+      "question": "A developer says: 'Let's build a generic notification service that any team can use.' Evaluate this.",
+      "answer": "\"Is notification delivery (the infrastructure: email, SMS, push, in-app) genuinely cross-cutting? Yes — that's a reasonable platform capability. But notification content, triggers, and business rules should stay domain-owned. I'd support a shared delivery infrastructure with domain-owned trigger logic. I would not support a generic service that absorbs when-and-why-to-notify decisions from multiple domains.\"",
+      "notes": "This is a nuanced case where partial generalisation makes sense. The delivery infrastructure (sending emails, pushing notifications) is genuinely cross-cutting and a good platform candidate. But the business rules about what triggers a notification, who receives it, and what content it contains are domain-specific. The split: platform owns delivery, domains own triggers and content."
+    },
+    {
+      "id": "ao-16",
+      "type": "scenario",
+      "category": "Future-Proof It",
+      "question": "Someone says: 'We need to future-proof the integration layer for when we switch payroll providers.' How do you respond?",
+      "answer": "\"If switching payroll providers is a realistic near-term possibility, then yes, an adapter/anti-corruption layer at that boundary makes sense — that's a genuinely irreversible decision worth protecting. If it's a theoretical someday-scenario, I'd build a clean interface to the current provider without investing in abstract adapter frameworks. The cost is concrete now; the future switch is uncertain.\"",
+      "notes": "This is a case where the response depends on likelihood. If the vendor switch is realistic (known timeline, known alternatives), an anti-corruption layer is good architecture. If it's hypothetical, building elaborate abstraction layers adds complexity for an event that may never happen. The principle: protect against likely, irreversible changes. Don't over-invest in unlikely ones."
+    },
+    {
+      "id": "ao-17",
+      "type": "flashcard",
+      "category": "Fast Counters",
+      "question": "Someone proposes a complex pattern. What's the quickest way to test if it's justified?",
+      "answer": "Ask two questions:\n1. \"What exact problem are we solving that the simpler option does not solve?\"\n2. \"Who owns it after launch?\"",
+      "notes": "These two questions cover the most common failure modes of overreach. The first demands a concrete deficiency in the simple option. The second demands operational ownership — architecture that nobody owns degrades quickly. If the proposer can't name the problem or the owner, the pattern is probably unjustified."
+    }
+  ]
+}

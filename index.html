@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meeting Prep</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Home Screen -->
+    <div id="home-screen" class="screen active">
+      <header class="app-header">
+        <h1>Meeting Prep</h1>
+        <p class="subtitle">Architecture meeting practice exercises</p>
+      </header>
+      <div id="deck-grid" class="deck-grid"></div>
+      <footer class="app-footer">
+        <button id="reset-progress-btn" class="btn-text">Reset all progress</button>
+      </footer>
+    </div>
+
+    <!-- Deck Screen -->
+    <div id="deck-screen" class="screen">
+      <header class="deck-header">
+        <button id="back-home-btn" class="btn-back" aria-label="Back to home">&larr;</button>
+        <div class="deck-header-text">
+          <h2 id="deck-title"></h2>
+          <p id="deck-description" class="subtitle"></p>
+        </div>
+      </header>
+      <div class="deck-controls">
+        <div class="filter-bar">
+          <label for="category-filter">Category:</label>
+          <select id="category-filter"><option value="all">All</option></select>
+        </div>
+        <div class="mode-toggle">
+          <button id="mode-study" class="btn-mode active">Study</button>
+          <button id="mode-quiz" class="btn-mode">Quiz</button>
+        </div>
+        <div class="deck-actions">
+          <button id="shuffle-btn" class="btn-icon" title="Shuffle cards">⧢</button>
+        </div>
+      </div>
+      <div class="progress-bar-container">
+        <div id="progress-bar" class="progress-bar"></div>
+        <span id="progress-text" class="progress-text"></span>
+      </div>
+
+      <!-- Study Mode -->
+      <div id="study-area" class="card-area">
+        <div id="study-card" class="card">
+          <div class="card-inner">
+            <div class="card-front">
+              <span class="card-badge" id="card-type-badge"></span>
+              <span class="card-badge category-badge" id="card-category-badge"></span>
+              <div class="card-content" id="card-question"></div>
+              <div class="card-hint">Tap to reveal answer</div>
+            </div>
+            <div class="card-back">
+              <div class="card-answer" id="card-answer"></div>
+              <details class="card-notes" id="card-notes-container">
+                <summary>Notes</summary>
+                <div id="card-notes"></div>
+              </details>
+            </div>
+          </div>
+        </div>
+
+        <!-- Follow-ups -->
+        <div id="followups-area" class="followups-area hidden">
+          <h3>Follow-up</h3>
+          <div id="followup-card" class="card followup-card">
+            <div class="card-inner">
+              <div class="card-front">
+                <div class="card-content" id="followup-question"></div>
+                <div class="card-hint">Tap to reveal</div>
+              </div>
+              <div class="card-back">
+                <div class="card-answer" id="followup-answer"></div>
+                <details class="card-notes" id="followup-notes-container">
+                  <summary>Notes</summary>
+                  <div id="followup-notes"></div>
+                </details>
+              </div>
+            </div>
+          </div>
+          <div class="followup-nav">
+            <button id="prev-followup" class="btn-sm">&larr; Prev</button>
+            <span id="followup-counter"></span>
+            <button id="next-followup" class="btn-sm">Next &rarr;</button>
+          </div>
+        </div>
+
+        <!-- Study card navigation and rating -->
+        <div class="card-nav">
+          <button id="prev-card" class="btn-nav">&larr; Previous</button>
+          <span id="card-counter" class="card-counter"></span>
+          <button id="next-card" class="btn-nav">Next &rarr;</button>
+        </div>
+        <div class="rating-bar">
+          <span>How well did you know this?</span>
+          <button class="btn-rating" data-rating="1">Hard</button>
+          <button class="btn-rating" data-rating="2">OK</button>
+          <button class="btn-rating" data-rating="3">Easy</button>
+        </div>
+      </div>
+
+      <!-- Quiz Mode -->
+      <div id="quiz-area" class="card-area hidden">
+        <div class="quiz-card">
+          <span class="card-badge" id="quiz-type-badge"></span>
+          <span class="card-badge category-badge" id="quiz-category-badge"></span>
+          <div class="quiz-question" id="quiz-question"></div>
+
+          <!-- Multi-choice options -->
+          <div id="quiz-options" class="quiz-options hidden"></div>
+
+          <!-- Classify / scenario / flashcard: reveal button -->
+          <div id="quiz-reveal-area" class="quiz-reveal-area">
+            <button id="quiz-reveal-btn" class="btn-primary">Reveal Answer</button>
+          </div>
+
+          <div id="quiz-answer-area" class="quiz-answer-area hidden">
+            <div class="quiz-answer" id="quiz-answer"></div>
+            <details class="card-notes" id="quiz-notes-container">
+              <summary>Notes</summary>
+              <div id="quiz-notes"></div>
+            </details>
+          </div>
+        </div>
+
+        <!-- Quiz follow-ups -->
+        <div id="quiz-followups-area" class="followups-area hidden">
+          <h3>Follow-up</h3>
+          <div class="quiz-card followup-card">
+            <div class="quiz-question" id="quiz-followup-question"></div>
+            <div id="quiz-followup-reveal-area" class="quiz-reveal-area">
+              <button id="quiz-followup-reveal-btn" class="btn-primary">Reveal Answer</button>
+            </div>
+            <div id="quiz-followup-answer-area" class="quiz-answer-area hidden">
+              <div class="quiz-answer" id="quiz-followup-answer"></div>
+              <details class="card-notes" id="quiz-followup-notes-container">
+                <summary>Notes</summary>
+                <div id="quiz-followup-notes"></div>
+              </details>
+            </div>
+          </div>
+          <div class="followup-nav">
+            <button id="quiz-prev-followup" class="btn-sm">&larr; Prev</button>
+            <span id="quiz-followup-counter"></span>
+            <button id="quiz-next-followup" class="btn-sm">Next &rarr;</button>
+          </div>
+        </div>
+
+        <div class="card-nav">
+          <button id="quiz-prev" class="btn-nav">&larr; Previous</button>
+          <span id="quiz-counter" class="card-counter"></span>
+          <button id="quiz-next" class="btn-nav">Next &rarr;</button>
+        </div>
+        <div class="quiz-score-bar">
+          <span>Mark yourself:</span>
+          <button class="btn-score" data-score="correct">Got it ✓</button>
+          <button class="btn-score" data-score="wrong">Missed it ✗</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

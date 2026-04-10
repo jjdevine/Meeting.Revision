@@ -1,0 +1,327 @@
+{
+  "id": "architect-playbook",
+  "title": "Architect Meeting Playbook",
+  "cards": [
+    {
+      "id": "ap-1",
+      "type": "flashcard",
+      "category": "Core Framework",
+      "question": "What is the 4-line meeting opener pattern you should use in every architecture discussion?",
+      "answer": "1. This is probably a [rules / workflow / eventing / integration / identity / reporting] problem.\n2. I see a simple option, a platform option, and a heavyweight option.\n3. The choice depends on [3–4 criteria].\n4. My default is [X] unless we need [Y].",
+      "notes": "This is the core framing technique. You do NOT need the final answer on the spot — you need a better first frame than everyone else. By classifying the problem, showing awareness of a spectrum of solutions, naming the decision criteria, and stating a default, you sound prepared, structured, and senior. The goal is to control the conversation shape, not to prescribe the answer immediately.",
+      "followUps": [
+        {
+          "question": "Why does this pattern work so well in meetings?",
+          "answer": "It works because it demonstrates structured thinking, shows you understand the problem space has multiple solutions, and forces the room to argue about criteria rather than jumping to products. Most people in the room will jump straight to a tool or vendor — you frame the decision instead."
+        }
+      ]
+    },
+    {
+      "id": "ap-2",
+      "type": "flashcard",
+      "category": "Core Framework",
+      "question": "What are the 6 problem domains you can classify any architecture issue into?",
+      "answer": "1. Rules / decisioning\n2. Workflow / orchestration\n3. Eventing / messaging\n4. Integration / API / B2B\n5. Identity / access\n6. Reporting / analytics",
+      "notes": "These six categories cover virtually every architecture discussion you'll encounter in an enterprise HR/payroll platform. When someone raises a topic, your first move is to classify it into one of these domains. This immediately narrows the solution space and shows you have a mental model for the problem. Most discussions involve one primary domain, occasionally two."
+    },
+    {
+      "id": "ap-3",
+      "type": "flashcard",
+      "category": "Core Framework",
+      "question": "What does 'I see a simple option, a platform option, and a heavyweight option' mean?",
+      "answer": "It means framing every technical decision as a spectrum of three tiers of increasing complexity, cost, and capability. The simple option is the lowest-risk, lowest-cost approach. The platform option introduces a managed service or external tool. The heavyweight option is a full enterprise capability.",
+      "notes": "The 'simple option' is typically code + configuration within the owning service — cheapest, fastest, least risk. The 'platform option' introduces a managed Azure service (e.g., App Configuration, Logic Apps, Event Grid) that provides operational convenience. The 'heavyweight option' is a full-blown enterprise capability (rules engine, event sourcing, BPM platform) with significant operational cost. By naming all three, you show the room you're not dogmatic — you're asking which one is justified. The key line is: 'What requirement eliminates the simple option?'",
+      "followUps": [
+        {
+          "question": "Give an example of the three options for a rules/decisioning problem.",
+          "answer": "Simple option: business rules in code with versioned config files, testable and deployable with the service. Platform option: Azure App Configuration for centralised settings and feature flags with immutable snapshots. Heavyweight option: a full rules engine (e.g., Logic Apps Rules Engine) where business users author, version, test, and publish rules independently of code releases.",
+          "notes": "You only move up the stack when there's a real requirement: business ownership of rules, frequent changes without code releases, audit trails by rule version, or reuse across multiple services."
+        }
+      ]
+    },
+    {
+      "id": "ap-4",
+      "type": "flashcard",
+      "category": "Core Framework",
+      "question": "What are the 5 key decision criteria that determine where a solution sits on the complexity spectrum?",
+      "answer": "1. Volatility — how often does it change?\n2. Ownership — who changes it (developer vs business)?\n3. Audit — do you need versioned history and replay?\n4. Latency — what freshness does the consumer need?\n5. Reuse — is this shared across multiple services/domains?",
+      "notes": "These five criteria are the forcing functions. When someone proposes a heavy solution, test it against these. If the answer is 'developers change it, it changes rarely, audit isn't required, and only one service uses it' — the simple option wins. You only move up the complexity curve when multiple criteria genuinely point that way."
+    },
+    {
+      "id": "ap-5",
+      "type": "scenario",
+      "category": "Rules & Decisioning",
+      "question": "Someone in a meeting says: 'We need a rules engine for our leave eligibility calculations.' How do you respond?",
+      "answer": "\"Before we call it a rules engine, let's clarify what actually needs to change without a code release. Who owns rule changes — developers or the business? How often do they change? Do we need audit history or replay by rule version? Leave eligibility might just need service-owned policy plus configuration, not a full rules platform.\"",
+      "notes": "Leave eligibility is a rules/decisioning problem. The simple option is code + versioned config in the absence service. You'd move to a rules platform only if: business users need to author rules directly, rules change frequently without code releases, you need version-specific audit and replay, or the same rules are reused across multiple services. Most leave eligibility rules are stable enough to stay in code.",
+      "followUps": [
+        {
+          "question": "They push back: 'But what if the rules change every quarter?' Does that change your answer?",
+          "answer": "Quarterly changes are manageable with config + code releases. That's not high volatility. You'd want a rules platform for rules that change weekly or daily, or where business users need self-service changes. Quarterly is a normal release cadence.",
+          "notes": "Volatility is relative. Quarterly = normal release cycle. Weekly = consider externalising to config. Daily or ad-hoc by business users = consider a rules platform. The question is who needs to make the change, not just frequency."
+        }
+      ]
+    },
+    {
+      "id": "ap-6",
+      "type": "flashcard",
+      "category": "Rules & Decisioning",
+      "question": "What questions should you ask first when a rules/decisioning topic comes up?",
+      "answer": "1. Who changes the rules?\n2. How often do they change?\n3. Do you need audit history or replay by rule version?\n4. Do non-developers need to author them?\n5. Are rules reused across multiple services?\n6. Do you need simulation/testing before publish?",
+      "notes": "These questions map directly to the decision criteria. If the answer is 'developers change them, they're stable, audit isn't critical, and they're service-specific' — keep them in code. Each 'yes' to these questions pushes you further toward a platform or heavyweight option."
+    },
+    {
+      "id": "ap-7",
+      "type": "multi-choice",
+      "category": "Rules & Decisioning",
+      "question": "What is the best default approach for developer-owned business rules in a payroll service?",
+      "options": [
+        "Full rules engine with business user UI",
+        "Code plus versioned configuration",
+        "Centralised shared rules service",
+        "Logic Apps workflow with decision branches"
+      ],
+      "correctOption": 1,
+      "answer": "Code plus versioned configuration.",
+      "notes": "For developer-owned rules, code + versioned config is the simplest, most testable, and safest option. It keeps logic close to the domain, is version-controlled in git, easily testable, and deployable with the service. A rules engine is only justified when business users need self-service authoring. A shared service is an anti-pattern that hides domain logic. Logic Apps is for workflow integration, not business rules."
+    },
+    {
+      "id": "ap-8",
+      "type": "flashcard",
+      "category": "Rules & Decisioning",
+      "question": "What should you avoid when dealing with rules/decisioning architecture?",
+      "answer": "1. Using a rules engine to cover bad domain boundaries\n2. Centralising every policy into one giant shared 'rules service'\n3. Putting correctness-critical logic somewhere that is hard to test, version, and replay",
+      "notes": "A common anti-pattern is creating a shared rules service that absorbs business logic from multiple domains. This creates tight coupling, unclear ownership, and makes each domain dependent on a central team. Rules should belong to the service that owns the domain. Payroll rules belong in the payroll service. Leave rules belong in the absence service."
+    },
+    {
+      "id": "ap-9",
+      "type": "scenario",
+      "category": "Workflow & Orchestration",
+      "question": "A colleague says: 'We need to orchestrate the employee onboarding process across 5 systems.' What type of problem is this and how do you frame it?",
+      "answer": "\"This is an orchestration problem. First, is this mostly system integration — provisioning accounts across SaaS and on-prem — or mostly domain logic? If it's connector-heavy with human approvals, Logic Apps is the default. If it's a code-owned saga with retries, compensation, and complex state, Durable Functions is better. A simple synchronous chain doesn't need orchestration at all.\"",
+      "notes": "Workflow/orchestration covers onboarding, offboarding, approval chains, and scheduled processes. The key distinction is integration-heavy vs domain-logic-heavy. Logic Apps has 400+ connectors and is ideal for SaaS provisioning and human approvals. Durable Functions is code-first and handles stateful, long-running processes with deterministic replay, checkpoints, and retries. Don't introduce orchestration for simple sequential steps that can stay in the service.",
+      "followUps": [
+        {
+          "question": "They say: 'It involves provisioning in Active Directory, creating accounts in ServiceNow and SAP, sending welcome emails, and a manager approval step.' Logic Apps or Durable Functions?",
+          "answer": "Logic Apps. This is connector-heavy with multiple SaaS systems and a human approval step. Logic Apps has built-in connectors for AD, ServiceNow, SAP, email, and approval workflows. You'd use Durable Functions if the process was primarily domain logic with complex compensation and retry semantics owned by the app team.",
+          "notes": "The decision heuristic: if you can describe the process mostly in terms of connectors and approvals, use Logic Apps. If you'd describe it mostly in terms of code, saga steps, and domain state machines, use Durable Functions."
+        }
+      ]
+    },
+    {
+      "id": "ap-10",
+      "type": "flashcard",
+      "category": "Workflow & Orchestration",
+      "question": "What questions should you ask first when workflow/orchestration comes up?",
+      "answer": "1. Is this mostly system integration, or mostly domain logic?\n2. Are there human approvals or external SaaS steps?\n3. Is it long-running?\n4. Does it need retries, timeouts, compensation, or state tracking?\n5. Who owns the flow: app team or integration team?",
+      "notes": "These questions separate different types of processes. Integration-heavy + human approvals → Logic Apps. Code-heavy + domain sagas → Durable Functions. Simple synchronous chains → don't invent orchestration, just code it in the service."
+    },
+    {
+      "id": "ap-11",
+      "type": "multi-choice",
+      "category": "Workflow & Orchestration",
+      "question": "An approval chain with SaaS connectors and human steps is best handled by:",
+      "options": [
+        "Durable Functions",
+        "Logic Apps",
+        "Service Bus queue processing",
+        "Custom code in the application service"
+      ],
+      "correctOption": 1,
+      "answer": "Logic Apps.",
+      "notes": "Logic Apps is the low-code workflow/integration platform with 400+ built-in connectors. It's designed for exactly this pattern: connecting SaaS systems, handling human approvals, and orchestrating integration flows. Durable Functions would be the choice for code-owned sagas with complex domain logic. Service Bus is messaging, not orchestration. Custom code would work but reinvents what Logic Apps provides out of the box."
+    },
+    {
+      "id": "ap-12",
+      "type": "classify",
+      "category": "Eventing & Messaging",
+      "question": "Classify each of these: (1) 'Process this payroll adjustment' (2) 'EmployeeCreated — anyone interested can react' (3) 'Ingest 10,000 audit log entries per second'",
+      "answer": "1. Command → Service Bus queue\n2. Business event → Event Grid (or Service Bus topics if you need broker semantics)\n3. Stream / telemetry → Event Hubs",
+      "notes": "This is the fundamental eventing classification. A command is a directed instruction to one processor — use Service Bus. A business event is a notification to many consumers — use Event Grid for reactive fan-out. A stream is high-throughput data ingestion — use Event Hubs. Getting this classification right is the first step in any eventing discussion. The key line: 'Before we pick a service, we need to decide whether we are sending a command, broadcasting an event, or ingesting a stream. Those are different problems.'"
+    },
+    {
+      "id": "ap-13",
+      "type": "flashcard",
+      "category": "Eventing & Messaging",
+      "question": "What questions should you ask first when eventing/messaging comes up?",
+      "answer": "1. Is this a command, an event, or a stream?\n2. One consumer or many?\n3. Do you need durable processing and retries?\n4. Is this business data or telemetry?\n5. Do consumers need independent scaling?",
+      "notes": "These questions disambiguate the three main messaging patterns. Commands (one consumer, reliable delivery) → Service Bus. Events (many consumers, reactive) → Event Grid or Service Bus topics. Streams (high volume, telemetry/audit) → Event Hubs. Most architecture confusion comes from calling everything 'events' when commands and streams are fundamentally different."
+    },
+    {
+      "id": "ap-14",
+      "type": "multi-choice",
+      "category": "Eventing & Messaging",
+      "question": "EmploymentStatusChanged needs to notify payroll, benefits, and reporting systems. Which Azure service?",
+      "options": [
+        "Service Bus queue",
+        "Event Grid",
+        "Event Hubs",
+        "Direct API calls to each system"
+      ],
+      "correctOption": 1,
+      "answer": "Event Grid.",
+      "notes": "This is a business event with fan-out to multiple consumers. Event Grid is the managed pub/sub event router designed for near-real-time event distribution to many subscribers. A Service Bus queue only delivers to one consumer. Event Hubs is for high-throughput stream ingestion. Direct API calls would create tight coupling and brittleness. Note: if you need broker-level features like sessions, dead-lettering, or complex routing, Service Bus topics would also work."
+    },
+    {
+      "id": "ap-15",
+      "type": "scenario",
+      "category": "Eventing & Messaging",
+      "question": "An architect says: 'Let's make the whole platform event-driven.' How do you respond?",
+      "answer": "\"I'm fine with events where they're the right pattern. But 'event-driven' covers at least three different things: commands, business events, and streams. Those are different problems with different services. We should classify each interaction before we commit to a blanket pattern. And consumers must be idempotent — are we designing for that?\"",
+      "notes": "The anti-pattern is calling everything 'event-driven' as a buzzword. The response forces specificity: which interactions are actually commands (Service Bus), which are notifications (Event Grid), and which are telemetry streams (Event Hubs)? This is the 'classify the problem' move from the core framework.",
+      "followUps": [
+        {
+          "question": "What should you avoid when thinking about eventing/messaging?",
+          "answer": "1. Calling everything 'event-driven' without classifying command vs event vs stream\n2. Using Event Hubs for business workflows (it's for telemetry/streams)\n3. Using a queue when you need fan-out (wrong pattern)\n4. Pretending consumers can be non-idempotent (they can't in distributed systems)"
+        }
+      ]
+    },
+    {
+      "id": "ap-16",
+      "type": "flashcard",
+      "category": "Integration & API",
+      "question": "What questions should you ask first when integration/API topics come up?",
+      "answer": "1. Is this API governance, protocol mediation, or process integration?\n2. Is the consumer internal, external, or partner?\n3. Is this synchronous or asynchronous?\n4. Are we dealing with SaaS connectors, files, or B2B formats?\n5. Do we need throttling, auth, transformation, or developer onboarding?",
+      "notes": "Integration problems come in three flavours: API governance (external edge), connector/process integration (SaaS and B2B), and internal service communication. Each has a different default tool. Don't collapse them into one product decision."
+    },
+    {
+      "id": "ap-17",
+      "type": "multi-choice",
+      "category": "Integration & API",
+      "question": "A vendor API needs throttling, authentication policies, and a developer portal. Which Azure service?",
+      "options": [
+        "Logic Apps",
+        "API Management (APIM)",
+        "Service Bus",
+        "Azure Front Door"
+      ],
+      "correctOption": 1,
+      "answer": "API Management (APIM).",
+      "notes": "APIM is the external API edge and governance service. It provides rate limiting, authentication/authorisation policies, request/response transformation, caching, and a developer portal. Logic Apps is for connector-heavy workflows. Service Bus is messaging. Front Door is a CDN/WAF. APIM is specifically designed for API governance at the edge — but don't put it in front of every internal service-to-service call without a governance reason."
+    },
+    {
+      "id": "ap-18",
+      "type": "scenario",
+      "category": "Integration & API",
+      "question": "Someone says: 'Let's put APIM in front of all our internal services.' What do you say?",
+      "answer": "\"APIM makes sense at the external edge where we need throttling, consumer isolation, and policy enforcement. For internal service-to-service traffic, we should only use it where there's a real governance requirement. Adding a gateway everywhere adds latency, cost, and another failure point. Let's use an API edge where there is an edge.\"",
+      "notes": "APIM (Azure API Management) is designed for external-facing API governance. Putting it in front of every internal service call is over-engineering — it adds latency, operational cost, and complexity. Use it where you genuinely need consumer isolation, rate limiting, transformation, or developer onboarding. Internal services that talk only to each other often don't need this."
+    },
+    {
+      "id": "ap-19",
+      "type": "scenario",
+      "category": "Identity & Access",
+      "question": "An architect proposes: 'We should encode all payroll access rules as Entra ID groups.' What's wrong with this approach?",
+      "answer": "\"Identity proves who the caller is. It does not decide payroll entitlements. We need to separate authentication from business authorisation. Entra groups are fine for IT roles and access control, but payroll entitlements — who can approve what amount, who can view which pay data — should live in domain logic and data, not only in directory groups.\"",
+      "notes": "This is the identity/access framing: always split authentication (who are you?) from business authorisation (what are you allowed to do in this domain?). Entra ID / Microsoft identity platform handles workforce SSO, OAuth 2.0, and OIDC. Managed identities handle Azure service-to-service auth. But business rules like 'payroll managers can approve adjustments up to £10,000' belong in domain data, not directory groups. Groups change too slowly and lack domain context."
+    },
+    {
+      "id": "ap-20",
+      "type": "flashcard",
+      "category": "Identity & Access",
+      "question": "What is the default approach for identity/access in an Azure platform?",
+      "answer": "1. Workforce SSO / token issuance → Microsoft Entra ID\n2. Azure service-to-service → Managed identities (no secrets)\n3. Business entitlements → Keep in domain logic and data, not only in IdP groups",
+      "notes": "Microsoft Entra ID (formerly Azure AD) is the cloud identity service supporting OAuth 2.0 and OIDC. Managed identities eliminate the need for applications to handle credentials — Azure manages the identity lifecycle automatically. The critical insight is that identity and business authorisation are separate concerns. Entra proves identity; domain logic decides entitlements."
+    },
+    {
+      "id": "ap-21",
+      "type": "scenario",
+      "category": "Reporting & Analytics",
+      "question": "A stakeholder asks: 'Can we build the headcount dashboard by querying the live employee database?' What do you say?",
+      "answer": "\"We should separate operational reads from enterprise analytics. A headcount dashboard is cross-domain analytics — it shouldn't query the live OLTP database directly. That creates coupling, performance risk, and bypasses domain boundaries. The better approach is a curated analytical model plus a Power BI semantic model with row-level security.\"",
+      "notes": "Reporting has two patterns: operational reporting (service-owned read models for the service's own screens) and enterprise analytics (cross-domain dashboards). Never build enterprise reporting by joining live microservice databases — it creates hidden coupling, performance problems, and breaks bounded contexts. Instead, publish curated data into an analytical store, build a Power BI semantic model on top, and enforce RLS. In Power BI workspaces, RLS applies to Viewer role users; Admin/Member/Contributor roles have edit access and aren't restricted by RLS."
+    },
+    {
+      "id": "ap-22",
+      "type": "multi-choice",
+      "category": "Reporting & Analytics",
+      "question": "Cross-domain HR analytics (headcount, attrition, comp) should be built on:",
+      "options": [
+        "Direct queries to each microservice's database",
+        "A shared operational database joining all domains",
+        "Curated analytical store + Power BI semantic model + RLS",
+        "Real-time event stream processing"
+      ],
+      "correctOption": 2,
+      "answer": "Curated analytical store + Power BI semantic model + RLS.",
+      "notes": "Cross-domain analytics needs curated, governed data — not live joins across service databases. A curated analytical store (data lake, Synapse) gives you a clean, owned dataset. Power BI semantic models provide governed metrics and measures. Row-Level Security (RLS) controls who sees which data (by manager, HRBP, country, legal entity). This pattern preserves service boundaries while enabling enterprise reporting."
+    },
+    {
+      "id": "ap-23",
+      "type": "flashcard",
+      "category": "Key Lines",
+      "question": "What is the single most useful line in any architecture meeting?",
+      "answer": "\"What requirement eliminates the simple option?\"",
+      "notes": "This one line cuts through vendor hype, pattern enthusiasm, and premature complexity. It forces the proposer to name a concrete requirement — not a preference, not a trend, not 'it would be nice'. If they can't name the requirement, the simple option wins. Use it constantly."
+    },
+    {
+      "id": "ap-24",
+      "type": "flashcard",
+      "category": "Key Lines",
+      "question": "Recall the 6 'lines worth memorising' from the architect playbook.",
+      "answer": "1. \"This looks like a capability question before it is a product question.\"\n2. \"I see a simple option, a platform option, and a heavyweight option.\"\n3. \"The decision hinges on volatility, ownership, audit, latency, and reuse.\"\n4. \"Let's separate authentication from business authorisation.\"\n5. \"We need to decide whether this is a command, an event, or a stream.\"\n6. \"We should not jump to vendors until we know where on the complexity curve this sits.\"",
+      "notes": "These lines are designed to be delivered verbatim in meetings. Each one reframes the discussion from product/vendor talk to capability/requirement talk. Practise saying them naturally until they feel automatic. The goal: you should be able to produce any of these within 2 seconds of hearing the trigger."
+    },
+    {
+      "id": "ap-25",
+      "type": "flashcard",
+      "category": "Default Stance",
+      "question": "What is the default technology bias for an Azure HR/payroll/talent platform? List all 9 defaults.",
+      "answer": "1. Payroll calculations / critical policy → code + versioned config\n2. Approvals / connector-heavy flows → Logic Apps\n3. Long-running code-owned sagas → Durable Functions\n4. Internal commands and durable async → Service Bus\n5. Domain notifications / reactive fan-out → Event Grid\n6. Telemetry / audit stream ingestion → Event Hubs\n7. External API governance → APIM\n8. Workforce and workload identity → Entra + managed identities\n9. Enterprise reporting → curated model + Power BI semantic model + RLS",
+      "notes": "Memorise the pattern, not the products. Products change; the framing does not. Each default represents the simplest appropriate technology for the problem class. You only deviate when specific requirements (volatility, ownership, audit, latency, reuse) force a different choice."
+    },
+    {
+      "id": "ap-26",
+      "type": "classify",
+      "category": "Core Framework",
+      "question": "Classify each scenario into one of the 6 problem domains:\n(A) Manager needs to approve a leave request\n(B) External payroll provider needs rate-limited API access\n(C) Headcount dashboard for HRBPs\n(D) Employee SSO across platform apps\n(E) PayrollRunCompleted needs to notify 4 systems\n(F) Benefits eligibility changes every open enrollment",
+      "answer": "(A) Workflow / orchestration\n(B) Integration / API\n(C) Reporting / analytics\n(D) Identity / access\n(E) Eventing / messaging\n(F) Rules / decisioning",
+      "notes": "(A) Approval chains are workflow — Logic Apps is the default for human approvals with connectors. (B) External API governance with rate limiting is an APIM problem. (C) Cross-domain dashboards are enterprise analytics — curated store + Power BI. (D) SSO is workforce identity — Entra ID. (E) One event, many consumers is event fan-out — Event Grid. (F) Eligibility rules that change periodically are decisioning — start with code + config."
+    },
+    {
+      "id": "ap-27",
+      "type": "scenario",
+      "category": "Rules & Decisioning",
+      "question": "Someone proposes building a centralised 'rules service' that all domains (payroll, absence, benefits) share. What's wrong with this?",
+      "answer": "\"A centralised rules service means every domain depends on one shared service for its core logic. That creates tight coupling, unclear ownership, and a bottleneck. Payroll rules and absence rules and benefits rules are different domains with different change cadences and different owners. They should live in their respective services. A shared platform decision is only justified if multiple domains truly need the same capability.\"",
+      "notes": "This is one of the 'avoid' items from the playbook. The anti-pattern is using a rules engine to paper over bad domain boundaries. Each bounded context should own its rules. Sharing a rules engine might make sense for infrastructure (the engine itself), but sharing the actual business rules across domains creates a distributed monolith.",
+      "followUps": [
+        {
+          "question": "When WOULD a shared rules platform be justified?",
+          "answer": "When multiple domains genuinely need the same capability: business-authored rules, auditable version history, simulation/testing before publish, and reuse of the same rules across services. Even then, each domain should own its own rulesets within the platform — not share one giant rule base."
+        }
+      ]
+    },
+    {
+      "id": "ap-28",
+      "type": "multi-choice",
+      "category": "Eventing & Messaging",
+      "question": "A payroll adjustment command needs reliable, exactly-once processing by a single consumer. Which service?",
+      "options": [
+        "Event Grid",
+        "Event Hubs",
+        "Service Bus",
+        "Azure Storage Queue"
+      ],
+      "correctOption": 2,
+      "answer": "Service Bus.",
+      "notes": "This is a command (directed instruction to one processor) that needs durable, reliable delivery. Azure Service Bus is the enterprise broker for high-value business messaging — it supports queues (one consumer), topics (pub/sub), sessions, dead-lettering, and transactions. Event Grid is for reactive event fan-out. Event Hubs is for high-throughput stream ingestion. Storage Queues are simpler/cheaper but lack the enterprise features needed for payroll-critical processing."
+    },
+    {
+      "id": "ap-29",
+      "type": "flashcard",
+      "category": "Workflow & Orchestration",
+      "question": "What should you avoid when dealing with workflow/orchestration?",
+      "answer": "1. Turning every multi-step process into orchestration\n2. Putting core domain behaviour into a connector flow just because it's visual\n3. Building distributed transactions by wishful thinking",
+      "notes": "Not every multi-step process needs orchestration. A simple synchronous service chain should stay simple. Don't use Logic Apps for domain logic just because the visual designer looks nice — domain logic belongs in code. And distributed transactions don't work by hoping they do; you need explicit compensation/rollback strategies (saga pattern) in Durable Functions."
+    },
+    {
+      "id": "ap-30",
+      "type": "scenario",
+      "category": "Reporting & Analytics",
+      "question": "Someone says: 'Just send all the data to the data lake and we'll report from there.' What do you say?",
+      "answer": "\"A data lake is not a substitute for service ownership and clean boundaries. Before picking the storage target, we need to define the business metrics and ownership model. Is this operational reporting — which should come from service-owned read models — or cross-domain analytics? If it's analytics, we need curated data, not a dump of raw service data.\"",
+      "notes": "The 'dump everything in the lake' approach creates a data swamp with no governance. Operational reporting should use service-owned read models (each service handles its own queries). Cross-domain analytics needs curated, owned datasets with clear metric definitions. The data lake is a tool, not a strategy."
+    }
+  ]
+}

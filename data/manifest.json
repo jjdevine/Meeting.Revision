@@ -1,0 +1,39 @@
+{
+  "decks": [
+    {
+      "id": "architect-playbook",
+      "title": "Architect Meeting Playbook",
+      "description": "Core framework for framing architecture discussions. Covers 6 problem domains with structured ask/default/say/avoid patterns.",
+      "file": "decks/architect-playbook.json",
+      "icon": "🏗️"
+    },
+    {
+      "id": "domain-cheatsheet",
+      "title": "Domain Cheatsheet",
+      "description": "Quick reference for Azure HR/payroll/talent platform decisions across payroll, absence, onboarding, benefits, identity, and reporting.",
+      "file": "decks/domain-cheatsheet.json",
+      "icon": "📋"
+    },
+    {
+      "id": "meeting-responses",
+      "title": "Meeting Response Pack",
+      "description": "Ready-made responses for common meeting scenarios including the 4-step pattern, situation-specific responses, and time-buying lines.",
+      "file": "decks/meeting-responses.json",
+      "icon": "🎯"
+    },
+    {
+      "id": "objection-handlers",
+      "title": "Objection Handlers",
+      "description": "Responses to meeting clichés: single pane of glass, golden source, everything real-time, AI, Kubernetes, shared platform.",
+      "file": "decks/objection-handlers.json",
+      "icon": "🛡️"
+    },
+    {
+      "id": "architecture-overreach",
+      "title": "Architecture Overreach",
+      "description": "Counters for architecture overreach: event sourcing, canonical models, one workflow engine, premature standardisation, and future-proofing.",
+      "file": "decks/architecture-overreach.json",
+      "icon": "⚖️"
+    }
+  ]
+}

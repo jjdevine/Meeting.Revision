@@ -1,0 +1,186 @@
+{
+  "id": "domain-cheatsheet",
+  "title": "Domain Cheatsheet",
+  "cards": [
+    {
+      "id": "dc-1",
+      "type": "flashcard",
+      "category": "Payroll",
+      "question": "What is the default technical approach for payroll calculation logic?",
+      "answer": "Keep payroll calculation logic code-first in the owning service, with centralised config/flags in App Configuration and Service Bus for durable async processing. Only consider a separate rules platform when rule changes are frequent, business-owned, auditable by version, or reused across services.",
+      "notes": "Payroll is correctness-critical. Code-first means the logic lives in the payroll service's codebase, is version-controlled in git, is unit-testable, and deploys with the service. Azure App Configuration centralises settings and feature flags with immutable snapshots and point-in-time revisions — useful for rate tables and toggles. Service Bus provides durable, reliable messaging for payroll processing commands. You'd only move to a rules platform (like Logic Apps Rules Engine) when business users need to author rules directly, changes happen frequently, and you need versioned audit trails."
+    },
+    {
+      "id": "dc-2",
+      "type": "flashcard",
+      "category": "Payroll",
+      "question": "What questions should you ask when payroll architecture comes up?",
+      "answer": "1. Who changes the rule?\n2. How often?\n3. Do we need replay by rule version?\n4. Is this shared across services?\n5. Is simulation/testing required before publish?",
+      "notes": "These questions determine whether payroll logic stays code-first or needs a rules platform. If developers own changes, they're infrequent, you don't need version replay, and it's single-service — code-first wins. Business ownership, frequent changes, audit requirements, and cross-service reuse push toward a platform."
+    },
+    {
+      "id": "dc-3",
+      "type": "scenario",
+      "category": "Payroll",
+      "question": "How would you summarise the payroll default to an architect in one sentence?",
+      "answer": "\"Payroll is correctness-critical. I'd stay code-first with versioned config unless we need business-authored, auditable, reusable rules.\"",
+      "notes": "This is the 'say' line for payroll. It's direct, defensible, and positions you as pragmatic rather than dogmatic. The word 'correctness-critical' signals you understand the domain's primary concern."
+    },
+    {
+      "id": "dc-4",
+      "type": "flashcard",
+      "category": "Payroll",
+      "question": "What are the anti-patterns to avoid in payroll architecture?",
+      "answer": "1. Giant shared rules services\n2. Non-versioned rate tables\n3. No replay/audit story\n4. Putting correctness-critical logic in hard-to-test places",
+      "notes": "Payroll needs to be reproducible: given the same inputs and rule version, you must get the same output. Non-versioned rate tables mean you can't replay a past payroll run. Shared rules services create coupling across domains. If you can't test it, version it, and replay it, it doesn't belong in payroll."
+    },
+    {
+      "id": "dc-5",
+      "type": "flashcard",
+      "category": "Absence / Leave",
+      "question": "What is the default technical approach for absence/leave management?",
+      "answer": "Keep entitlement policy service-owned and simple. Use Logic Apps for approval-heavy or connector-heavy flows. Move to Durable Functions only when the process is code-centric, stateful, and long-running with retries or compensation.",
+      "notes": "Absence/leave involves two concerns: policy (eligibility rules, accrual calculations) and process (approval workflows, manager notifications). Policy should stay in the service. Process orchestration depends on complexity: Logic Apps for approval chains with SaaS connectors, Durable Functions for complex code-owned sagas. Don't hide policy logic inside visual workflow tools."
+    },
+    {
+      "id": "dc-6",
+      "type": "scenario",
+      "category": "Absence / Leave",
+      "question": "Someone proposes using Logic Apps to implement leave accrual calculations. Is this a good idea?",
+      "answer": "\"No. Leave accrual is policy logic — it should stay in the service code where it's testable, versionable, and owned by the domain team. Logic Apps is for the process around it: approval flows, SaaS integration, notifications. Don't hide core policy inside visual flows.\"",
+      "notes": "This is the 'avoid hiding core policy logic inside visual flows' anti-pattern. Logic Apps is excellent for integration and approval orchestration, but business rules (accrual rates, eligibility criteria, carryover limits) should be in testable domain code. Mixing concerns makes both harder to change.",
+      "followUps": [
+        {
+          "question": "What questions would you ask about an absence management system?",
+          "answer": "1. Is this straight-through processing or does it need approval?\n2. Any SLA/timeouts on approvals?\n3. Calendar/public holiday rules?\n4. What happens on cancellation or retroactive change?"
+        }
+      ]
+    },
+    {
+      "id": "dc-7",
+      "type": "flashcard",
+      "category": "Onboarding / Offboarding",
+      "question": "What is the default technical approach for onboarding/offboarding?",
+      "answer": "Treat as orchestration plus identity lifecycle. Put workforce identity and app access in Entra ID. Use Logic Apps where the work is mostly provisioning/integration across systems. Use Durable Functions where the team owns a code-defined saga. Use managed identities for service-to-service calls.",
+      "notes": "Onboarding is a multi-system orchestration problem: create AD account, provision SaaS apps, send welcome emails, set up payroll, assign equipment. The key question is whether it's mostly connector-heavy (Logic Apps) or code-heavy saga (Durable Functions). Entra ID manages the identity lifecycle. Managed identities eliminate credential management for service-to-service calls — Azure handles the identity lifecycle automatically."
+    },
+    {
+      "id": "dc-8",
+      "type": "scenario",
+      "category": "Onboarding / Offboarding",
+      "question": "How would you describe the onboarding architecture challenge in one sentence?",
+      "answer": "\"This is orchestration, not just workflow. Connector-heavy points to Logic Apps; code-owned saga behaviour points to Durable.\"",
+      "notes": "The distinction between orchestration and workflow matters. Workflow implies a linear flow. Orchestration implies coordinating multiple independent systems with failure handling, compensation, and state management. Onboarding touches many systems (AD, SaaS apps, payroll, email, equipment) and needs rollback capability if any step fails."
+    },
+    {
+      "id": "dc-9",
+      "type": "flashcard",
+      "category": "Benefits",
+      "question": "What is the default technical approach for benefits architecture?",
+      "answer": "Treat as eligibility rules plus partner integration. Start with service-owned rules/config. Use Service Bus for reliable enrollment processing. Use APIM at carrier/vendor API edges. Use Logic Apps when integration is connector-heavy or B2B-like.",
+      "notes": "Benefits architecture has two key dimensions: rules (eligibility, plan options, life events) and integration (carrier APIs, file exchanges, enrollment processing). Rules should start service-owned. For integration: APIM provides auth, throttling, and transformation at the vendor API edge. Service Bus ensures reliable enrollment message processing. Logic Apps handles connector-heavy or B2B integration patterns."
+    },
+    {
+      "id": "dc-10",
+      "type": "flashcard",
+      "category": "Benefits",
+      "question": "What questions should you ask when benefits architecture comes up?",
+      "answer": "1. How many carriers/vendors?\n2. API or file-based integration?\n3. Real-time or batch?\n4. Enrollment windows?\n5. Retro changes?\n6. SLA and reconciliation needs?",
+      "notes": "These questions reveal the integration complexity. Multiple carriers with different interfaces (API, SFTP, EDI) push toward Logic Apps integration accounts. Real-time enrollment vs batch windows affects messaging choices. Retro changes need compensation/replay capability. Reconciliation needs drive reporting requirements."
+    },
+    {
+      "id": "dc-11",
+      "type": "scenario",
+      "category": "Benefits",
+      "question": "Someone says: 'Benefits are complex, we need a dedicated benefits platform component.' How do you respond?",
+      "answer": "\"This is rules plus partner integration. I wouldn't jump to a benefits platform component unless partner complexity or business-owned rule churn actually forces it. Let's start with service-owned rules and see where the integration pain really is.\"",
+      "notes": "This is the 'avoid product-first thinking because benefits are complex' anti-pattern. Complexity alone doesn't justify a platform. You need specific forcing conditions: many carriers with different interfaces, business-owned rule changes, complex enrollment windows, or reconciliation requirements that exceed what service-owned logic can handle."
+    },
+    {
+      "id": "dc-12",
+      "type": "flashcard",
+      "category": "Identity / Access",
+      "question": "What is the default technical approach for identity/access in an HR/payroll platform?",
+      "answer": "Split authentication from business authorisation. Use Microsoft identity platform / Entra for workforce SSO and OAuth2/OIDC-based API access. Use managed identities for Azure workloads. Keep payroll/HR entitlements in domain data, not in directory groups alone.",
+      "notes": "The Microsoft identity platform supports OAuth 2.0 and OpenID Connect for app authentication. APIM can authenticate to backends using managed identity tokens from Entra. The critical architectural principle: directory groups handle IT access roles (who can access which app), but business entitlements (who can approve payroll up to £50k, who can view salary data for which legal entity) belong in domain data where domain logic can enforce them."
+    },
+    {
+      "id": "dc-13",
+      "type": "multi-choice",
+      "category": "Identity / Access",
+      "question": "Where should payroll approval limits (e.g., 'can approve adjustments up to £10,000') be stored?",
+      "options": [
+        "Entra ID directory groups",
+        "APIM policies",
+        "Domain data in the payroll service",
+        "App Configuration feature flags"
+      ],
+      "correctOption": 2,
+      "answer": "Domain data in the payroll service.",
+      "notes": "Business entitlements like approval limits are domain concepts — they belong in domain data where domain logic can enforce them. Entra groups are too coarse (they don't support amount-based rules). APIM policies handle API-level auth, not domain rules. App Configuration is for settings and flags, not business entitlements. The payroll service owns payroll authorisation rules."
+    },
+    {
+      "id": "dc-14",
+      "type": "flashcard",
+      "category": "Reporting / Analytics",
+      "question": "What is the default technical approach for reporting/analytics in an HR/payroll platform?",
+      "answer": "Separate operational reads from enterprise analytics. For service screens, use service-owned read models. For cross-domain analysis, publish curated Power BI semantic models and enforce RLS where needed.",
+      "notes": "Power BI semantic models provide governed metrics, measures, and relationships. Row-Level Security (RLS) controls data visibility: in Power BI workspaces, RLS applies to Viewer users, while Admin/Member/Contributor roles have edit access and are not restricted by RLS. This means you must design your workspace role assignments carefully — don't give everyone Member/Contributor just for convenience, or RLS won't protect sensitive data."
+    },
+    {
+      "id": "dc-15",
+      "type": "flashcard",
+      "category": "Fast Service Map",
+      "question": "Match each Azure service to its primary purpose in an HR/payroll platform.",
+      "answer": "• Config / flags → App Configuration\n• Connector-heavy or human workflow → Logic Apps\n• Code-owned long-running saga → Durable Functions\n• High-value business messaging → Service Bus\n• Reactive event fan-out → Event Grid\n• Telemetry / stream ingestion → Event Hubs\n• API edge governance → API Management\n• Workforce identity → Entra ID\n• Analytics model → Power BI semantic model",
+      "notes": "This is the fast service map — your quick-reference lookup. Each service has a primary sweet spot. The most common mistake is using a service for something outside its sweet spot: Event Hubs for business workflows, APIM for internal service calls, or directory groups for business authorisation."
+    },
+    {
+      "id": "dc-16",
+      "type": "scenario",
+      "category": "Fast Service Map",
+      "question": "Someone jumps straight to naming a vendor product. How do you steer the conversation back?",
+      "answer": "Use one of these:\n• \"What requirement forces us off the simple option?\"\n• \"Who owns change, and how is that change versioned and audited?\"\n• \"Is this a workflow problem or are we jumping to a product category too early?\"\n• \"Are we solving one bounded context, or accidentally inventing a platform?\"",
+      "notes": "These lines pull the conversation back from product/vendor talk to requirement/capability talk. The goal is to make the room justify the complexity before committing to it. This is the 'capability first, product second' principle."
+    },
+    {
+      "id": "dc-17",
+      "type": "multi-choice",
+      "category": "Absence / Leave",
+      "question": "A leave request needs manager approval, calendar checking, and a notification to payroll. What's the best approach?",
+      "options": [
+        "Code it all in the absence service",
+        "Logic Apps for the approval flow, service-owned policy for eligibility, Event Grid to notify payroll",
+        "Durable Functions for everything",
+        "Put it all in a shared workflow engine"
+      ],
+      "correctOption": 1,
+      "answer": "Logic Apps for approval, service-owned policy for eligibility, Event Grid to notify payroll.",
+      "notes": "This combines three patterns correctly: eligibility policy stays in domain code (rules), the approval flow with connectors uses Logic Apps (workflow), and payroll notification is a business event with fan-out (Event Grid). This is the kind of multi-domain answer that shows architectural maturity."
+    },
+    {
+      "id": "dc-18",
+      "type": "flashcard",
+      "category": "Onboarding / Offboarding",
+      "question": "What should you avoid in onboarding/offboarding architecture?",
+      "answer": "1. Synchronous chains across many systems (fragile)\n2. Secret sprawl — use managed identities instead\n3. Unclear rollback ownership — who handles failure recovery?",
+      "notes": "Onboarding touches many systems. Synchronous service chains mean one failure cascades everywhere. Use managed identities instead of storing credentials for each system. Most importantly, define who owns the recovery when a step fails — is it the orchestrator, the target system, or a manual process?"
+    },
+    {
+      "id": "dc-19",
+      "type": "classify",
+      "category": "Fast Service Map",
+      "question": "Match each requirement to the correct Azure service:\n(A) Rate-limit a carrier API and require API keys\n(B) Reliably process payroll commands one at a time\n(C) Broadcast PayrollRunCompleted to 5 systems\n(D) Store centralised feature flags with immutable snapshots\n(E) Run a code-defined saga with retries and compensation",
+      "answer": "(A) API Management (APIM)\n(B) Service Bus\n(C) Event Grid\n(D) App Configuration\n(E) Durable Functions",
+      "notes": "(A) API governance at the edge = APIM. (B) Durable command processing for one consumer = Service Bus. (C) Event fan-out to multiple subscribers = Event Grid. (D) Centralised config with immutable snapshots = App Configuration. (E) Stateful code orchestration with retries = Durable Functions. Each service targets a specific problem class."
+    },
+    {
+      "id": "dc-20",
+      "type": "flashcard",
+      "category": "Payroll",
+      "question": "What are the four payroll-specific lines worth memorising?",
+      "answer": "1. \"For payroll, correctness and replay matter more than architectural elegance.\"\n2. \"Any dynamic rules story needs versioning, testability, and audit by effective date.\"\n3. \"A shared platform decision is only justified if multiple domains truly need the same capability.\"\n4. \"For payroll and HR, business ownership of change is a stronger signal than technical preference.\"",
+      "notes": "These lines work because they demonstrate domain awareness. 'Correctness and replay' shows you understand payroll's primary concern. 'Versioning and effective date' shows you know payroll is time-sensitive. 'Business ownership of change' shows you think about who maintains the system, not just how it's built."
+    }
+  ]
+}

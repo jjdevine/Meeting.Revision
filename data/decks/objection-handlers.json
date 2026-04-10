@@ -1,0 +1,205 @@
+{
+  "id": "objection-handlers",
+  "title": "Objection Handlers",
+  "cards": [
+    {
+      "id": "oh-1",
+      "type": "flashcard",
+      "category": "Core Technique",
+      "question": "What is the 3-step objection handling technique?",
+      "answer": "1. Translate the slogan into an actual problem\n2. Narrow the scope to user, data, flow, or SLA\n3. Ask what forces the heavyweight option",
+      "notes": "The job is not to kill ideas. The job is to force slogans to become requirements, trade-offs, and owners. The universal opening line is: 'I'm not against it. I want the requirement that justifies it.' This keeps you collaborative, not adversarial."
+    },
+    {
+      "id": "oh-2",
+      "type": "scenario",
+      "category": "Single Pane of Glass",
+      "question": "Someone says: 'We need a single pane of glass.' What do you say?",
+      "answer": "• \"Do we need one UI, one workflow, or just consistent access and visibility?\"\n• \"A single pane is a UX goal, not automatically a system design.\"\n• \"Forcing everything into one surface often creates a shallow portal and bad domain UX.\"",
+      "notes": "'Single pane of glass' is one of the most common enterprise clichés. It usually masks an unclear requirement. The real need might be: SSO across apps, shared navigation/design system, consolidated search, or unified reporting. Each is a different solution. A literal 'single pane' — one UI for HR, payroll, and talent — usually creates a shallow portal that's bad at everything rather than good at anything.",
+      "followUps": [
+        {
+          "question": "What's your default position on 'single pane of glass'?",
+          "answer": "Use federated experience, not forced consolidation: shared identity (SSO), shared navigation/design system, shared reporting/search where needed, but separate domain apps where the workflows genuinely differ. The line: 'I'd rather unify the experience than pretend all domains belong in one application.'",
+          "notes": "Federated experience means users feel like they're in one platform (consistent look, single sign-on, shared navigation) but each domain app is independently built and maintained. This preserves domain UX quality while giving the appearance of unity."
+        },
+        {
+          "question": "What should you watch for when 'single pane of glass' is proposed?",
+          "answer": "1. Giant portal programme with massive scope\n2. UI monolith hiding backend fragmentation\n3. 'Single pane' being code for 'leadership wants one screenshot for a presentation'",
+          "notes": "The third one is surprisingly common. Sometimes 'single pane' really means 'someone senior wants to show one dashboard in a board meeting.' That's a reporting/dashboard problem, not an architecture problem."
+        }
+      ]
+    },
+    {
+      "id": "oh-3",
+      "type": "scenario",
+      "category": "Golden Source",
+      "question": "Someone says: 'We need a golden source.' What do you say?",
+      "answer": "• \"Golden source for which entity, which attribute, and which effective date?\"\n• \"Let's separate system of entry, system of record, and authoritative publisher.\"\n• \"There is usually no universal golden source across HR, payroll, and talent.\"",
+      "notes": "'Golden source' sounds simple but hides massive complexity. Different systems are authoritative for different data: HR owns workforce master data (name, org structure), payroll owns pay results and effective calculations, talent owns recruitment state, identity owns credentials. Even within an entity like 'employee', different attributes have different authoritative sources. The key is to think in terms of authoritative ownership by domain and attribute, not one magic master system.",
+      "followUps": [
+        {
+          "question": "How do you force specificity when someone claims they need a 'golden source'?",
+          "answer": "Force them to specify three dimensions:\n1. Entity: employee, contractor, absence record, payroll result, candidate\n2. Field: legal name, tax code, bank account, pay result, job title\n3. Time: current truth, future-dated truth, historical truth\n\nDifferent answers for each combination.",
+          "notes": "For example, 'employee legal name' is owned by HR (system of entry) but might be published to payroll and identity. 'Payroll result' is owned by payroll. 'Candidate pipeline status' is owned by talent. There is no one system that is the 'golden source' for all of these."
+        },
+        {
+          "question": "What should you watch for with 'golden source' proposals?",
+          "answer": "1. Fake MDM (Master Data Management) programme with no field-level ownership defined\n2. Endless sync loops between systems\n3. People using 'golden source' to avoid the hard work of data governance",
+          "notes": "A real golden source strategy requires field-level ownership (who is authoritative for each attribute), clear sync patterns (who pushes to whom), and conflict resolution (what happens when two systems disagree). Most 'golden source' proposals skip all of this."
+        }
+      ]
+    },
+    {
+      "id": "oh-4",
+      "type": "scenario",
+      "category": "Everything Real-Time",
+      "question": "Someone says: 'Everything should be real-time.' What do you say?",
+      "answer": "• \"What breaks if this is 30 seconds late, 5 minutes late, or next-day?\"\n• \"Freshness is an SLA, not a virtue.\"\n• \"Real-time is expensive. We should pay for it only where latency changes the outcome.\"",
+      "notes": "Real-time is expensive in operational cost, infrastructure complexity, and coupling between systems. Most business processes don't need true real-time (sub-second). The question is: what's the business impact of delay? If a payroll figure being 5 minutes old doesn't change any outcome, near-real-time or even batch is fine. True real-time should be reserved for flows where delay causes material harm — e.g., blocking a user, missing a compliance window, or producing incorrect calculations.",
+      "followUps": [
+        {
+          "question": "What's your default position on freshness?",
+          "answer": "Use the lightest freshness model that meets the business need:\n• Batch when batch is enough\n• Near-real-time for most operational sync\n• True real-time only for flows where delay causes material harm\n\nThe line: 'Let's define freshness by business impact, not by architectural taste.'",
+          "notes": "Three tier freshness: batch (hourly/daily), near-real-time (seconds to minutes via messaging), true real-time (sub-second via streaming/push). Each tier has increasing cost and complexity. Most HR/payroll flows live in batch or near-real-time."
+        }
+      ]
+    },
+    {
+      "id": "oh-5",
+      "type": "scenario",
+      "category": "AI Should Do This",
+      "question": "Someone says: 'AI should do this.' What do you say?",
+      "answer": "• \"Which part exactly: extract, classify, summarise, recommend, or decide?\"\n• \"What happens when it is wrong?\"\n• \"For HR and payroll, assistive AI and decision-making AI are not the same thing.\"",
+      "notes": "AI in HR/payroll has a clear boundary: assistive tasks (document extraction, summarisation, case triage, recommendation, draft generation for human review) are generally safe. Decision-making tasks (pay outcomes, compliance decisions, access entitlements, contractual interpretation) are high-risk because AI output is probabilistic — it can be wrong, and wrong pay or compliance outcomes have legal consequences.",
+      "followUps": [
+        {
+          "question": "Where is AI appropriate in an HR/payroll platform?",
+          "answer": "Good: document extraction, summarisation, case triage, recommendation, draft generation for human review.\n\nBad: final authority on pay outcomes, compliance decisions, access entitlements, contractual interpretation without review.",
+          "notes": "The key line: 'I'm open to AI where error is tolerable and review exists. I would not make pay or compliance depend on probabilistic output by default.'"
+        },
+        {
+          "question": "What should you watch for when 'AI' is proposed?",
+          "answer": "1. 'AI' meaning 'we haven't defined the problem yet'\n2. No success metric\n3. No fallback path when AI is wrong\n4. Hidden PII/privacy risk in training data or prompts",
+          "notes": "The biggest red flag is when 'AI' is the answer before the problem is clearly defined. Also watch for privacy: HR data is sensitive, and using it for AI training or in prompts may violate data protection regulations."
+        }
+      ]
+    },
+    {
+      "id": "oh-6",
+      "type": "scenario",
+      "category": "Just Use Kubernetes",
+      "question": "Someone says: 'Just use Kubernetes.' What do you say?",
+      "answer": "• \"Which problem are we solving that simpler Azure hosting doesn't solve?\"\n• \"Kubernetes is a platform choice with a permanent ops tax.\"\n• \"Default should be the simplest runtime that meets the control, scale, and isolation requirements.\"",
+      "notes": "Kubernetes (AKS in Azure) is a powerful container orchestration platform, but it comes with significant operational overhead: cluster management, networking, security patching, monitoring, and a skilled platform team. For many standard business services, Azure Functions, App Service, or Container Apps provide sufficient hosting without the operational tax. Kubernetes is justified when you need complex container orchestration, custom networking, service mesh, advanced scheduling, or strong platform standardisation around containers.",
+      "followUps": [
+        {
+          "question": "When IS Kubernetes the right choice?",
+          "answer": "When you have:\n• Complex container workloads needing orchestration\n• Strong platform standardisation around containers\n• Advanced operational controls (service mesh, custom networking)\n• Team capability to own cluster complexity\n\nThe line: 'I'm happy to use Kubernetes when the workload needs Kubernetes. I don't want to buy cluster complexity for ordinary services.'",
+          "notes": "The alternative Azure hosting options are: Functions (event-driven, serverless), App Service (managed web hosting), Container Apps (simplified container hosting with Kubernetes under the hood but without cluster management). Each is simpler than raw AKS."
+        }
+      ]
+    },
+    {
+      "id": "oh-7",
+      "type": "scenario",
+      "category": "Shared Platform",
+      "question": "Someone says: 'Put it in the shared platform.' What do you say?",
+      "answer": "• \"Is this truly cross-cutting, or is it just repeated in two teams right now?\"\n• \"Shared platform should provide paved roads and guardrails, not absorb domain behaviour.\"\n• \"Centralising too early creates a queue, a bottleneck, and weakest-common-denominator design.\"",
+      "notes": "Platform teams should provide cross-cutting infrastructure: CI/CD templates, observability standards, identity patterns, secrets management, networking guardrails, API standards, golden path libraries. They should NOT absorb domain-specific logic: payroll rules, absence policy, onboarding business decisions. The test: is this genuinely cross-cutting (used by many teams), or is it domain-specific (belongs to one bounded context)?",
+      "followUps": [
+        {
+          "question": "What are good vs bad candidates for a shared platform?",
+          "answer": "Good: CI/CD templates, observability standards, identity patterns, secrets management, networking guardrails, API standards, golden path libraries.\n\nBad: payroll rules, absence policy logic, onboarding business decisions, anything that belongs to a bounded context.",
+          "notes": "The line: 'Shared platform should make teams faster at their own domain work. It should not become a second domain team.' Watch for: central team becoming an approval queue, 'reuse' being used to justify domain theft, platform team owning business logic it cannot safely change."
+        }
+      ]
+    },
+    {
+      "id": "oh-8",
+      "type": "flashcard",
+      "category": "Fast Rebuttals",
+      "question": "What are the 7 fast rebuttal lines for any objection?",
+      "answer": "1. \"That sounds like a slogan. What is the actual requirement?\"\n2. \"What fails if we take the simpler option?\"\n3. \"Who owns change after go-live?\"\n4. \"How is this versioned, audited, and supported?\"\n5. \"Which decision here is hard to reverse?\"\n6. \"Are we solving for users, architects, or optics?\"\n7. \"I want the forcing condition, not the preferred product.\"",
+      "notes": "These are short, sharp lines you can use when you need a quick response. #1 calls out buzzword-driven thinking. #2 forces concrete justification. #3 questions operational reality. #4 probes governance. #5 identifies irreversible decisions. #6 questions who benefits. #7 demands the specific requirement."
+    },
+    {
+      "id": "oh-9",
+      "type": "flashcard",
+      "category": "Closing Lines",
+      "question": "What are the 4 closing lines that keep you in control?",
+      "answer": "1. \"My default is the simpler option unless we can name the requirement that forces the heavier one.\"\n2. \"I'm fine with the heavy option once we write down the operational cost and owner.\"\n3. \"Let's make the irreversible decision last.\"\n4. \"Let's decide capability first, product second.\"",
+      "notes": "Use these to close any discussion. #1 is pragmatic anchoring. #2 accepts the heavy option but demands accountability. #3 is a time-sequencing principle — defer the hardest-to-reverse decisions. #4 is the meta-principle that stops vendor jumping."
+    },
+    {
+      "id": "oh-10",
+      "type": "flashcard",
+      "category": "One-Line Domain Versions",
+      "question": "Give the one-line domain-specific version for each of the 6 clichés.",
+      "answer": "• Single pane: \"Unify identity and navigation first; don't force HR, payroll, and talent into one app unless the user journey genuinely needs it.\"\n• Golden source: \"Use authoritative ownership by domain and attribute; there is no single magic source for all workforce data.\"\n• Real-time: \"Only make it real-time where delay changes pay, compliance, or user outcome.\"\n• AI: \"Use AI to assist HR operations; do not let it quietly decide pay or compliance.\"\n• Kubernetes: \"AKS is not the default for ordinary business services.\"\n• Shared platform: \"Cross-cutting belongs in platform; payroll and HR decisions do not.\"",
+      "notes": "These are the domain-tuned versions of general objection responses. They show you understand the HR/payroll context specifically, not just general enterprise architecture. Each one is short enough to deliver in a meeting without sounding rehearsed."
+    },
+    {
+      "id": "oh-11",
+      "type": "multi-choice",
+      "category": "Single Pane of Glass",
+      "question": "A 'single pane of glass' request is really about which of these?",
+      "options": [
+        "Building one monolithic UI for all domains",
+        "One of: SSO, common navigation, shared search, or consolidated reporting",
+        "Replacing all domain apps with a portal",
+        "A database consolidation project"
+      ],
+      "correctOption": 1,
+      "answer": "One of: SSO, common navigation, shared search, or consolidated reporting.",
+      "notes": "The 'single pane' request is almost never about building one UI. It's about a specific UX or information need: SSO (one login), common navigation (consistent app switching), shared search (find anything from one place), or consolidated reporting (one dashboard). Identifying which one makes the requirement tractable instead of enormous."
+    },
+    {
+      "id": "oh-12",
+      "type": "multi-choice",
+      "category": "Golden Source",
+      "question": "In a multi-domain HR platform, 'employee' data ownership is best handled by:",
+      "options": [
+        "One master database for all employee attributes",
+        "Authoritative ownership by domain and attribute",
+        "Syncing everything to a central MDM",
+        "Whichever system was built first"
+      ],
+      "correctOption": 1,
+      "answer": "Authoritative ownership by domain and attribute.",
+      "notes": "Different domains own different aspects of 'employee': HR owns personal/org data, payroll owns pay calculations, talent owns recruitment state, identity owns credentials. Even fields like 'email address' may have different authoritative sources depending on context (personal vs corporate). A single master database forces one system to own data it doesn't understand."
+    },
+    {
+      "id": "oh-13",
+      "type": "scenario",
+      "category": "Everything Real-Time",
+      "question": "A product owner says: 'The absence dashboard needs to update in real-time.' How do you probe this?",
+      "answer": "\"What breaks if the data is 5 minutes old? An absence dashboard is typically used for planning and visibility, not time-critical operations. If 5-minute freshness is acceptable, near-real-time messaging gives us that without the cost and complexity of true streaming. Let's define freshness by business impact.\"",
+      "notes": "Most dashboards don't need sub-second freshness. Near-real-time (event-based updates with small delays) is sufficient for planning and reporting. True real-time streaming is expensive and justified only when delay causes material harm (blocking a user, missing a compliance window, producing incorrect pay). The absence dashboard is almost certainly fine with 5-minute lag."
+    },
+    {
+      "id": "oh-14",
+      "type": "scenario",
+      "category": "AI Should Do This",
+      "question": "Someone proposes: 'We should use AI to automatically approve routine absences.' What's your assessment?",
+      "answer": "\"Which part: identifying routine absences (classification), or actually approving them (decision)? Classifying absences as routine is a good AI use case — pattern recognition with human review. Auto-approval is a business decision that needs a clear policy, audit trail, and fallback for errors. I'd frame this as AI-assisted triage with rule-based auto-approval for cases that meet explicit criteria, not AI making the approval decision.\"",
+      "notes": "This separates the AI-appropriate part (classification/triage) from the business decision (approval). Classification can tolerate some error if there's human review. But approval has real consequences — if AI wrongly approves a leave that shouldn't have been approved, there are HR/legal implications. Rule-based auto-approval (if balance > 0 AND within policy, auto-approve) is more appropriate than probabilistic AI approval."
+    },
+    {
+      "id": "oh-15",
+      "type": "scenario",
+      "category": "Shared Platform",
+      "question": "A platform architect says: 'We should centralise all approval workflows into the platform.' Is this a good idea?",
+      "answer": "\"Approval workflows cross many domains, but each domain's approval rules are different. Payroll approvals have amount thresholds and segregation of duties. Leave approvals have balance checks and manager hierarchies. Centralising the approval infrastructure (the engine) is fine — but centralising the approval logic means the platform team owns business rules for every domain. That creates a bottleneck and confused ownership.\"",
+      "notes": "The distinction is between shared infrastructure (the workflow engine, notification delivery, approval UI patterns) and shared logic (who can approve what, under what conditions). Infrastructure can be shared; business logic should stay in the domain. The line: 'Shared platform should make teams faster at their own domain work. It should not become a second domain team.'"
+    },
+    {
+      "id": "oh-16",
+      "type": "flashcard",
+      "category": "Core Technique",
+      "question": "What single line is the most useful in the entire objection handlers pack?",
+      "answer": "\"What requirement eliminates the simple option?\"",
+      "notes": "This line kills a lot of nonsense without sounding political. It works against every cliché: single pane, golden source, real-time, AI, Kubernetes, shared platform. If the proposer can name a concrete requirement, you have a real discussion. If they can't, the simple option wins."
+    }
+  ]
+}

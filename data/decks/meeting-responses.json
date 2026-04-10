@@ -1,0 +1,186 @@
+{
+  "id": "meeting-responses",
+  "title": "Meeting Response Pack",
+  "cards": [
+    {
+      "id": "mr-1",
+      "type": "flashcard",
+      "category": "The 4-Step Pattern",
+      "question": "What is the 4-step meeting response pattern?",
+      "answer": "1. Classify the problem — \"This is mainly a rules / workflow / integration / reporting decision.\"\n2. Force decision criteria — \"The choice depends on ownership, volatility, audit, latency, and reuse.\"\n3. Set the default — \"Default is the simple option unless a clear requirement forces the heavier one.\"\n4. Stop premature product talk — \"Let's lock the capability first, then compare products.\"",
+      "notes": "This is the meta-pattern that underlies every other response. Steps 1–2 reframe the discussion. Step 3 anchors to pragmatism. Step 4 prevents vendor/product jumping. Memorise this sequence — every specific response in this deck is a variation of it."
+    },
+    {
+      "id": "mr-2",
+      "type": "flashcard",
+      "category": "The 4-Step Pattern",
+      "question": "What is the 'best delivery format' for a meeting response?",
+      "answer": "\"I see this as a [problem type] decision. The choice depends on [3 criteria]. My default would be [simple option] unless we know [forcing condition].\"",
+      "notes": "Example in practice: 'I see this as a decisioning problem. The choice depends on rule volatility, business ownership, and auditability. My default would be service-owned logic plus config unless we know rules need business authoring and versioned replay.' That is the sweet spot: prepared, useful, not bluffing."
+    },
+    {
+      "id": "mr-3",
+      "type": "scenario",
+      "category": "We Need a Rules Engine",
+      "question": "Someone says: 'We need a rules engine.' What do you say?",
+      "answer": "• \"Before we call it a rules engine, what actually needs to change without a code release?\"\n• \"Who owns rule changes, and how are they versioned, tested, and audited?\"\n• \"This may just be service-owned policy plus configuration, not a full rules platform.\"\n• \"Let's separate config, decision tables, and a real rules engine. Those are not the same thing.\"",
+      "notes": "The key move is disaggregation: config (feature flags, settings), decision tables (lookup-based rules), and a full rules engine (business-authored, versioned, auditable) are three different things. Most people collapse them into one. By separating them, you show the room that 'rules engine' is a spectrum, not a binary choice.",
+      "followUps": [
+        {
+          "question": "They respond: 'Business users need to change eligibility criteria monthly.' Does that change the analysis?",
+          "answer": "Monthly business-owned changes with audit requirements do push toward a rules platform. But first confirm: are these changes to thresholds/values (decision tables / config) or to the logic structure itself? If it's just values, externalised config may suffice. If business users need to author new rule structures, a proper rules platform is justified.",
+          "notes": "Frequency alone doesn't determine the answer. The nature of the change matters: value changes (thresholds, rates) can be handled by config/decision tables. Structural changes (new rule types, new logic) require a rules authoring platform."
+        }
+      ]
+    },
+    {
+      "id": "mr-4",
+      "type": "scenario",
+      "category": "This Needs Workflow",
+      "question": "Someone says: 'This needs workflow/orchestration.' What do you say?",
+      "answer": "• \"Is this mostly business policy, or mostly process coordination across systems?\"\n• \"Are we dealing with approvals and connectors, or code-owned long-running state?\"\n• \"A multi-step process does not automatically justify orchestration.\"\n• \"Let's separate domain logic from the process wrapper around it.\"",
+      "notes": "The key distinction is between domain logic and process coordination. Domain logic (calculating leave accrual, determining eligibility) should stay in service code. Process coordination (approval chains across SaaS systems) may need workflow tooling. The anti-pattern is hiding domain logic inside a visual workflow tool because it looks more 'managed'."
+    },
+    {
+      "id": "mr-5",
+      "type": "scenario",
+      "category": "Make It Event-Driven",
+      "question": "Someone says: 'Let's make it event-driven' or 'use event sourcing.' What do you say?",
+      "answer": "• \"Do we need a command, a business event, or a stream? Those are different problems.\"\n• \"What specific pain are we solving that a queue plus audit trail does not solve?\"\n• \"Do we need full temporal reconstruction, or just durable messaging and history?\"\n• \"Event sourcing is only worth it when replay and event-first modelling are real requirements, not because it sounds clean.\"",
+      "notes": "'Event-driven' is one of the most over-used terms in architecture. It conflates three distinct patterns: commands (one processor), events (many subscribers), and streams (high-throughput ingestion). Event sourcing specifically means storing state as an immutable sequence of events and rebuilding state by replaying them — it has significant costs (event versioning, eventual consistency, query complexity) that are only justified for specific use cases."
+    },
+    {
+      "id": "mr-6",
+      "type": "scenario",
+      "category": "Put APIM Everywhere",
+      "question": "Someone says: 'Put APIM in front of everything.' What do you say?",
+      "answer": "• \"Is this an external API governance problem or just internal service-to-service traffic?\"\n• \"Where do we actually need throttling, productisation, policy enforcement, or consumer isolation?\"\n• \"Putting a gateway everywhere adds control, but it also adds latency, cost, and another failure point.\"\n• \"Let's use an API edge where there is an edge.\"",
+      "notes": "APIM (Azure API Management) is designed for external-facing API governance: rate limiting, developer portals, API key management, request/response transformation. For internal service-to-service calls between your own microservices, APIM adds latency and operational cost without proportional benefit. Use it at genuine boundaries — external consumers, partner APIs, third-party integrations — not between every internal service."
+    },
+    {
+      "id": "mr-7",
+      "type": "scenario",
+      "category": "Send It to the Data Lake",
+      "question": "Someone says: 'Send it to the data lake' or 'report off the platform.' What do you say?",
+      "answer": "• \"Is this operational reporting or cross-domain analytics?\"\n• \"A data lake is not a substitute for service ownership and clean boundaries.\"\n• \"We should not solve integration by dumping everything into analytics storage.\"\n• \"Before picking the storage target, let's define the business metrics and ownership model.\"",
+      "notes": "The 'data lake as integration strategy' anti-pattern happens when teams treat analytics storage as the way to share data between services. This bypasses domain boundaries, creates ungoverned data sprawl, and means analytics quality depends on raw operational data quality. Instead: services should publish curated data for analytics, with clear ownership of metrics and definitions."
+    },
+    {
+      "id": "mr-8",
+      "type": "scenario",
+      "category": "Split Into Microservices",
+      "question": "Someone says: 'Split this into another microservice.' What do you say?",
+      "answer": "• \"What bounded context are we protecting by splitting it?\"\n• \"If the data and change cadence are shared, the split may just create chatty coupling.\"\n• \"A separate deployable is not automatically a better boundary.\"\n• \"Let's optimise for ownership and change isolation, not service count.\"",
+      "notes": "Microservice splits should be driven by bounded context boundaries, independent change cadences, and team ownership — not by a desire for 'clean architecture'. A bad split creates distributed coupling: services that must change together, chatty API calls, and distributed data consistency problems. The test: can this service be deployed independently by a different team on a different cadence?"
+    },
+    {
+      "id": "mr-9",
+      "type": "scenario",
+      "category": "Jump to Product",
+      "question": "Someone jumps straight to a product or vendor name. What do you say?",
+      "answer": "• \"What requirement eliminates the simple option?\"\n• \"Which non-functional requirement is actually driving this product choice?\"\n• \"What is the operational model after go-live, and who owns it?\"\n• \"Let's agree the capability, constraints, and decision criteria before naming vendors.\"",
+      "notes": "Premature vendor selection is one of the most common meeting failures. People name a product because they've seen a demo, read a blog post, or have existing familiarity. The response forces them to work backwards: what requirement exists, what criteria matter, and what are the operational implications. This is the 'capability first, product second' principle."
+    },
+    {
+      "id": "mr-10",
+      "type": "flashcard",
+      "category": "Time-Buying Lines",
+      "question": "What are the 6 lines that buy you thinking time without sounding vague?",
+      "answer": "1. \"I think we're mixing the business requirement with the implementation pattern.\"\n2. \"There's a simple version and a heavyweight version of this problem. We should decide which one we actually have.\"\n3. \"I'd keep the default close to the owning service unless reuse and governance justify centralising it.\"\n4. \"This feels like a capabilities discussion before it becomes a tooling discussion.\"\n5. \"Let's identify the decision that is hard to reverse and treat that separately.\"\n6. \"I don't think the product choice is the first decision here.\"",
+      "notes": "These are designed to buy you 15–20 seconds of thinking time while sounding deliberate and senior. Each one reframes the discussion rather than answering directly. Use them when you need a moment to formulate your actual response. They work because they're substantive observations, not stalling tactics."
+    },
+    {
+      "id": "mr-11",
+      "type": "flashcard",
+      "category": "Top 8 to Memorise",
+      "question": "What are the 8 lines you should memorise first?",
+      "answer": "1. \"What requirement eliminates the simple option?\"\n2. \"Who owns change?\"\n3. \"How is it versioned and audited?\"\n4. \"Is this a capability problem or a product conversation too early?\"\n5. \"What bounded context are we protecting?\"\n6. \"Do we need a command, an event, or a stream?\"\n7. \"Is this operational reporting or cross-domain analytics?\"\n8. \"Default is the simple option unless a clear requirement forces the heavier one.\"",
+      "notes": "These 8 lines cover the most common meeting situations. #1 is the single most useful line — it applies everywhere. #2–3 probe ownership and governance. #4 stops vendor jumping. #5 challenges unnecessary splits. #6 classifies messaging. #7 separates reporting concerns. #8 anchors every discussion to pragmatism. Master these 8 and you'll handle most meetings confidently."
+    },
+    {
+      "id": "mr-12",
+      "type": "flashcard",
+      "category": "Payroll-Specific",
+      "question": "What are the payroll-specific meeting lines worth memorising?",
+      "answer": "1. \"For payroll, correctness and replay matter more than architectural elegance.\"\n2. \"Any dynamic rules story needs versioning, testability, and audit by effective date.\"\n3. \"A shared platform decision is only justified if multiple domains truly need the same capability.\"\n4. \"For payroll and HR, business ownership of change is a stronger signal than technical preference.\"",
+      "notes": "These lines signal domain expertise. 'Correctness and replay' means if you run the same payroll with the same rules and data from that period, you must get the same result. 'Effective date' is critical in payroll — rule changes are dated and past periods must use the rules that were active at that time. 'Business ownership of change' recognises that in HR/payroll, who maintains the rules matters more than how clever the architecture is."
+    },
+    {
+      "id": "mr-13",
+      "type": "scenario",
+      "category": "The 4-Step Pattern",
+      "question": "Practice: Someone raises that the approval process for salary changes is getting complex. Apply the 4-step pattern.",
+      "answer": "1. Classify: \"This is mainly a workflow decision — we're looking at approval chains with rules about who can approve what amount.\"\n2. Criteria: \"The choice depends on how many approval levels, whether there are SaaS connectors involved, and whether the app team or integration team owns the flow.\"\n3. Default: \"My default would be Logic Apps for the approval flow with domain-owned authorisation rules in the service.\"\n4. Stop product jump: \"Let's map the approval steps before picking tools.\"",
+      "notes": "This is the 4-step pattern in practice. Notice how step 1 classifies (workflow), step 2 names specific criteria (levels, connectors, ownership), step 3 states a pragmatic default (Logic Apps + domain rules), and step 4 prevents premature tooling discussion."
+    },
+    {
+      "id": "mr-14",
+      "type": "scenario",
+      "category": "The 4-Step Pattern",
+      "question": "Practice: A stakeholder asks for 'real-time reporting on absence across all departments.' Apply the 4-step pattern.",
+      "answer": "1. Classify: \"This is a reporting/analytics decision.\"\n2. Criteria: \"The choice depends on freshness requirements, cross-domain scope, and who needs row-level restrictions.\"\n3. Default: \"My default would be a curated analytical model with a Power BI semantic model and RLS, unless we genuinely need sub-minute freshness — which reporting rarely does.\"\n4. Stop: \"Let's define what 'real-time' means here. What breaks if this data is 5 minutes old? 30 minutes?\"",
+      "notes": "Double classification here: it's both reporting and a 'real-time' claim. The response handles both: classifies as analytics, questions the freshness requirement, and sets a pragmatic default. Most 'real-time reporting' requests don't actually need real-time data — they need 'fresh enough' data."
+    },
+    {
+      "id": "mr-15",
+      "type": "flashcard",
+      "category": "Time-Buying Lines",
+      "question": "You're caught off guard by a complex question in a meeting. What's your go-to recovery line?",
+      "answer": "\"There's a simple version and a heavyweight version of this problem. We should decide which one we actually have.\"",
+      "notes": "This line works as a universal stalling tactic because it's always true — every architecture decision has a spectrum of complexity. It buys you time to think while sounding like you're making a valuable observation. Follow it with: 'My instinct is [simpler option] unless [specific forcing condition]' once you've gathered your thoughts."
+    },
+    {
+      "id": "mr-16",
+      "type": "multi-choice",
+      "category": "The 4-Step Pattern",
+      "question": "What should come FIRST in the 4-step meeting response pattern?",
+      "options": [
+        "Name the product or vendor",
+        "Classify the problem type",
+        "State your default recommendation",
+        "Ask about non-functional requirements"
+      ],
+      "correctOption": 1,
+      "answer": "Classify the problem type.",
+      "notes": "Always classify first. 'This is mainly a rules/workflow/integration/reporting decision.' Classification narrows the solution space, shows structured thinking, and prevents the room from jumping to random products. Everything else follows from correct classification."
+    },
+    {
+      "id": "mr-17",
+      "type": "scenario",
+      "category": "We Need a Rules Engine",
+      "question": "Practice delivering this response aloud: Someone says 'We need a rules engine for payroll tax calculations.'",
+      "answer": "\"Payroll tax calculations are correctness-critical. Before we call it a rules engine requirement, let's separate what's happening: are the tax rules changing frequently? Who changes them — developers during a release, or business users on demand? Do we need replay by rule version for audit? If developers own the changes and they're driven by legislation cycles, this is usually code-first with versioned config. A full rules platform is justified when business users need self-service authoring and versioned replay.\"",
+      "notes": "This response demonstrates domain expertise (correctness-critical, replay, effective dates) while applying the framework (classify, ask questions, state default). It doesn't dismiss the idea — it asks for the requirement that justifies it."
+    },
+    {
+      "id": "mr-18",
+      "type": "flashcard",
+      "category": "Top 8 to Memorise",
+      "question": "Quick-fire: what's the one line to use when someone names a product too early?",
+      "answer": "\"What requirement eliminates the simple option?\"",
+      "notes": "This is the single best line in the whole pack. It works because it doesn't attack the product — it asks for justification. If they can name the requirement, great, now you have a real discussion. If they can't, the simple option wins by default."
+    },
+    {
+      "id": "mr-19",
+      "type": "scenario",
+      "category": "Split Into Microservices",
+      "question": "A developer says: 'We should split the employee profile and payroll into separate microservices.' How do you evaluate this?",
+      "answer": "\"What bounded context are we protecting by splitting? Employee profile (personal data, job history, org structure) and payroll (calculations, runs, results) are plausibly different bounded contexts with different change cadences and different teams. This split might be justified. But if both services need to change together for every requirement, the split just creates distributed coupling. The test: can each service be deployed independently by a different team?\"",
+      "notes": "Not all microservice splits are bad — this response evaluates rather than reflexively rejecting. Employee profile and payroll likely are separate bounded contexts. The key test is independent deployability and team ownership. If they share a database, change in lockstep, and are maintained by one team, the split adds complexity without benefit.",
+      "followUps": [
+        {
+          "question": "How do you know if a microservice split is wrong?",
+          "answer": "Warning signs: the services must always be deployed together, they share a database, changes to one always require changes to the other, or they communicate with a high volume of synchronous calls. These indicate distributed coupling — you've taken a monolith and made it worse by adding network boundaries between tightly coupled components."
+        }
+      ]
+    },
+    {
+      "id": "mr-20",
+      "type": "scenario",
+      "category": "Jump to Product",
+      "question": "An architect says: 'Let's use Confluent Kafka for all our messaging.' How do you respond without sounding dismissive?",
+      "answer": "\"I'm not against Kafka. I want the requirement that justifies it over the simpler options we already have in Azure. Are we dealing with commands, events, or streams? For business commands, Service Bus is the native option. For event fan-out, Event Grid. For high-throughput stream ingestion, Event Hubs — which is Kafka-compatible. What specific capability does Confluent Kafka provide that these don't cover?\"",
+      "notes": "This response demonstrates the pattern: don't attack the product, ask for the requirement. It also shows Azure awareness (Event Hubs has Kafka compatibility). The response classifies the messaging pattern (command/event/stream) and maps to Azure defaults before discussing alternatives."
+    }
+  ]
+}
