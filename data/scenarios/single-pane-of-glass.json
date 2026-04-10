@@ -1,0 +1,112 @@
+{
+  "id": "rp-single-pane",
+  "title": "The Single Pane of Glass",
+  "context": "The newly appointed Chief People Officer has been in the role for three months. Coming from a large tech company with a polished unified HR portal, she is frustrated that her organisation's HR platform requires users to navigate between five different applications: an HR system for employee records, a payroll portal, an absence management tool, a learning and development platform, and a recruitment system. She has called an architecture meeting to mandate a 'single portal experience' and has executive sponsorship. The Head of UX and a Programme Manager are also present. You are the architect and this is the first time you've met her.",
+  "questions": [
+    {
+      "id": "rp-sp-1",
+      "prompt": "The CPO opens: \"At my previous company, every employee had one place to go for everything. Leave requests, payslips, training courses, open roles — all in one app with one login. I want the same here. We should build a single HR portal that consolidates all five systems.\" The Head of UX adds: \"From a design perspective this is absolutely the right direction.\" The Programme Manager is already starting to scope the project. How should you respond?",
+      "options": [
+        {
+          "text": "A unified portal is a great goal and absolutely achievable. We can build a new frontend that aggregates data from all five systems through APIs. It'll take 12-18 months but this is the right investment.",
+          "correct": false,
+          "explanation": "You've accepted the solution — a new aggregating frontend — without questioning whether it addresses the actual problem. More importantly, you've just committed to a 12-18 month programme in a first meeting with a new executive. You don't yet know what 'single pane' actually means to her. Is it one login? One navigation? One UI style? One search? One notifications inbox? Or literally one codebase? These have very different costs and the cheapest options may solve 80% of the problem."
+        },
+        {
+          "text": "Before we scope the portal, I want to understand what problem each user persona actually has today. When you say 'one place for everything,' is the pain point multiple logins, having to navigate between different visual styles, not being able to find things, or are there genuine workflow journeys that span multiple systems and break today? The answer changes the architecture significantly.",
+          "correct": true,
+          "explanation": "This is the right first move. The CPO's frustration is real, but 'single pane of glass' is a UX aspiration and an outcome goal, not an architecture specification. The actual user pain — multiple logins, navigation friction, broken cross-system journeys — determines which set of solutions is cheapest and fastest. SSO alone might fix 50% of the problem. A shared navigation shell with unified search might fix another 30%. A full portal rebuild has the same complexity as replacing all five backends and may not fix the last 20%."
+        },
+        {
+          "text": "I appreciate the ambition, but consolidating five systems into one portal is technically very complex. These systems have different data models, different APIs, different update frequencies, and different security domains. I'd want to do a proper technical assessment before we commit to timelines.",
+          "correct": false,
+          "explanation": "While the complexity is real, leading with it in a first meeting with a new executive who has just described a clear vision will read as resistance. You also haven't engaged with the business problem at all — you've jumped straight to why it's hard. The CPO came from a company that did this; she knows it's achievable. What you need to do is reframe the solution space, not raise the difficulty bar."
+        }
+      ]
+    },
+    {
+      "id": "rp-sp-2",
+      "prompt": "The CPO answers: \"Honestly, the biggest frustration is login fatigue — employees complain constantly about different passwords. But also, when a new employee starts, they need to complete tasks in four different systems and nobody tells them what order to do things or tracks completion. That's a real onboarding problem.\" The Head of UX adds: \"And the mobile experience is non-existent — half the apps don't work on phones.\" How should you respond?",
+      "options": [
+        {
+          "text": "Good — we've just identified three separate problems with three different solutions on the complexity spectrum. Login fatigue is an identity problem, not a portal problem — SSO with Azure AD across all five apps solves it, probably within a month for the systems we own. The onboarding completion tracking is a workflow problem — an onboarding checklist that orchestrates tasks across systems is independent of whether those systems share a UI. Mobile is a UX delivery problem — it needs investment but it's solvable app by app rather than requiring a full portal rebuild. None of these require us to build one new mega-application.",
+          "correct": true,
+          "explanation": "You've done exactly what the architect playbook calls for: separated the slogan 'single pane of glass' into its constituent problems and matched each to the simplest solution on the spectrum. SSO is fast and cheap. Onboarding orchestration is a workflow feature that's independent of UI unification. Mobile can be addressed incrementally. By showing that these are solvable today without a major programme, you've given the CPO real wins quickly and avoided committing the organisation to a 12-18 month rebuild that might not even address the root pain."
+        },
+        {
+          "text": "Those are great points that strengthen the case for a portal. We could design the portal so it handles SSO through a unified auth layer, provides the onboarding journey as a first-class feature, and is mobile-first by design. That way we solve all three problems in one investment.",
+          "correct": false,
+          "explanation": "You've reframed three separate, lightweight solvable problems as justification for the heavy option. 'Solve them all with one portal' sounds appealing but it means the SSO fix — which could go live in weeks — gets delayed until the portal is delivered in 12-18 months. You're holding quick wins hostage to a large programme. The question you're not asking is: what is the opportunity cost of not fixing login fatigue for over a year while we build the portal?"
+        },
+        {
+          "text": "We can fix the login issue quickly with SSO. The other two are bigger items we should put into the portal programme. That way we get a quick win now and solve the full vision over time.",
+          "correct": false,
+          "explanation": "This is partially right — SSO as a quick fix is good thinking — but you've then accepted that onboarding and mobile belong in the 'portal programme,' which presupposes there is a portal programme to speak of. You haven't yet established whether a full portal is the right solution at all. The onboarding problem is a workflow problem independent of UI consolidation; don't let it get absorbed into a programme that may delay the solution."
+        }
+      ]
+    },
+    {
+      "id": "rp-sp-3",
+      "prompt": "The CPO says: \"OK, I like the SSO idea for quick wins. But I still want one unified experience eventually — one navigation, one visual style, one search. Is that a reasonable long-term target?\" The Programme Manager quickly adds: \"If we're going to do this architecturally, we should do it properly — build one new portal and decomission the five existing apps over time.\" How should you respond?",
+      "options": [
+        {
+          "text": "A unified experience is a completely reasonable long-term goal, and there's a well-established architectural pattern for delivering it: a micro-frontend shell. Shared navigation, unified design system, single search, one login — all delivered without rebuilding the underlying applications. Each domain team keeps ownership of their UI as a module mounted into the shell. That gives you the 'one experience' from the user's perspective without a big-bang rebuild. The Programme Manager's proposal — one new portal replacing all five apps — is the heaviest option on the spectrum and also the highest-risk. You don't need to decomission the five apps to deliver the unified experience the CPO wants.",
+          "correct": true,
+          "explanation": "The micro-frontend shell is the correct architectural answer for unified experience without monolithic rebuild. It delivers exactly what the CPO wants — one navigation, one visual style, one search, one login — while keeping domain teams autonomous and avoiding the enormous risk of replacing five live applications simultaneously. By naming the pattern explicitly, you've given the CPO and Programme Manager a concrete alternative to the 'rebuild everything' approach. You've also correctly labelled the Programme Manager's proposal as the heavyweight option without dismissing it dismissively."
+        },
+        {
+          "text": "A single portal decommissioning five apps is achievable but the risk is high — if any one of the five migrations goes wrong, the whole portal suffers. I'd recommend a phased approach where we build the portal alongside the existing apps and migrate one domain at a time.",
+          "correct": false,
+          "explanation": "You've accepted the 'build a new portal' premise and are now managing the risk of the approach rather than questioning whether it's actually needed. A phased migration is indeed safer than a big bang, but you've still committed the organisation to a programme of replacing all five applications. The micro-frontend approach delivers the same user-visible outcome without any application replacement at all."
+        },
+        {
+          "text": "I'd want the business to define the user journey map first — which cross-domain journeys are actually broken — before we decide on portal architecture. Without that, we're designing for an imagined problem.",
+          "correct": false,
+          "explanation": "You've identified a reasonable next step but you've been evasive about the architecture. The CPO has now asked twice whether a unified experience is a reasonable goal and you've deflected both times. At some point you need to show your hand architecturally — the CPO deserves an answer about what's possible and what that looks like technically. Journey mapping is a useful input, but it doesn't replace architectural guidance on the 'how.'"
+        }
+      ]
+    },
+    {
+      "id": "rp-sp-4",
+      "prompt": "The CPO is enthusiastic about the micro-frontend approach. She asks: \"What about search? At my last company you could type 'John Smith' and get his employee record, his latest payslip, his open leave request, and his training history all in one results page. Can we build that?\" The Programme Manager immediately says: \"That's an Elasticsearch implementation. We set that up in a couple of weeks last time I managed a project like this.\" How should you respond?",
+      "options": [
+        {
+          "text": "Unified search over HR data is technically achievable but this is one of the more sensitive features on the list. Who sees what in those results is a non-trivial security question — a line manager should see their team's leave requests but not payroll data, a payroll admin should see pay data but not talent profiles, an employee should only see their own sensitive records. Before we build the index, we need to model the access control rules carefully. The indexing itself is straightforward; the permissions layer is where this gets complex.",
+          "correct": true,
+          "explanation": "You've correctly identified that unified search is an authorisation problem more than a search problem. The Programme Manager's 'Elasticsearch in two weeks' framing is technically naive — the index is easy, but a search result that shows John Smith's payslip to someone who shouldn't see it is a GDPR incident. By naming the access control requirement as the hard part without blocking the feature, you've added genuine architectural value. You've also gently corrected the Programme Manager's timeline without a confrontation."
+        },
+        {
+          "text": "Unified search is a great user feature. Elasticsearch with an index per domain, aggregating results client-side, is the right approach. We'd need APIs from each of the five systems to feed the index. Two weeks is optimistic — I'd say 6-8 weeks for an initial version.",
+          "correct": false,
+          "explanation": "You've joined the conversation at the wrong level. The programme manager's two week estimate was the issue — and you've addressed it by adjusting the timeline, not by questioning the access control design. A search result that surfaces payslips, employee records, and performance reviews without a well-designed permissions layer is a data protection failure. You should be raising that before discussing timelines."
+        },
+        {
+          "text": "We should check with the existing system vendors first — some of them may already have search APIs we can aggregate. We don't necessarily need to build our own search index.",
+          "correct": false,
+          "explanation": "Checking vendor APIs is a reasonable discovery task but it's a deflection from the real architectural question, which is about access control across sensitive data domains. Whether we use vendor APIs or build our own index, the permission model for who can see what in a unified search result is the hard part. Starting with vendor discovery doesn't address that."
+        }
+      ]
+    },
+    {
+      "id": "rp-sp-5",
+      "prompt": "The CPO closes the meeting: \"This has been the most useful architecture conversation I've had since joining. Can you own driving this forward? I want SSO delivered in Q1, the micro-frontend shell in Q2-Q3, and a roadmap for unified search in Q3.\" She's excited and clearly expecting a yes. The Programme Manager is already scheduling a follow-up. How should you respond?",
+      "options": [
+        {
+          "text": "I can drive the architectural recommendations and work with the platform teams on delivery. I want to be transparent about two things: SSO in Q1 is achievable for the systems we own directly — for the third-party vendors we'll need to confirm what they support, and some may charge for enterprise SSO integration. The micro-frontend shell in Q2-Q3 is a reasonable target for a first-domain integration, but the full five-domain rollout will depend on each team's capacity. If you can help unblock prioritisation decisions across the five domain teams, I can make sure the architecture is ready. I'm not the delivery manager for all five teams, but I can be the architectural authority holding the approach together.",
+          "correct": true,
+          "explanation": "This is the right way to accept ownership while being honest about the limits of your authority. You've said yes, set a realistic dependency (vendor SSO capabilities, domain team capacity), and drawn the right boundary: you own the architecture, not the delivery of five separate teams. The proactive offer to be the 'architectural authority holding the approach together' is exactly what a senior architect should offer. You've also given the CPO a clear ask — help unblocking prioritisation — which is the right escalation path when cross-team dependencies stall."
+        },
+        {
+          "text": "Yes, I can own this end to end. Let me put together a full programme plan with milestones for SSO, the shell, and search and share it before the next session.",
+          "correct": false,
+          "explanation": "You've just agreed to own a cross-team programme that includes delivery commitments for five domain teams you don't manage. A programme plan with milestones implies you can commit those teams' capacity — which you can't. You'll either produce a plan that becomes meaningless the moment you try to get team buy-in, or you'll end up personally responsible for a delivery timeline that depends on other people's decisions. Accept architectural ownership; don't inadvertently accept programme management ownership."
+        },
+        {
+          "text": "I appreciate the confidence, but I should be honest — the Q1 and Q2-Q3 timelines depend on a lot of factors I don't control yet. I don't want to commit to dates before the teams have been consulted.",
+          "correct": false,
+          "explanation": "While the caution about timelines is correct, this response is too passive for the moment. The CPO has just given you a direct invitation to step into an architect-level ownership role for a strategic initiative. Deflecting without making any commitment will leave a vacuum that the Programme Manager — who has already started scheduling follow-ups — will fill with their own framing. Accept the architectural ownership clearly and then set the expectations about timelines and team dependencies, rather than using the uncertainty to avoid committing to anything."
+        }
+      ]
+    }
+  ]
+}

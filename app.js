@@ -2,7 +2,7 @@
   "use strict";
 
   // ── Cache version — bump this when pushing deck changes ─────────
-  const CACHE_VERSION = "4";
+  const CACHE_VERSION = "5";
 
   // ── State ──────────────────────────────────────────────────────
   const STORAGE_KEY = "meetingprep";
@@ -108,6 +108,7 @@
     }
 
     // Render single scenario entry card
+    if (!scenarioEntry || !manifest.scenarios) return;
     const totalScenarios = manifest.scenarios.length;
     const attempted = manifest.scenarios.filter(
       (s) => progress["rp_best_" + s.id] != null
@@ -767,8 +768,12 @@
     await loadManifest();
     // Pre-load all decks for card counts on home screen
     await Promise.all(manifest.decks.map((d) => loadDeck(d.id)));
-    // Pre-load all scenarios
-    await Promise.all(manifest.scenarios.map((s) => loadScenario(s.id)));
+    // Pre-load all scenarios (non-fatal if this fails)
+    if (manifest.scenarios) {
+      await Promise.all(manifest.scenarios.map((s) => loadScenario(s.id))).catch((e) => {
+        console.error("Failed to pre-load scenarios:", e);
+      });
+    }
     renderHome();
     bindEvents();
   }

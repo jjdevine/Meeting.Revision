@@ -60,6 +60,30 @@
       "file": "scenarios/realtime-everything.json",
       "icon": "⚡",
       "questions": 5
+    },
+    {
+      "id": "rp-ai-pitch",
+      "title": "The AI Pitch",
+      "description": "Respond to a CTO-driven push to add AI across the HR and payroll platform. Separate safe assistive AI from high-risk decision-making AI, handle GDPR exposure, and give concrete architectural guidance.",
+      "file": "scenarios/ai-pitch.json",
+      "icon": "🤖",
+      "questions": 5
+    },
+    {
+      "id": "rp-one-workflow-engine",
+      "title": "One Workflow Engine to Rule Them All",
+      "description": "Push back on a platform mandate to standardise all orchestration on Logic Apps. Distinguish integration workflows, approval flows, domain orchestration, and case management — and negotiate a defensible carve-out.",
+      "file": "scenarios/one-workflow-engine.json",
+      "icon": "⚙️",
+      "questions": 5
+    },
+    {
+      "id": "rp-single-pane",
+      "title": "The Single Pane of Glass",
+      "description": "Reframe a new CPO's demand for a unified HR portal. Decompose 'single pane of glass' into login, navigation, search, and workflow problems — and present the micro-frontend alternative to a platform rebuild.",
+      "file": "scenarios/single-pane-of-glass.json",
+      "icon": "🪟",
+      "questions": 5
     }
   ]
 }

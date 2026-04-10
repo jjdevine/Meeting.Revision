@@ -1,0 +1,112 @@
+{
+  "id": "rp-one-workflow-engine",
+  "title": "One Workflow Engine to Rule Them All",
+  "context": "The platform team has proposed standardising the entire organisation on a single workflow orchestration platform — they're pitching Azure Logic Apps as the one tool for every process: HR onboarding flows, payroll run orchestration, absence approvals, integration pipelines to third-party systems, and long-running compliance case management. The Platform Architect is presenting to a cross-team architecture review. He has strong buy-in from the Head of Operations who is tired of every team using different tools. You are the solution architect for the HR domain. The CTO is chairing.",
+  "questions": [
+    {
+      "id": "rp-owe-1",
+      "prompt": "The Platform Architect opens: \"Right now we have four different orchestration tools across the platform: Logic Apps, Durable Functions, Power Automate, and some teams rolling their own with queues and timers. It's a support nightmare. I'm proposing we standardise everything on Logic Apps. One tool, one operational model, one team responsible for governance.\" The Head of Operations adds: \"Finally. I've been asking for this for two years.\" How should you respond?",
+      "options": [
+        {
+          "text": "Standardisation makes sense from an operational perspective. Logic Apps is well-supported on Azure and the platform team are already skilled on it. We should migrate all our workflows to Logic Apps as part of the next planning cycle.",
+          "correct": false,
+          "explanation": "You've agreed to a 'one engine for everything' mandate without testing whether Logic Apps is actually the right fit for all four workflow categories in play. Logic Apps is an excellent connector and integration platform, but it is a poor host for code-heavy domain logic, long-running stateful processes with complex retry semantics, or workflows where business logic belongs in the owning service. Agreeing upfront means your payroll run orchestration — which has complex transactional requirements — will end up in a visual designer it was never designed for."
+        },
+        {
+          "text": "I want to support standardisation, but I think we're conflating four different classes of problem and assuming one tool serves all of them equally well. Let me name them: connector workflows — calling third-party APIs, syncing data, integrating with external systems — Logic Apps is genuinely the right fit. Human approval flows — absence requests, expense sign-offs — Power Automate or Logic Apps with SharePoint works well. Code-owned domain orchestration — payroll run sequencing with compensating transactions, retry semantics, and exact-once guarantees — that's Durable Functions territory. Case management — long-running compliance investigations — that's a different class again. My concern isn't standardisation; it's forcing domain process logic into a visual designer that can't own it properly.",
+          "correct": true,
+          "explanation": "This is the exact right response for the 'one workflow engine' objection. You've supported the intent (cut tool sprawl, improve governance) while exposing the architectural flaw: not all processes are the same class of problem. Logic Apps is a superb integration and connector orchestrator. It is a poor host for code-heavy domain workflows with complex compensating transaction logic. By naming the four categories, you've given the room a taxonomy to reason with rather than a simple yes or no."
+        },
+        {
+          "text": "Standardising on Logic Apps creates vendor lock-in risk. If Microsoft changes the pricing model or deprecates features, we'd be in a difficult position. We should consider a more portable orchestration solution.",
+          "correct": false,
+          "explanation": "Vendor lock-in is a real but secondary concern here, and it's not the most useful thing to raise. You're already deeply on Azure — Logic Apps lock-in is a minor incremental risk relative to the platform dependency you already have. Leading with this concern makes you look like you're looking for a reason to block rather than engaging with the real problem, which is architectural fit for different process categories."
+        }
+      ]
+    },
+    {
+      "id": "rp-owe-2",
+      "prompt": "The Platform Architect pushes back: \"I've heard the 'different tools for different problems' argument before, but in practice it just means every team does whatever they want and nobody can support it. One operational model with clear guardrails is better than perfect architectural purity.\" The Head of Operations nods vigorously. The CTO looks sceptical of your position. How should you respond?",
+      "options": [
+        {
+          "text": "You're right operationally, and I don't want to be the person defending tool sprawl. Let me be more specific about where I'm drawing the line. I'm fine with Logic Apps as the default for integration, connectors, and approval flows — that covers probably 70% of what we're being asked to standardise. What I'm asking for is a carve-out for domain-owned long-running orchestration in payroll specifically, where the correctness guarantees matter more than a unified operations model. Payroll run processing has exact-once requirements and compensating transaction logic that Durable Functions handles and Logic Apps doesn't. That's one carve-out, not a rejection of the whole proposal.",
+          "correct": true,
+          "explanation": "This is how you handle pushback while defending a technically valid position. You've acknowledged the operational concern, moved off the abstract 'different tools' argument to a specific and justified exception, and quantified the concession (70% standardised on Logic Apps is a huge win for the platform team). The payroll carve-out is defensible because exact-once guarantee is a real, concrete requirement that Logic Apps cannot deliver. You've given the CTO something to agree to rather than a standoff."
+        },
+        {
+          "text": "I agree we should standardise the operational model and governance, but the implementation tool can vary by category. We could adopt Logic Apps standards for monitoring, alerting, and deployment while allowing Durable Functions where the domain demands it.",
+          "correct": false,
+          "explanation": "This is a reasonable middle ground but it's too vague to resolve the standoff. 'Standards for monitoring and deployment while allowing variation' is exactly the kind of answer that results in years of committee work and no actual standardisation. You need to commit to concrete categories: what goes on Logic Apps and what gets a carve-out and why. The platform team and Head of Operations will interpret 'varies by category' as leaving the door open for every team to opt out whenever they feel like it."
+        },
+        {
+          "text": "The operational concern is valid but the answer isn't forcing a single tool — it's investing in platform engineering capability so teams can run diverse tools well. We need better observability and runbook standards, not mandatory tool choices.",
+          "correct": false,
+          "explanation": "You're proposing more investment as the solution to a coordination problem, which will not land well. The CTO and Head of Operations are trying to reduce complexity, not fund a platform engineering uplift. This response sounds like you're protecting your team's autonomy at the cost of organisational simplicity. Even if the argument has merit, it's the wrong answer to the specific concern about support fragmentation being raised in this room."
+        }
+      ]
+    },
+    {
+      "id": "rp-owe-3",
+      "prompt": "The CTO agrees to the payroll carve-out. The Platform Architect then says: \"Good. Now the compliance case management system — right now each regional team has built their own. I want to replace all of them with one Logic Apps workflow that handles the entire investigation lifecycle.\" The compliance team lead, who is on the call, looks uncomfortable. How should you respond?",
+      "options": [
+        {
+          "text": "Case management is a different class of problem from either integration workflows or domain orchestration. A compliance investigation isn't a linear process — it branches, loops, gets reassigned, goes dormant for weeks, and has complex state transitions driven by human decisions. Logic Apps can technically model this, but it will end up with hundreds of conditions in a visual designer that nobody can read or maintain. Before we commit to this, I'd want to understand whether the regional variation in how they run investigations is a problem to solve or a legitimate difference in local compliance requirements.",
+          "correct": true,
+          "explanation": "You've correctly identified compliance case management as the third distinct category — long-running, human-driven, non-linear workflows with complex state. This is where Logic Apps starts to break down, not because it can't do it, but because the maintenance cost of a 500-action visual workflow with dozens of branch conditions is very high. More importantly, you've asked the right tactical question: is the regional variation a bug or a feature? If the regional teams have different regulatory requirements, forcing them into one shared workflow may be technically possible but operationally dangerous."
+        },
+        {
+          "text": "Replacing regional case management systems with a single centralised workflow is a significant project. We should understand the data migration requirements, the change management implications, and the impact on ongoing cases before committing.",
+          "correct": false,
+          "explanation": "You've focused on delivery risk rather than the architectural question. While migration and change management are real concerns, you've missed the more fundamental issue: whether Logic Apps is the right tool for long-running, human-driven case management at all. Listing project risks without questioning the approach will not help the compliance team lead who is clearly uncomfortable."
+        },
+        {
+          "text": "I support consolidating the case management systems. Having five different implementations of the same process is clearly inefficient and inconsistent. Logic Apps with a shared data model should work.",
+          "correct": false,
+          "explanation": "You've agreed without questioning whether the regional variation is intentional or whether Logic Apps is actually suited to this complexity. Compliance investigations in different regions may operate under different regulatory frameworks — the 'inefficiency' may be a legal obligation, not a technical failure. Treating all variation as waste before you understand the domain is exactly the kind of architectural overreach this course exists to help you avoid."
+        }
+      ]
+    },
+    {
+      "id": "rp-owe-4",
+      "prompt": "After further discussion, the CTO decides compliance case management will be evaluated separately. The Platform Architect closes with: \"Last item — all new workflow development must use Logic Apps from this point forward until further notice. Teams can't adopt new tools without platform review.\" The CTO is about to agree. How should you respond?",
+      "options": [
+        {
+          "text": "I can support that with one addition: the platform review process needs a clear timebox and documented criteria. If it takes six weeks to get approval for a tool choice, teams will just find workarounds. Fast review for straightforward cases, escalation path for edge cases. If we agree that, I'll enforce the default-to-Logic-Apps rule in my domain.",
+          "correct": true,
+          "explanation": "This is exactly the right move at this stage. You've agreed to the policy — which is reasonable — while adding the one condition that prevents it from becoming a bottleneck or causing shadow IT. A governance policy without a timebox and clear criteria always leads to either long delays or workarounds. By making your agreement conditional on a functioning review process, you've supported the standardisation goal without setting your team up for future friction."
+        },
+        {
+          "text": "I agree with the default-Logic-Apps principle. Let's document the exceptions we've agreed today — payroll Durable Functions and the case management evaluation — and treat everything else as Logic Apps unless escalated.",
+          "correct": false,
+          "explanation": "This is mostly right but you've missed the crucial issue: no timebox or criteria for the review process. Agreeing to a governance gate without specifying how fast it operates or what criteria it uses is the most common cause of governance failure. You'll end up with a platform review committee that meets quarterly and blocks every exception for six months. The answer is almost right — it just needs the process guardrail."
+        },
+        {
+          "text": "I'm not comfortable with that level of restriction. Platform mandates slow teams down and remove the architectural flexibility we need to deliver. I'd prefer a 'Logic Apps is recommended' guideline rather than a mandatory policy.",
+          "correct": false,
+          "explanation": "You've walked away from a reasonable conclusion that the room earned through a good discussion. You agreed to carve-outs for specific cases — which means Logic Apps as the default is a sensible conclusion. Retreating to 'recommended not mandatory' at the last moment undermines the collaborative progress made during the session and makes you look like you were protecting team autonomy all along rather than engaging honestly with the coordination problem."
+        }
+      ]
+    },
+    {
+      "id": "rp-owe-5",
+      "prompt": "At the end of the meeting, the CTO asks: \"Can someone pull together a decision record for what we agreed? I want it before the next planning cycle.\" Everyone looks at the Platform Architect, who shrugs and says: \"I'll cover the Logic Apps mandate. Architecture team, can you cover the exceptions and criteria?\" Then they drop off the call. Everyone is now looking at you. How should you respond?",
+      "options": [
+        {
+          "text": "I'll write up the full decision record. I'll document the default (Logic Apps for integration, connector, and approval workflows), the agreed exceptions (Durable Functions for payroll run orchestration, case management TBD pending evaluation), and the platform review process criteria. I'll share a draft for comment by end of week and ask the platform team to review before it's finalised.",
+          "correct": true,
+          "explanation": "This is the right answer. The person who doesn't own the outcome but offers to write the decision record almost always ends up with the most accurate version — because you were the one pushing for clear criteria and carve-outs throughout the meeting. By taking ownership of the full document, you ensure the nuance gets captured rather than being simplified away by the platform team's summary. End of week is fast enough to maintain momentum, and asking for platform review at the end ensures alignment without giving anyone an excuse to rewrite the conclusions."
+        },
+        {
+          "text": "I'll cover the exceptions but the Platform Architect should write up the mandate — they proposed it, they should own the record.",
+          "correct": false,
+          "explanation": "This is territorially reasonable but practically unhelpful. If you only write up the exceptions, the platform team's mandate document will set the frame and your exceptions will look like footnotes. Decision records work best when someone owns the whole thing. You're also more invested in the nuance being captured accurately than the platform team is — they got the broad outcome they wanted. Splitting the record is how important context gets lost."
+        },
+        {
+          "text": "Let me check with our engineering manager first to confirm this falls within my remit before I commit to owning the documentation.",
+          "correct": false,
+          "explanation": "This is exactly the wrong instinct. You've just spent a meeting exhibiting senior architectural judgement, navigating the conversation skillfully, and earning the CTO's respect on difficult calls. Asking for managerial sign-off before writing a meeting summary undoes that impression entirely. Decision records are not high-risk deliverables — writing one doesn't commit you to anything you didn't already agree to in the room. Take the action and move."
+        }
+      ]
+    }
+  ]
+}
