@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  // ── Supabase client ────────────────────────────────────────────
+  const supabase = (typeof SUPABASE_URL !== "undefined" && SUPABASE_URL !== "https://YOUR_PROJECT_REF.supabase.co")
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+  let currentUser = null;
+  let syncInFlight = false;
+
   // ── Cache version — bump this when pushing deck changes ─────────
   const CACHE_VERSION = "5";
 
@@ -32,6 +39,7 @@
   const deckScreen = $("#deck-screen");
   const scenarioListScreen = $("#scenario-list-screen");
   const roleplayScreen = $("#roleplay-screen");
+  const authScreen = $("#auth-screen");
   const deckGrid = $("#deck-grid");
   const scenarioEntry = $("#scenario-entry");
   const scenarioGrid = $("#scenario-grid");
@@ -50,8 +58,152 @@
       progress = raw ? JSON.parse(raw) : {};
     } catch { progress = {}; }
   }
-  function saveProgress() {
+  function saveProgressLocal() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch {}
+  }
+  function saveProgress() {
+    saveProgressLocal();
+    debouncedSync();
+  }
+
+  // ── Supabase sync ─────────────────────────────────────────────
+  let syncTimer = null;
+  function debouncedSync() {
+    if (!currentUser) return;
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(() => pushState(), 1500);
+  }
+
+  async function pushState() {
+    if (!supabase || !currentUser || syncInFlight) return;
+    syncInFlight = true;
+    try {
+      const { error } = await supabase.from("meeting_prep_state").upsert({
+        user_id: currentUser.id,
+        progress_data: progress,
+        updated_at: new Date().toISOString(),
+      });
+      if (error) console.error("Sync push error:", error.message);
+    } catch (e) {
+      console.error("Sync push exception:", e);
+    } finally { syncInFlight = false; }
+  }
+
+  async function pullState() {
+    if (!supabase || !currentUser) return;
+    const { data, error } = await supabase
+      .from("meeting_prep_state")
+      .select("progress_data")
+      .eq("user_id", currentUser.id)
+      .maybeSingle();
+
+    if (error || !data) return;
+    mergeProgress(data.progress_data || {});
+    saveProgressLocal();
+  }
+
+  function mergeProgress(remote) {
+    for (const key of Object.keys(remote)) {
+      const local = progress[key];
+      const rem = remote[key];
+      if (!local) { progress[key] = rem; }
+      else if ((rem.lastSeen || 0) > (local.lastSeen || 0)) { progress[key] = rem; }
+    }
+  }
+
+  async function syncNow() {
+    if (!currentUser) return;
+    const btn = $("#sync-now-btn");
+    btn.disabled = true;
+    await pullState();
+    await pushState();
+    renderHome();
+    btn.disabled = false;
+  }
+
+  // ── Auth ───────────────────────────────────────────────────────
+  function showUserBar() {
+    if (!currentUser) {
+      $("#user-bar").classList.add("hidden");
+      return;
+    }
+    $("#user-bar").classList.remove("hidden");
+    $("#user-email").textContent = currentUser.email;
+  }
+
+  function showScreen(name) {
+    authScreen.classList.toggle("active", name === "auth");
+    homeScreen.classList.toggle("active", name === "home");
+    deckScreen.classList.toggle("active", name === "deck");
+    scenarioListScreen.classList.toggle("active", name === "scenario-list");
+    roleplayScreen.classList.toggle("active", name === "roleplay");
+  }
+
+  async function enterApp() {
+    loadProgress();
+    await loadManifest();
+    await Promise.all(manifest.decks.map((d) => loadDeck(d.id)));
+    if (manifest.scenarios) {
+      await Promise.all(manifest.scenarios.map((s) => loadScenario(s.id))).catch((e) => {
+        console.error("Failed to pre-load scenarios:", e);
+      });
+    }
+    if (currentUser) {
+      await pullState();
+    }
+    showUserBar();
+    renderHome();
+    showScreen("home");
+    bindEvents();
+  }
+
+  function bindAuthEvents() {
+    const tabs = $$(".auth-tab");
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        tabs.forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        const isLogin = tab.dataset.tab === "login";
+        $("#auth-submit-btn").textContent = isLogin ? "Sign In" : "Sign Up";
+        $("#auth-error").classList.add("hidden");
+      });
+    });
+
+    $("#auth-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = $("#auth-email").value.trim();
+      const password = $("#auth-password").value;
+      const isLogin = $(".auth-tab.active").dataset.tab === "login";
+      const errorEl = $("#auth-error");
+      const btn = $("#auth-submit-btn");
+
+      btn.disabled = true;
+      errorEl.classList.add("hidden");
+
+      try {
+        const { data, error } = isLogin
+          ? await supabase.auth.signInWithPassword({ email, password })
+          : await supabase.auth.signUp({ email, password });
+
+        if (error) {
+          errorEl.textContent = error.message;
+          errorEl.classList.remove("hidden");
+          btn.disabled = false;
+          return;
+        }
+        currentUser = data.user;
+        await enterApp();
+      } catch (err) {
+        errorEl.textContent = "An unexpected error occurred.";
+        errorEl.classList.remove("hidden");
+        btn.disabled = false;
+      }
+    });
+
+    $("#skip-auth-btn").addEventListener("click", () => {
+      currentUser = null;
+      enterApp();
+    });
   }
 
   // ── Data loading ───────────────────────────────────────────────
@@ -194,13 +346,7 @@
     updateProgress();
   }
 
-  // ── Screen switching ───────────────────────────────────────────
-  function showScreen(name) {
-    homeScreen.classList.toggle("active", name === "home");
-    deckScreen.classList.toggle("active", name === "deck");
-    scenarioListScreen.classList.toggle("active", name === "scenario-list");
-    roleplayScreen.classList.toggle("active", name === "roleplay");
-  }
+  // (showScreen moved to auth section above)
 
   // ── Mode switching ─────────────────────────────────────────────
   function setMode(m) {
@@ -713,6 +859,14 @@
       }
     });
 
+    // Sync & logout
+    $("#sync-now-btn").addEventListener("click", syncNow);
+    $("#logout-btn").addEventListener("click", async () => {
+      if (supabase) await supabase.auth.signOut();
+      currentUser = null;
+      showScreen("auth");
+    });
+
     // Role Play events
     $("#rp-back-btn").addEventListener("click", () => {
       openScenarioList();
@@ -764,18 +918,18 @@
 
   // ── Init ───────────────────────────────────────────────────────
   async function init() {
-    loadProgress();
-    await loadManifest();
-    // Pre-load all decks for card counts on home screen
-    await Promise.all(manifest.decks.map((d) => loadDeck(d.id)));
-    // Pre-load all scenarios (non-fatal if this fails)
-    if (manifest.scenarios) {
-      await Promise.all(manifest.scenarios.map((s) => loadScenario(s.id))).catch((e) => {
-        console.error("Failed to pre-load scenarios:", e);
-      });
+    if (supabase) {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        currentUser = data.session.user;
+        await enterApp();
+        return;
+      }
+      bindAuthEvents();
+      showScreen("auth");
+    } else {
+      await enterApp();
     }
-    renderHome();
-    bindEvents();
   }
 
   init();
