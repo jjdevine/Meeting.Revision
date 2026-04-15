@@ -1,0 +1,112 @@
+{
+  "id": "rp-shared-policy",
+  "title": "The Shared Policy Hub",
+  "context": "A run of policy changes has frustrated the leadership team. Leave eligibility varies by country, overtime approval thresholds keep changing, compensation guidance is being reviewed, and payroll teams are under pressure to implement statutory changes faster. The CTO has proposed an enterprise 'Policy Hub' where business users can manage rules without waiting for engineering releases. HR Operations likes the promise of self-service. Payroll is nervous about putting critical calculations into a shared platform. You are asked to respond in an architecture workshop.",
+  "questions": [
+    {
+      "id": "rp-pol-1",
+      "prompt": "The CTO says: \"We're wasting time with rules buried in different services. I want one enterprise policy engine where HR Operations can manage eligibility, accrual, overtime, approval thresholds, and maybe even payroll policy without waiting for releases.\" How should you respond?",
+      "options": [
+        {
+          "text": "I would reject the whole direction. Rules belong in code, and once we let business users manage them directly we lose engineering discipline and reliability. The safest answer is to keep all policy in the owning services and improve release processes rather than introducing any kind of external rule management capability. The cost of business self-service is too high in systems this sensitive.",
+          "correct": false,
+          "explanation": "This is too rigid. Some policy areas really are business-owned, high-volatility, and better served by controlled externalisation with audit and simulation. Rejecting all externalisation means you are not engaging with the legitimate agility problem the CTO is raising."
+        },
+        {
+          "text": "Before we call it one policy engine, we need to separate three things: configuration, decision tables, and a real rules platform. We also need to separate domains. Leave eligibility, payroll calculations, approval thresholds, and compensation policy do not all have the same ownership, change rate, or risk profile. I'm open to externalising the volatile, business-owned parts, but I would not centralise correctness-critical domain logic by default.",
+          "correct": true,
+          "explanation": "This is the correct architectural move. You have disaggregated the problem before discussing a solution. That protects the room from treating every rule-like thing as evidence for one enterprise hub. It also keeps the door open for sensible externalisation where the criteria genuinely support it."
+        },
+        {
+          "text": "I support the idea. The current rules landscape is too fragmented, and an enterprise policy engine would finally give the business one place to manage change. If we centralise the rules now, every domain benefits from the same authoring model, the same audit trail, and the same deployment process. That should reduce engineering bottlenecks and improve consistency because the organisation is no longer relying on each service team to implement policy correctly in its own way.",
+          "correct": false,
+          "explanation": "This lumps together very different classes of rule. Configuration, decision tables, business-authored policies, and correctness-critical calculation logic are not the same thing. You have accepted an enterprise platform answer before separating the domains, ownership models, and failure impacts involved."
+        }
+      ]
+    },
+    {
+      "id": "rp-pol-2",
+      "prompt": "The Head of HR Operations says: \"The biggest pain is leave policy. Country rules change often, carry-over exceptions happen, and the business wants self-service changes before release trains catch up.\" How should you respond?",
+      "options": [
+        {
+          "text": "I still would not externalise anything. Once policy leaves the service codebase, it becomes harder to test and easier to misuse. Even if leave policy changes often, engineering should remain the gatekeeper and continue releasing those changes through normal service deployments. The operational pain is real, but it is better to speed up releases than to put policy management into a separate capability.",
+          "correct": false,
+          "explanation": "This ignores exactly the kind of signal that might justify externalisation. Frequent business-owned changes, effective dating, exception handling, and a need for simulation are strong indicators that a domain-specific policy capability could be useful. You are clinging to the default even after the criteria started pointing elsewhere."
+        },
+        {
+          "text": "That is a much better candidate for externalisation than payroll calculation logic. If policy changes are frequent, business-owned, need effective dating, audit, and perhaps simulation before publish, then a domain-specific leave policy capability could make sense. The key is domain-specific: solve the leave problem first, don't use it as permission to centralise unrelated rules across the platform.",
+          "correct": true,
+          "explanation": "Exactly right. You have recognised a genuine candidate for a heavier rules capability while still resisting the leap to an enterprise-wide policy engine. This is the disciplined way to use the decision criteria rather than treating every rule as the same."
+        },
+        {
+          "text": "Then the answer is obvious: we should use the same shared engine for leave, payroll, access decisions, and compensation guidance so HR has one place to manage everything. If leave policy justifies a rules platform, it makes sense to maximise the return by routing all major policies through the same tool from the start. Otherwise we'll end up with multiple overlapping policy solutions and no enterprise coherence.",
+          "correct": false,
+          "explanation": "This is the classic overreach move. A genuine case for externalising one domain's volatile policy is not evidence that all domains should share one rule engine and one authoring model. You are using one valid requirement to justify a much larger platform than the evidence supports."
+        }
+      ]
+    },
+    {
+      "id": "rp-pol-3",
+      "prompt": "The Payroll Director says: \"If we build a rules platform for leave, payroll should use it too. Statutory calculations change every year and we need consistency across countries.\" How should you respond?",
+      "options": [
+        {
+          "text": "I would be very careful with payroll. Annual statutory change is not the same as high-volatility business policy, and payroll errors have a very different blast radius. Payroll calculations usually need tight code-level testing, versioning by pay run, reproducibility, and strong ownership inside the payroll domain. Externalise parameters where helpful, but don't assume a business-authored rules tool is the right place for core payroll logic.",
+          "correct": true,
+          "explanation": "This is the correct distinction. You are not denying that payroll changes; you are pointing out that the shape of that change and the consequences of error are different. That is exactly why a rules decision should be based on ownership, volatility, audit, and failure impact rather than a generic desire for consistency."
+        },
+        {
+          "text": "I agree. Payroll is exactly the kind of area that benefits from a shared rules platform because the calculations are complex and the organisation needs consistency. If we centralise the payroll rules, we can manage statutory changes once, publish them centrally, and avoid duplicated implementation effort across services and regions. The more important the logic is, the more valuable it is to pull it into a dedicated enterprise engine.",
+          "correct": false,
+          "explanation": "This confuses importance with suitability for centralisation. Payroll has a very different failure profile from leave policy. Core calculations need strong testing, versioning by pay run, reproducibility, and close domain ownership. Those traits often argue against a business-authored shared engine rather than for it."
+        },
+        {
+          "text": "Payroll should stay entirely hard-coded. Even statutory rates and thresholds should live directly in the code so that every change requires a full engineering cycle. The moment we externalise any part of payroll, we increase the risk of accidental change and weaken the integrity of the calculation engine. If consistency matters, hard-coding is the safest discipline.",
+          "correct": false,
+          "explanation": "This is too absolute. Externalising parameters and versioned configuration can be perfectly appropriate in payroll. The real question is which parts of the logic should remain code-owned and which values can be safely managed as controlled data. Hard-coding everything is as blunt as externalising everything."
+        }
+      ]
+    },
+    {
+      "id": "rp-pol-4",
+      "prompt": "The Enterprise Architect says: \"A shared policy engine gives us consistency. Otherwise every domain invents different rule formats, simulations, and approval workflows.\" How should you respond?",
+      "options": [
+        {
+          "text": "I don't think consistency matters much here. Different domains should feel free to model policy however they like, and if that means one team uses code, another uses spreadsheets, and another uses a workflow tool, that is simply autonomy. The more we talk about common patterns, the more we risk constraining useful local optimisation. I'd rather tolerate inconsistency than introduce any shared governance around rules.",
+          "correct": false,
+          "explanation": "This abandons a legitimate enterprise concern. Some consistency in audit, testing, change control, and simulation is valuable even if the rules do not all live in one engine. Rejecting all standardisation makes you sound indifferent to governance rather than disciplined about where it should apply."
+        },
+        {
+          "text": "That is exactly why the shared engine is worth it. Consistency is one of the strongest arguments for centralisation because once every domain uses the same runtime and authoring model, governance becomes much easier. Different rule formats and simulation approaches are signs of architectural drift, and the cleanest way to stop that is to bring all policies into the same central execution platform.",
+          "correct": false,
+          "explanation": "This assumes consistency requires shared execution, which is not true. You can standardise governance expectations without forcing every domain into one central runtime. The risk here is creating a bottleneck platform that owns too much behaviour in the name of neatness."
+        },
+        {
+          "text": "Consistency of governance is a real requirement, but that doesn't automatically mean one runtime or one shared service. We can standardise the pattern — versioning, effective dating, approvals, simulation, audit — without forcing every domain's rules into one central execution engine. Shared infrastructure is fine. Shared domain logic is where we get into trouble.",
+          "correct": true,
+          "explanation": "Exactly. You have preserved the valid platform concern while rejecting the overreach. This is the distinction senior architects make: standardise the guardrails and operating model, not necessarily the location of every piece of business logic."
+        }
+      ]
+    },
+    {
+      "id": "rp-pol-5",
+      "prompt": "The CTO closes with: \"What's the actionable plan that gives the business more agility without creating another monster platform?\" How should you respond?",
+      "options": [
+        {
+          "text": "Do a rule inventory across the estate and classify each candidate by ownership, volatility, audit and replay need, reuse, and failure impact. Most rules will stay as service-owned code plus versioned config. Pick one genuinely business-owned, high-volatility domain — leave policy is the obvious one — and pilot externalisation there with clear authoring, simulation, and rollback. Earn the right to broaden later instead of declaring an enterprise policy hub on day one.",
+          "correct": true,
+          "explanation": "This is the best answer because it uses the decision criteria explicitly and turns them into a delivery plan. You are preserving agility where the evidence supports it while avoiding a premature enterprise platform bet. That is disciplined architecture rather than enthusiasm-driven platform building."
+        },
+        {
+          "text": "The safest answer is to do nothing structurally and accept the release friction. At least we know the current service-owned model works, even if the business finds it slow. Introducing any externalisation or rule-management capability will create governance and testing complexity that may not be worth the effort. Sometimes architectural restraint just means tolerating operational inconvenience.",
+          "correct": false,
+          "explanation": "This is too passive. The business has described a real agility problem, and there are focused ways to address it without building a monster platform. Doing nothing makes you sound risk-averse rather than thoughtful."
+        },
+        {
+          "text": "We should launch the enterprise Policy Hub formally and migrate every major rule set onto it over the next twelve months. That is the most decisive way to remove the current fragmentation and give the business one place to manage change. If we only pilot one domain, we risk under-investing and ending up with yet another tactical exception rather than finally solving policy management strategically across the estate.",
+          "correct": false,
+          "explanation": "This ignores the CTO's warning about creating a monster platform. A broad migration plan treats a still-unproven capability as if it were already justified across the estate. It maximises risk before the organisation has learned whether the pattern works in any one domain."
+        }
+      ]
+    }
+  ]
+}

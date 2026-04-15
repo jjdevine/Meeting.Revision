@@ -84,6 +84,46 @@
       "file": "scenarios/single-pane-of-glass.json",
       "icon": "🪟",
       "questions": 5
+    },
+    {
+      "id": "rp-golden-source",
+      "title": "The Golden Source Programme",
+      "description": "Respond to a CIO-sponsored 'One Employee Truth' programme proposing a central Employee Master service. Separate authoritative ownership by attribute and time model rather than accepting a single-write-path architecture.",
+      "file": "scenarios/golden-source-programme.json",
+      "icon": "🏛️",
+      "questions": 5
+    },
+    {
+      "id": "rp-identity-boundaries",
+      "title": "The Identity Boundary Debate",
+      "description": "Respond to CISO pressure to let HR own access decisions after a joiner/mover/leaver audit. Separate workforce facts from access policy enforcement and define the right integration between HR and IAM.",
+      "file": "scenarios/identity-boundaries.json",
+      "icon": "🔐",
+      "questions": 5
+    },
+    {
+      "id": "rp-reporting-truth",
+      "title": "The Reporting Truth Fight",
+      "description": "Address a CFO frustrated by conflicting headcount, payroll cost, and attrition numbers across teams. Establish that metric definitions and data ownership must be resolved before platform consolidation.",
+      "file": "scenarios/reporting-truth-fight.json",
+      "icon": "📊",
+      "questions": 5
+    },
+    {
+      "id": "rp-shared-policy",
+      "title": "The Shared Policy Hub",
+      "description": "Push back on a CTO proposal for an enterprise policy engine covering leave, overtime, compensation, and payroll rules. Separate configuration, decision tables, and domain-critical logic before committing to a shared platform.",
+      "file": "scenarios/shared-policy-hub.json",
+      "icon": "📜",
+      "questions": 5
+    },
+    {
+      "id": "rp-workflow-platform",
+      "title": "The Workflow Platform Mandate",
+      "description": "Frame a COO demand to standardise all employee lifecycle processes on one workflow platform. Classify orchestration types — integration flows, approvals, long-running sagas, and case management — before selecting tooling.",
+      "file": "scenarios/workflow-platform-mandate.json",
+      "icon": "🔄",
+      "questions": 5
     }
   ]
 }

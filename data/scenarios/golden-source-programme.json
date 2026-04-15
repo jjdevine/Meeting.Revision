@@ -1,0 +1,112 @@
+{
+  "id": "rp-golden-source",
+  "title": "The Golden Source Programme",
+  "context": "After a bruising quarter-end, the CIO has launched a 'One Employee Truth' programme. Finance is frustrated that headcount differs between HR, payroll, identity, and reporting. The Enterprise Data Lead has proposed a new central Employee Master service that every system will read from and write to. The CHRO likes the simplicity of the message. The Payroll Director is worried about pay-period cut-offs and historical corrections. You're asked to respond in the steering meeting.",
+  "questions": [
+    {
+      "id": "rp-gs-1",
+      "prompt": "The Enterprise Data Lead opens with: \"We have to stop debating ownership. The fix is obvious: HR is the golden source for employee data, so we create a central Employee Master and route all changes through it. That gives us one place to govern and one API for every consumer.\" The CIO adds: \"That sounds clean. Any objections?\" How should you respond?",
+      "options": [
+        {
+          "text": "I support the direction. The current landscape is too fragmented, and a central Employee Master would finally give us a clean model. My recommendation would be to define a universal employee schema, migrate all employee-related writes through the new service, and have each existing system become either a publisher or subscriber to it over time. That gives us architectural clarity and prevents future duplication. Once the new master is in place, downstream reporting, access control, and integrations all become simpler because every consumer is talking to one domain rather than four.",
+          "correct": false,
+          "explanation": "This sounds tidy but it accepts the slogan without analysing the domain. 'Employee data' is not one thing. Workforce master data, pay results, access state, and historical corrections have different owners and different time models. A central write path would not remove that complexity; it would hide it inside a new bottleneck service that has to mediate every disagreement. You've endorsed a big-bang architecture before establishing what is actually authoritative for which fields."
+        },
+        {
+          "text": "Before we choose architecture, I want to force more specificity. 'Employee data' is too broad. We need to separate entity, field, and time: legal name today, future org assignment, historical pay result, manager relationship, access status. HR may be authoritative for some workforce attributes, payroll for pay results, and identity for credentials. I'm supportive of a clearer ownership model, but I would not start with a central write path until we've mapped authoritative ownership field by field.",
+          "correct": true,
+          "explanation": "This is the right move. You are not rejecting simplification; you are refusing to let a vague phrase drive a concrete architecture. The key insight is that authority is usually attribute-specific and time-sensitive, not universal. By separating entity, field, and time, you've moved the room from slogan to operating model. That is the architect's job here."
+        },
+        {
+          "text": "I do have an objection. Golden source programmes almost never work in practice because the reality is always messy. I'd rather we accept that HR, payroll, and identity will always disagree on some fields and stop trying to normalise it architecturally. We can just document the differences and let each team continue owning its own version. A central master will create more governance meetings than value.",
+          "correct": false,
+          "explanation": "This is too fatalistic. The problem is real, and the business is asking for simplification for a reason. Simply declaring 'golden source programmes never work' makes you sound cynical rather than useful. There is a better middle ground: improve field-level ownership and publication patterns without pretending one service can own everything."
+        }
+      ]
+    },
+    {
+      "id": "rp-gs-2",
+      "prompt": "The CHRO says: \"If we don't make HR the owner of all employee data, we'll stay messy forever. The employee starts in HR, so HR should own the record end to end.\" The Payroll Director immediately replies: \"Pay results, tax setup, and retro corrections absolutely do not belong to HR.\" How should you respond?",
+      "options": [
+        {
+          "text": "Both of you are right about different slices. HR is usually the system of entry for workforce master data: legal identity, job, organisation, manager, employment status. Payroll is authoritative for pay calculations, tax treatment, and pay results. Identity is authoritative for credentials and access state. The mistake is trying to assign one system as owner of the whole person. We need authoritative ownership by attribute, not by slogan.",
+          "correct": true,
+          "explanation": "Exactly right. You've preserved clarity without collapsing distinct domains into one. This is the core golden-source correction: ownership belongs to the domain that gives the field its meaning. The room now has a useful model instead of a false binary between HR ownership and payroll ownership."
+        },
+        {
+          "text": "The cleanest way through this is shared ownership. We can create a data governance forum that jointly approves the employee fields HR and payroll both care about, and any system disagreement can be resolved there. That avoids one side feeling overridden and keeps the model collaborative. With the right governance board, we can probably manage the edge cases without needing hard technical ownership lines.",
+          "correct": false,
+          "explanation": "Shared ownership sounds diplomatic but it is operationally weak. When two systems disagree, someone still has to be authoritative. A governance forum can define policy, but it cannot be the runtime answer for every correction, sync issue, or historical replay. Ambiguous ownership is one of the main reasons these programmes fail."
+        },
+        {
+          "text": "The Payroll Director is overcomplicating this. The employee lifecycle begins in HR, so HR should own the master record throughout. Payroll can calculate what it needs, but the authoritative employee record should still sit in HR, including payroll-related attributes once they're generated. Otherwise we'll never get to a single version of truth. We need one function to win the ownership argument, and HR is the obvious default because it sits closest to the employee relationship.",
+          "correct": false,
+          "explanation": "This just replaces one oversimplification with another. The fact that a person starts in HR does not make HR authoritative for every attribute generated later. Pay results, tax calculations, and payroll corrections belong to the payroll domain because payroll owns the business meaning and legal responsibility for them. A single owner for the whole person is the wrong abstraction."
+        }
+      ]
+    },
+    {
+      "id": "rp-gs-3",
+      "prompt": "The Enterprise Architect says: \"Fine, field-level ownership is messy. A central Employee API still makes sense: every UI and downstream system reads through it, and we can progressively move writes into it later. The central API becomes the canonical domain.\" The Head of Product likes the idea of a single integration point. How should you respond?",
+      "options": [
+        {
+          "text": "I would avoid any central layer at all. Every consuming team should integrate directly with HR, payroll, identity, and whatever else it needs. The moment we introduce a federation or a read model, we're back to centralisation and hidden ownership. It's better for consumers to understand the real estate properly than to abstract it behind another service.",
+          "correct": false,
+          "explanation": "This overcorrects. A central read projection or federation can be a perfectly reasonable consumer-facing abstraction when done carefully. The issue is not central reads; it is pretending a read convenience layer should become the canonical write domain. You don't need to reject every abstraction to protect service ownership."
+        },
+        {
+          "text": "I think that's the right compromise. A central Employee API gives Product the consistency they want without forcing us to solve every ownership argument on day one. We can start by federating reads and then move writes into the API over time as teams align. That way the API becomes the canonical employee domain gradually rather than through a big-bang cutover. Consumers get one place to integrate, and the architecture becomes cleaner each quarter as more ownership shifts inward.",
+          "correct": false,
+          "explanation": "This is how a read façade quietly turns into a distributed monolith. You have accepted the premise that a useful consumer abstraction should eventually become a universal write domain. That creates a new service that owns almost nothing directly but must coordinate everything. Read consolidation can be sensible. Write centralisation is a very different and much riskier move."
+        },
+        {
+          "text": "A single integration point for reads can be useful, but that's a different thing from a canonical write domain. If we need a consolidated employee view, let's build it as a read model or federation layer sourced from authoritative systems. I would be very cautious about moving writes into a central service, because then we've created a new domain that owns nothing but has to coordinate everything. Read consolidation is a consumer concern; write ownership should stay with the domain that owns the attribute.",
+          "correct": true,
+          "explanation": "This is the right distinction. A consolidated read layer can improve consumer experience without stealing ownership from the underlying domains. By separating read convenience from write authority, you've protected the boundaries while still giving Product a path to a simpler integration story."
+        }
+      ]
+    },
+    {
+      "id": "rp-gs-4",
+      "prompt": "The Data Governance Lead says: \"To keep systems aligned, let's set up bi-directional sync for key employee fields. If payroll corrects a bank account or HR changes a manager, both systems update each other automatically. That avoids drift.\" How should you respond?",
+      "options": [
+        {
+          "text": "Bi-directional sync is how we create loops, hidden precedence rules, and impossible audit trails. For each field, pick one authoritative source and publish changes outward. If another system captures a correction, that should be either a delegated write-back to the owner or a controlled exception process, not a permanent two-way sync. Directionality is what keeps the model understandable.",
+          "correct": true,
+          "explanation": "Correct. The real discipline in distributed data ownership is directionality. Once every field has one authoritative publisher, the estate becomes debuggable. Corrections can still happen, but they happen through explicit patterns rather than magic replication in both directions."
+        },
+        {
+          "text": "That seems like the fastest way to reduce inconsistency. As long as we define a conflict rule such as latest timestamp wins, the systems should converge automatically. Most of the disagreement today comes from manual lag and incomplete integrations, so a proper two-way sync would solve the operational pain without a major domain redesign. We can always tighten the precedence rules later if certain fields prove more sensitive.",
+          "correct": false,
+          "explanation": "'Latest timestamp wins' is not governance. Bi-directional sync creates loops, hidden precedence rules, and audit problems the first time two systems disagree for legitimate reasons. It also makes historical replay much harder because cause and effect blur together. This is exactly the kind of shortcut that creates a fragile estate."
+        },
+        {
+          "text": "We can avoid the loop problem by introducing the new Employee Master as the neutral third copy. HR and payroll both sync their changes into the master, and the master republishes the winning version back out. That gives us central reconciliation while still allowing both operational systems to edit what they need. The master effectively arbitrates disagreements so the individual systems do not have to.",
+          "correct": false,
+          "explanation": "This only hides the same problem inside a third system. The master would still need field-level authority rules, conflict handling, and historical accountability. Adding a neutral copy does not remove the need to decide who is truly authoritative. It just adds another place for state to diverge."
+        }
+      ]
+    },
+    {
+      "id": "rp-gs-5",
+      "prompt": "The CIO says: \"I hear the nuance, but the board still wants a simplification story this quarter. I can't go back with 'it depends by field'. What is the concrete plan?\" How should you respond?",
+      "options": [
+        {
+          "text": "To create clarity fast, I would simply declare HR the golden source for all current and future employee data and document payroll and identity as downstream exceptions. That message is easy for the board to understand, and we can work through the exceptions later once the strategic direction is set. Simplicity of narrative matters here more than getting every edge case right in the first pass.",
+          "correct": false,
+          "explanation": "This is false clarity. The board may like the message now, but the operating model will contradict it almost immediately. Telling a simple story that you know is untrue is not good architecture leadership; it just stores up future confusion."
+        },
+        {
+          "text": "Go back with a two-layer plan. First, publish an authoritative ownership matrix for the top 20 employee fields and the five highest-pain integrations: who captures the data, who is authoritative, who publishes it, and what freshness is required. Second, implement one high-value flow end to end, for example HR job change publishing to payroll, identity, and reporting with clear event contracts. That gives the board a simplification story grounded in operating reality, not a big-bang master-data promise.",
+          "correct": true,
+          "explanation": "This is strong because it turns nuance into a deliverable. The ownership matrix gives clarity. The end-to-end flow proves the model operationally. You have offered the CIO a board-friendly story that is specific, measurable, and actually executable within a quarter."
+        },
+        {
+          "text": "We should respond with a full master data programme. Over the next six months we define a universal employee schema, appoint data stewards for each function, design the new Employee Master, and only then begin implementation. That gives the board a serious transformation story and ensures we don't rush into tactical fixes. A problem this structural needs a structural answer rather than incremental point-to-point cleanup.",
+          "correct": false,
+          "explanation": "This is too slow and too abstract for the pressure the CIO is describing. It gives the board a programme narrative but not an operating improvement. It also delays the hard ownership decisions by turning them into a design exercise. The better answer is something concrete, narrow, and visibly useful this quarter."
+        }
+      ]
+    }
+  ]
+}
