@@ -8,8 +8,13 @@
   let currentUser = null;
   let syncInFlight = false;
 
-  // ── Cache version — bump this when pushing deck changes ─────────
-  const CACHE_VERSION = "5";
+  // ── Automatic cache busting for static JSON content ─────────────
+  const CACHE_BUST = String(Date.now());
+
+  function withCacheBust(path) {
+    const sep = path.includes("?") ? "&" : "?";
+    return path + sep + "v=" + CACHE_BUST;
+  }
 
   // ── State ──────────────────────────────────────────────────────
   const STORAGE_KEY = "meetingprep";
@@ -208,14 +213,14 @@
 
   // ── Data loading ───────────────────────────────────────────────
   async function loadManifest() {
-    const resp = await fetch("data/manifest.json?v=" + CACHE_VERSION);
+    const resp = await fetch(withCacheBust("data/manifest.json"));
     manifest = await resp.json();
   }
 
   async function loadDeck(id) {
     if (decks[id]) return decks[id];
     const entry = manifest.decks.find((d) => d.id === id);
-    const resp = await fetch("data/" + entry.file + "?v=" + CACHE_VERSION);
+    const resp = await fetch(withCacheBust("data/" + entry.file));
     decks[id] = await resp.json();
     return decks[id];
   }
@@ -223,7 +228,7 @@
   async function loadScenario(id) {
     if (scenarios[id]) return scenarios[id];
     const entry = manifest.scenarios.find((s) => s.id === id);
-    const resp = await fetch("data/" + entry.file + "?v=" + CACHE_VERSION);
+    const resp = await fetch(withCacheBust("data/" + entry.file));
     scenarios[id] = await resp.json();
     return scenarios[id];
   }
