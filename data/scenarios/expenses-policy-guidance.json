@@ -1,0 +1,112 @@
+{
+  "id": "rp-expenses-policy-guidance",
+  "title": "Ask the Policy, Not the Internet",
+  "context": "The team is reviewing the AI policy guidance feature for Expenses. Product wants an impressive conversational experience. Compliance is worried about fabricated answers. Customer Success wants admins to maintain a single source of truth without operational overhead. You are the solution architect. The Head of Product is chairing, and the AI lead is present.",
+  "questions": [
+    {
+      "id": "rp-epg-1",
+      "prompt": "The AI Lead says: \"To keep the experience smooth, if the uploaded policy does not answer a question we can let the assistant fall back to general expense best practice. Users care about helpfulness, not whether the answer came from their exact policy.\" Compliance looks alarmed. How should you respond?",
+      "options": [
+        {
+          "text": "That is the right product trade-off. A conversational assistant that says 'I do not know' too often will feel broken, so it is better to use general expenses guidance as a backstop and only flag the source when policy-specific wording happens to be available.",
+          "correct": false,
+          "explanation": "This is exactly what the requirement is trying to avoid. The assistant must answer from the uploaded or linked policy content, and if the policy does not contain the answer it should say so rather than guessing. Helpfulness does not justify inventing policy."
+        },
+        {
+          "text": "We should not let the assistant invent policy. The requirement is that responses are grounded in the uploaded or linked policy, and if the policy does not contain an answer the system should indicate that rather than guessing. In this feature, trustworthiness is more important than conversational fluency.",
+          "correct": true,
+          "explanation": "This is the correct response. It aligns with the explicit requirement that all AI responses must be sourced from the customer's policy content and that the system must not guess when the content is missing."
+        },
+        {
+          "text": "We can use general best practice only for low-risk questions like receipt evidence or mileage, and reserve policy grounding for higher-risk questions like financial limits. That gives us a sensible middle ground between usability and compliance.",
+          "correct": false,
+          "explanation": "The requirement does not create a low-risk exception. Once the assistant answers as though it understands the customer's policy, it must stay grounded in that policy. A selective fallback would still produce unauthorised guidance inside a policy feature."
+        }
+      ]
+    },
+    {
+      "id": "rp-epg-2",
+      "prompt": "The UX Lead says: \"Showing source references under every answer will clutter the interface. People just want the answer. Let us make references optional behind a 'show details' link, or remove them entirely in the approval flow.\" How should you respond?",
+      "options": [
+        {
+          "text": "I agree. Source references are mainly an implementation concern, not a user need. If the answer quality is good enough, surfacing citations will only make the experience look less polished and more defensive.",
+          "correct": false,
+          "explanation": "The requirement is explicit that when providing an answer, the AI agent must show the user where in the policy the information came from. The references are not cosmetic; they are part of how the feature establishes trust and traceability."
+        },
+        {
+          "text": "We need visible source traceability because that is part of the product promise, not an internal debug aid. The requirement says the AI agent must show where in the policy the answer came from. We can design that elegantly, but we should not hide or remove it, especially in the moments where employees and managers are deciding whether to submit or approve a claim.",
+          "correct": true,
+          "explanation": "This is the right response. It preserves a mandatory behaviour while still leaving room for good UX design. The references matter because the assistant is meant to guide real expense decisions at the point of need."
+        },
+        {
+          "text": "We can remove references from the chat itself as long as the answer is generated from policy content. If Compliance later needs traceability, we can store the underlying source passages in an audit log without exposing them to users.",
+          "correct": false,
+          "explanation": "Internal audit logging is not a substitute for user-facing traceability. The requirement is specifically about what the user sees when the assistant provides an answer."
+        }
+      ]
+    },
+    {
+      "id": "rp-epg-3",
+      "prompt": "The Service Design Lead says: \"To keep the submission screens simple, let us launch the policy assistant as a separate help-centre page. Users can navigate out to it when they are unsure. Embedding it directly in submission and approval can come later.\" How should you respond?",
+      "options": [
+        {
+          "text": "That makes sense because it keeps the claim flow clean and avoids squeezing AI components into the main product surface. If users really need policy help, they will be willing to open another page and come back.",
+          "correct": false,
+          "explanation": "This misses a core requirement of the feature. The policy agent is meant to provide guidance in the moment, directly within the expense submission flow, so users can get help before completing their claim. Moving it out to a separate help centre recreates the very friction the feature is supposed to remove."
+        },
+        {
+          "text": "I would keep the assistant at the point of need. The whole problem statement here is that people struggle to find and interpret policy while they are submitting or approving expenses. A separate help centre preserves the old context-switch. The right design goal is an embedded assistant that gives sourced guidance without forcing users to leave the workflow they are already in.",
+          "correct": true,
+          "explanation": "This is the correct answer. It ties the architectural choice back to the user problem and matches the explicit requirement that the AI policy agent should sit directly within the submission flow."
+        },
+        {
+          "text": "We should do both from day one: a separate help centre for discoverability and a floating assistant across the whole product. That way every user journey is covered and we are not forced to choose one entry point.",
+          "correct": false,
+          "explanation": "This sounds comprehensive but it adds scope without solving the central design question. The requirement is specifically about the assistant being situated where users need it during submission or approval, not about maximising the number of entry points."
+        }
+      ]
+    },
+    {
+      "id": "rp-epg-4",
+      "prompt": "The Sysadmin representative asks: \"Do I have to keep uploading revised PDF policies every time Legal changes a line, or can I just point the system at our SharePoint policy and let that be the source? Also, what happens to old answers if I update it?\" How should you respond?",
+      "options": [
+        {
+          "text": "For control reasons we should only support manual document uploads. Live links to SharePoint create too much unpredictability, and if the policy changes we should retroactively regenerate prior answers so the conversation history stays aligned to the latest policy version.",
+          "correct": false,
+          "explanation": "This contradicts two requirements. The feature explicitly says a SharePoint link can be uploaded and used in the same way as a document upload, and it also says that updating the policy will not reindex previous questions but will be effective from the point of upload."
+        },
+        {
+          "text": "The design should support either an uploaded policy document or a SharePoint link as the source of truth. When the policy is updated, the new content should apply from that point onward, but the feature does not retroactively reindex previous questions. That gives admins a maintainable source without pretending the past conversation happened against a different policy than the one in force at the time.",
+          "correct": true,
+          "explanation": "This is the correct response because it combines both parts of the requirement accurately: document upload and SharePoint link are both supported, and updates take effect going forward rather than rewriting prior answers."
+        },
+        {
+          "text": "We can support both uploads and SharePoint, but if the source changes we really should rerun the index and rewrite prior answers automatically. Otherwise users may read older guidance that is now superseded, which makes the system inconsistent.",
+          "correct": false,
+          "explanation": "While the concern is understandable, it does not match the specified behaviour. The requirement explicitly says policy updates will not reindex previous questions and will instead take effect from the point of upload."
+        }
+      ]
+    },
+    {
+      "id": "rp-epg-5",
+      "prompt": "An HR stakeholder says: \"A plain answer is not enough. If an employee asks about mileage, the assistant should take account of whether they have a car allowance and answer accordingly. Otherwise it will still feel generic.\" The AI Lead worries that this starts to look like personalisation rather than policy guidance. How should you respond?",
+      "options": [
+        {
+          "text": "We should avoid using any employee context because once the assistant starts personalising answers it becomes too hard to explain or govern. It is safer to provide the same generic answer to everyone and let employees work out which rule applies to them.",
+          "correct": false,
+          "explanation": "The requirement explicitly allows contextualised answers, including the example of choosing mileage rates depending on whether the employee has a car allowance. Refusing all context would underdeliver against the feature intent."
+        },
+        {
+          "text": "Contextualisation is part of the value here, as long as the answer is still grounded in the policy. The requirement even gives mileage rates and car allowance status as an example of using employee knowledge to tailor the response. So the principle should be: personalise the application of the rule, but do not invent rules that are not present in the source policy.",
+          "correct": true,
+          "explanation": "This is the right answer because it balances the two constraints: the assistant can use employee context to apply the policy more helpfully, but the underlying rule still has to come from the uploaded or linked policy content."
+        },
+        {
+          "text": "We should leave contextualisation to a later release because it couples the assistant too tightly to People data. For phase one, the fastest route is a pure document Q&A experience with no awareness of the current user at all.",
+          "correct": false,
+          "explanation": "This may be simpler technically, but it steps back from a stated requirement. The PRD specifically calls out applying knowledge of the employee when answering relevant policy questions."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "id": "rp-expenses-claim-policy-enforcement",
+  "title": "A Warning Is Not a Decision",
+  "context": "The Expenses squad is reviewing the first end-to-end claim flow with Product, Payroll, UX, and Operations. Everyone wants a cleaner approval journey, but there is pressure to keep phase one contained and avoid colliding with other payroll roadmap items. You are the solution architect. The Director of Product is chairing.",
+  "questions": [
+    {
+      "id": "rp-ecp-1",
+      "prompt": "The UX Lead says: \"Out-of-policy values should hard-stop submission. If someone types a number above the limit, the system should block them completely. Warnings are too weak.\" The manager representative says they still want visibility of unusual claims. How should you respond?",
+      "options": [
+        {
+          "text": "I agree that hard blocking is cleaner. If the system already knows a value is out of policy, there is no reason to let the claim continue through the workflow. That reduces noise for managers and makes the policy feel enforceable.",
+          "correct": false,
+          "explanation": "This overstates what the requirement says. The employee journey explicitly calls for a warning when the employee enters an out-of-policy number, with a link to the relevant policy detail. The broader feature also includes manager visibility of out-of-policy claims and configurable auto-accept or auto-reject rules, which means the response should not be a blanket hard stop."
+        },
+        {
+          "text": "I would not treat every out-of-policy value as an automatic hard block. The current requirement is that the employee gets a warning, plus a link to the relevant policy detail, and that managers can still view out-of-policy claims. Actual acceptance or rejection can then be driven by configured rules rather than an unconditional UI block at data entry time.",
+          "correct": true,
+          "explanation": "This is the correct response because it preserves the specific employee-facing behaviour in the PRD while leaving room for configurable policy enforcement downstream."
+        },
+        {
+          "text": "We should allow submission silently and only tell the employee later if the claim is rejected. That keeps the form lightweight and avoids distracting users with policy messages before they have even finished completing the claim.",
+          "correct": false,
+          "explanation": "This discards a required part of the journey. The requirement explicitly says the employee should be warned when they type a number that is out of policy, and the warning should link to the relevant policy detail."
+        }
+      ]
+    },
+    {
+      "id": "rp-ecp-2",
+      "prompt": "The Operations Lead says: \"To simplify the MVP, let us make every claim go through the same manual path. No auto-approvals, no auto-rejections, just managers reviewing everything.\" The Sysadmin representative objects that this removes a major efficiency gain. How should you respond?",
+      "options": [
+        {
+          "text": "That simplification is worth it. Manual review of every claim is the safest first version because we avoid policy edge cases and do not need any admin configuration beyond basic submission and approval.",
+          "correct": false,
+          "explanation": "While it sounds safer, it drops a stated requirement. The setup section explicitly says the sysadmin should be able to configure the system so that certain claims are auto-rejected or auto-approved."
+        },
+        {
+          "text": "I would keep configurable automation in scope. The PRD explicitly gives sysadmins the ability to set certain claims to auto-accept or auto-reject, and that matters because the feature is meant to reduce manual effort, not just digitise it. We can constrain the initial rule set if needed, but removing the capability entirely would miss the requirement.",
+          "correct": true,
+          "explanation": "This is the correct answer. It protects an explicit setup capability while still leaving room to limit how ambitious the first rule catalogue is."
+        },
+        {
+          "text": "We can meet both needs by auto-approving everything that looks in policy and only routing suspicious claims to managers. That way we maximise speed in the first release and do not need sysadmin configuration at all.",
+          "correct": false,
+          "explanation": "This replaces admin-configurable behaviour with a hard-coded platform rule. The requirement is specifically that the sysadmin should be able to configure whether claims are auto-approved or auto-rejected."
+        }
+      ]
+    },
+    {
+      "id": "rp-ecp-3",
+      "prompt": "The Payroll Product Lead says: \"While we are touching approvals, this is the moment to redesign the whole authorisation route inside Expenses. Let us make the module support its own configurable approval chain instead of waiting on Payroll.\" How should you respond?",
+      "options": [
+        {
+          "text": "That is the right move because approvals are central to the Expenses experience, and relying on another team's roadmap will only slow us down. If we own the authorisation route in Expenses, we control the end-to-end journey.",
+          "correct": false,
+          "explanation": "This conflicts with the epic-level scope statement. The Expenses module is not meant to introduce changes to the existing employee-to-line-manager authorisation route in this phase; enhanced configurable workflows are being delivered by Payroll separately."
+        },
+        {
+          "text": "I would keep the scope boundary intact. The current plan is that Expenses relies on the existing employee-to-line-manager route and then benefits from the enhanced configurable workflows Payroll is delivering later. If we try to build a separate authorisation engine inside Expenses now, we create overlap, delay the module, and move outside the stated release scope.",
+          "correct": true,
+          "explanation": "This is the correct response. It uses the explicit epic boundary to avoid scope creep and duplicate workflow capability inside the module."
+        },
+        {
+          "text": "We should do a temporary approval engine in Expenses for phase one and then decommission it once Payroll delivers the richer workflow capability. That gives us independence now without locking us into a permanent architecture.",
+          "correct": false,
+          "explanation": "Temporary workflow engines have a habit of becoming permanent. More importantly, this still violates the stated scope boundary that Expenses is not changing the authorisation route in this phase."
+        }
+      ]
+    },
+    {
+      "id": "rp-ecp-4",
+      "prompt": "The Engineering Manager says: \"If an employee has multiple jobs, we should just default the claim to their primary assignment. Asking them to choose adds friction and most people will not care.\" The payroll analyst looks doubtful. How should you respond?",
+      "options": [
+        {
+          "text": "That is acceptable for a first release because primary assignment will be right most of the time, and the reporting can correct any mistakes later. It is better to optimise for speed than add another mandatory field to the claim form.",
+          "correct": false,
+          "explanation": "The requirement is more specific than that. It says that if an employee has more than one job, they should select which job the expense is for. Defaulting silently to a primary assignment would override a deliberate business requirement."
+        },
+        {
+          "text": "We should let the employee choose when they have more than one job. The requirement calls that out explicitly, which suggests it is important for downstream correctness. We can still make the UX efficient by preselecting a likely option or keeping the choice lightweight, but we should not remove the decision entirely.",
+          "correct": true,
+          "explanation": "This is the right answer because it preserves the requirement while still acknowledging UX concerns. The architecturally important point is that the system cannot silently assume the correct employment context for every claim."
+        },
+        {
+          "text": "We should hide the job choice from the employee and let the manager assign the claim to the right job during approval. Managers are better placed to make that call and it keeps the submission flow shorter.",
+          "correct": false,
+          "explanation": "That shifts a required employee action into a later stage of the process and creates extra approval friction. The requirement says the employee should select the relevant job when they have more than one."
+        }
+      ]
+    },
+    {
+      "id": "rp-ecp-5",
+      "prompt": "The Product Manager says: \"To keep scope tight, if a claim is rejected the employee can just create a new one from scratch. Reopening and resubmitting the original claim is nice to have.\" Customer Success says that will irritate users. How should you respond?",
+      "options": [
+        {
+          "text": "I would accept that simplification. Rejected claims are a minority case, and reusing the original submission adds state-management complexity that is not worth it for an initial release.",
+          "correct": false,
+          "explanation": "The employee journey requirement specifically says that if a claim is rejected, the employee should have the option to edit and resubmit it rather than having to start again. Removing that behaviour would be a direct requirement miss."
+        },
+        {
+          "text": "We should support edit-and-resubmit for rejected claims. That behaviour is explicitly called out in the employee journey, and it matters because the module is meant to reduce friction, not send users back to the beginning every time something is wrong. If we need to simplify, we should simplify elsewhere rather than discarding this recovery path.",
+          "correct": true,
+          "explanation": "This is the correct response. It protects a named part of the journey and ties it back to the broader usability goals of the module."
+        },
+        {
+          "text": "We can avoid the issue by preventing managers from rejecting claims outright. They can only request changes, and the employee edits the claim in place without a formal reject state.",
+          "correct": false,
+          "explanation": "That changes the workflow semantics rather than meeting the requirement. The PRD discusses claims being accepted or rejected and notifying the employee accordingly, so the design should handle rejected claims properly rather than trying to redefine them away."
+        }
+      ]
+    }
+  ]
+}

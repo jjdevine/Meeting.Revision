@@ -124,6 +124,54 @@
       "file": "scenarios/workflow-platform-mandate.json",
       "icon": "🔄",
       "questions": 5
+    },
+    {
+      "id": "rp-expenses-module-activation",
+      "title": "The Switch That Must Not Surprise Anyone",
+      "description": "Guide an activation design review for the new Expenses module. Preserve clear entitlement boundaries, avoid Claims confusion, and prevent payroll side effects.",
+      "file": "scenarios/expenses-module-activation.json",
+      "icon": "🧩",
+      "questions": 5
+    },
+    {
+      "id": "rp-expenses-claim-policy-enforcement",
+      "title": "A Warning Is Not a Decision",
+      "description": "Shape phase-one claim policy handling. Balance employee warnings, manager visibility, admin-configured automation, and tight scope boundaries.",
+      "file": "scenarios/expenses-claim-policy-enforcement.json",
+      "icon": "🧾",
+      "questions": 5
+    },
+    {
+      "id": "rp-expenses-ocr-receipts",
+      "title": "Read the Receipt, Not the Tea Leaves",
+      "description": "Review OCR receipt scanning decisions across UX, tax compliance, payroll mapping, and secure evidence handling.",
+      "file": "scenarios/expenses-ocr-receipts.json",
+      "icon": "📸",
+      "questions": 5
+    },
+    {
+      "id": "rp-expenses-policy-guidance",
+      "title": "Ask the Policy, Not the Internet",
+      "description": "Design trustworthy in-flow AI policy guidance. Keep answers grounded in uploaded policy, include source traceability, and handle updates safely.",
+      "file": "scenarios/expenses-policy-guidance.json",
+      "icon": "🧠",
+      "questions": 5
+    },
+    {
+      "id": "rp-expenses-mileage-analytics-integrations",
+      "title": "The Miles, the Metrics, and the Money",
+      "description": "Align mileage reimbursement, analytics foundations, anomaly-readiness, and internal/external integration expectations.",
+      "file": "scenarios/expenses-mileage-analytics-integrations.json",
+      "icon": "🚗",
+      "questions": 5
+    },
+    {
+      "id": "rp-expenses-rules-engine-extraction",
+      "title": "From Policy PDF to Enforced Rule",
+      "description": "Evaluate how policy text becomes enforceable configuration. Clarify rules engine sequencing, build-vs-buy decisions, and admin review controls.",
+      "file": "scenarios/expenses-rules-engine-and-extraction.json",
+      "icon": "📐",
+      "questions": 5
     }
   ]
 }

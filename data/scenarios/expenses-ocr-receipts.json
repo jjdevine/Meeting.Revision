@@ -1,0 +1,112 @@
+{
+  "id": "rp-expenses-ocr-receipts",
+  "title": "Read the Receipt, Not the Tea Leaves",
+  "context": "The team is assessing the OCR receipt-scanning capability for the Expenses module. A vendor has just demoed a polished mobile capture flow. Tax wants HMRC-relevant detail. Security wants to understand how evidence is stored. Product wants the experience to feel almost effortless for employees. You are the solution architect. The Programme Director is chairing.",
+  "questions": [
+    {
+      "id": "rp-eor-1",
+      "prompt": "The OCR vendor says: \"Our strongest selling point is straight-through automation. User review slows everything down, so the best experience is to scan the receipt, populate the fields, and submit automatically unless the image is completely unreadable.\" Product looks impressed. How should you respond?",
+      "options": [
+        {
+          "text": "That is exactly the level of automation we should aim for. If the OCR confidence is high, there is little value in making the employee review the claim. Removing manual confirmation is how we make the feature feel modern and differentiated.",
+          "correct": false,
+          "explanation": "The PRD does not support a no-review model. Employees must be able to edit OCR output, low-confidence fields should be highlighted for confirmation, and if the service cannot interpret the image the user should be prompted to retake the photo or enter details manually."
+        },
+        {
+          "text": "Automation is valuable, but the product still needs an explicit user intervention path. The OCR should populate the claim and reduce effort, not remove user control. When confidence is low we need to highlight fields for confirmation, and if the receipt cannot be interpreted the user should be able to retake the photo or enter the details manually.",
+          "correct": true,
+          "explanation": "This is the correct response because it captures the required balance: strong automation with clear user correction and fallback paths."
+        },
+        {
+          "text": "We should reject low-confidence scans entirely and force the employee to start again from the first screen. That is safer than allowing manual correction because it avoids bad OCR data entering the system.",
+          "correct": false,
+          "explanation": "The requirement is not to reject imperfect scans automatically. It is to let users intervene: confirm uncertain fields, retake the photo if necessary, or manually enter the details when the OCR service cannot interpret the image."
+        }
+      ]
+    },
+    {
+      "id": "rp-eor-2",
+      "prompt": "The Tax Lead says: \"For phase one, do we really need more than merchant, date, and total? The rest feels like a later optimisation.\" Finance is nervous because VAT recovery matters. How should you respond?",
+      "options": [
+        {
+          "text": "Yes, merchant, date, and total are enough for an MVP. We can treat VAT as a manual downstream concern because trying to capture full tax detail through OCR will only slow delivery and increase error rates.",
+          "correct": false,
+          "explanation": "This misses a central requirement. The OCR engine must detect VAT-compliant information and map VAT amount, VAT rate, supplier VAT registration number where present, and taxable versus non-taxable elements into the claim in line with HMRC expectations."
+        },
+        {
+          "text": "We do need richer extraction because HMRC-relevant VAT handling is part of the release scope, not a stretch goal. The OCR output has to support things like VAT amount, VAT rate, supplier VAT registration number where present, and taxable versus non-taxable elements, in addition to the basic transaction fields. Otherwise we would be delivering a capture gimmick rather than a compliant expense process.",
+          "correct": true,
+          "explanation": "This is the correct answer. It ties OCR design back to the explicit VAT-handling requirements and the broader compliance promise of the module."
+        },
+        {
+          "text": "We should let users manually mark whether a receipt is VAT-compliant and keep OCR focused only on the visible total. VAT recovery is really a finance workflow issue rather than a capture issue.",
+          "correct": false,
+          "explanation": "The requirement says the system should detect whether a receipt includes VAT-compliant information and map the relevant details accurately into the claim. That responsibility sits with the OCR capability, not only with later manual finance handling."
+        }
+      ]
+    },
+    {
+      "id": "rp-eor-3",
+      "prompt": "The Payroll analyst says: \"Even if OCR extracts the receipt details, employees should still choose the claim type manually. Mapping to payslip items is too domain-specific for the scanner and we can avoid that complexity for now.\" How should you respond?",
+      "options": [
+        {
+          "text": "That is the pragmatic choice. OCR should stay limited to text extraction and not try to infer downstream payroll meaning. Asking the employee to pick the right claim type is a small price to pay for faster delivery.",
+          "correct": false,
+          "explanation": "This would underdeliver against a named requirement. The system should automatically map OCR output to existing payslip items so the correct claim type is created without requiring manual selection by the employee."
+        },
+        {
+          "text": "Automatic mapping to the relevant payslip item is part of the requirement, because the value of OCR is not just reading text but reducing claim creation effort end to end. We should still keep user correction available where confidence is low, but the default path should not require the employee to classify the claim manually after scanning.",
+          "correct": true,
+          "explanation": "This is the correct answer. It connects the extraction capability to the downstream claim-type requirement while preserving the user-intervention model where needed."
+        },
+        {
+          "text": "We should postpone both mapping and classification until after manager approval. Once the manager sees the receipt, they can decide which payslip item it belongs to and that removes the need for OCR to understand the domain at submission time.",
+          "correct": false,
+          "explanation": "That would push work later in the process and undermine the promise of automated, intelligent claim creation. The PRD places the mapping behaviour in the OCR-assisted submission flow itself."
+        }
+      ]
+    },
+    {
+      "id": "rp-eor-4",
+      "prompt": "The Security Architect says: \"To reduce risk, can we process receipt images transiently and discard them once the text has been extracted? Storing images creates another class of sensitive data we need to govern.\" How should you respond?",
+      "options": [
+        {
+          "text": "Yes. If the structured data has already been captured, keeping the image is unnecessary. Throwing images away after OCR is the cleanest security posture and customers are unlikely to miss them.",
+          "correct": false,
+          "explanation": "That is incompatible with the requirement. All scanned receipts and the extracted data are meant to be stored securely and automatically attached to the expense claim. The evidence itself is part of the claim record."
+        },
+        {
+          "text": "We should absolutely govern the storage carefully, but secure retention is part of the feature rather than an optional extra. The requirement is that scanned receipts and their extracted data are stored securely and attached to the claim. So the architecture question is how we protect and retain that evidence properly, not whether we keep it at all.",
+          "correct": true,
+          "explanation": "This is the correct response. It respects the explicit storage requirement while acknowledging the legitimate security concern and reframing it as a design obligation rather than a reason to discard the evidence."
+        },
+        {
+          "text": "We can keep the image only for receipts where VAT has been detected, and discard it for simpler claims. That gives Finance the audit evidence they need without forcing us to store every receipt equally.",
+          "correct": false,
+          "explanation": "The requirement is broader than that. It says all scanned receipts and the extracted data are stored securely and attached to the claim, not only the subset that meets a VAT condition."
+        }
+      ]
+    },
+    {
+      "id": "rp-eor-5",
+      "prompt": "The Fraud Lead says: \"Duplicate receipt detection can sit with anomaly detection later. Let the OCR feature focus only on capture and extraction for now.\" Product wonders whether that is a reasonable scope cut. How should you respond?",
+      "options": [
+        {
+          "text": "That is a sensible split. Duplicate checking is an analytics concern and does not belong in the capture workflow. We can let the claim proceed and rely on later anomaly rules to catch suspicious repeats.",
+          "correct": false,
+          "explanation": "The OCR PRD already includes duplicate detection in this feature. It says the system will detect potential duplicate receipts and alert the user if the image or extracted data appears similar to an existing claim."
+        },
+        {
+          "text": "Duplicate detection belongs here as well. The OCR feature is not only about reading the receipt; it also uses the image and extracted data to help prevent obvious submission mistakes or abuse at the point of entry. The requirement explicitly says the user should be alerted when the receipt appears similar to an existing claim.",
+          "correct": true,
+          "explanation": "This is the correct answer. It keeps the submission-time safeguard where the PRD places it instead of deferring everything to later anomaly processing."
+        },
+        {
+          "text": "We should block any suspected duplicate automatically and prevent the employee from proceeding. That is the cleanest anti-fraud posture and means we do not need later review logic.",
+          "correct": false,
+          "explanation": "The PRD says the system should alert the user when a potential duplicate is detected. It does not say every suspected duplicate should be hard-blocked without further review."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "id": "rp-expenses-rules-engine-extraction",
+  "title": "From Policy PDF to Enforced Rule",
+  "context": "The architecture group is reviewing how Expenses will move from natural-language policy documents to enforceable rules. Product wants a conference-ready story. Engineering wants to avoid unnecessary components. Procurement has found vendors promising policy extraction out of the box. You are the solution architect for the programme. The CTO is chairing.",
+  "questions": [
+    {
+      "id": "rp-ere-1",
+      "prompt": "The Product Manager says: \"Why are we talking about a rules engine at all? If the AI can read the policy, surely it can just decide at claim time whether something is in or out of policy. That would save us months.\" How should you respond?",
+      "options": [
+        {
+          "text": "That is a reasonable simplification. If the model can answer policy questions, it can probably make policy decisions too, so adding a separate rules engine just duplicates capability and creates maintenance overhead we do not need.",
+          "correct": false,
+          "explanation": "This collapses several distinct capabilities into one opaque runtime decision. The PRDs separate policy guidance, rules engine, extraction, and enforcement for a reason. The rules engine is the precursor that allows extracted policy logic to become explicit, reviewable, and enforceable rather than hidden inside ad hoc model calls."
+        },
+        {
+          "text": "I would keep those concerns separate. A conversational policy assistant helps users understand the policy, but enforcement needs explicit rules that the product can apply consistently. That is why the rules engine exists as its own capability and why extraction comes after it. If we let an AI make enforcement calls directly from document text at runtime, we lose determinism, reviewability, and a clear admin control point.",
+          "correct": true,
+          "explanation": "This is the correct response. It respects the sequencing in the PRDs and explains the architectural reason for it: guidance is not the same thing as deterministic policy enforcement."
+        },
+        {
+          "text": "We should keep the AI in the loop for final decision-making but use a lightweight rules engine only for straightforward numeric limits. That gives us a hybrid model where the assistant handles the messy cases and the engine only covers the easy ones.",
+          "correct": false,
+          "explanation": "The PRDs do not frame the engine as a narrow helper for simple limits. The rules engine is the foundation that makes later extraction and enforcement possible. Leaving final decisions to the AI undermines the reason the engine exists."
+        }
+      ]
+    },
+    {
+      "id": "rp-ere-2",
+      "prompt": "Procurement says: \"A vendor has shown us a platform that claims it can ingest policies, extract the rules, and manage the whole lifecycle. We should decide today whether we are buying or building so we can move quickly.\" The CTO looks to you. How should you respond?",
+      "options": [
+        {
+          "text": "If the vendor demo looked good, we should commit now. The fastest path is usually the right one for a new module, and we can always revisit the decision if the platform turns out to be too constraining later.",
+          "correct": false,
+          "explanation": "The rules engine PRD explicitly says a build-versus-buy approach needs a spike. Committing at this stage would skip the piece of work that is already recognised as necessary to make that decision responsibly."
+        },
+        {
+          "text": "We should not pretend the decision is already made. The PRD explicitly calls out a build-versus-buy spike, which is the right move here. We need to test whether an external product can represent the kinds of rules we care about, fit our admin review model, and integrate cleanly with the wider Expenses roadmap before we commit the architecture to it.",
+          "correct": true,
+          "explanation": "This is the correct answer because it matches the documented milestone and gives a sound architectural reason for it. The spike is not bureaucracy; it is how you de-risk an important foundation decision."
+        },
+        {
+          "text": "We should build the rules engine ourselves and treat the decision as already settled. Rules are core intellectual property for the module, so buying would create too much dependency on an external vendor regardless of what the spike might show.",
+          "correct": false,
+          "explanation": "This is just the mirror image of overcommitting to buy. The requirement does not pre-decide the outcome. It says the team needs a spike to decide on build versus buy."
+        }
+      ]
+    },
+    {
+      "id": "rp-ere-3",
+      "prompt": "The Engineering Lead says: \"Once the system extracts rules from the uploaded policy, we should apply them automatically. If the AI is good enough to find the rules, it is good enough to activate them. Asking the sysadmin to review them just adds friction.\" How should you respond?",
+      "options": [
+        {
+          "text": "I agree. Automatic activation is the only way to make extraction feel genuinely intelligent. If admins still have to review everything, they will see the feature as glorified data entry rather than automation.",
+          "correct": false,
+          "explanation": "That ignores a specific requirement. The extracted rules and limits are meant to be presented to the admin for review before they are applied, and the sysadmin must be able to edit them. The human review step is part of the safety model, not optional friction."
+        },
+        {
+          "text": "The review step stays. The extraction feature is supposed to save setup time by proposing rules and limits, but the sysadmin is still the control point before those rules are applied to Expenses. That is why the extracted limits need to be shown in an easy-to-understand format and why editing is required. We are automating discovery, not removing accountability.",
+          "correct": true,
+          "explanation": "This is the correct response. It matches the PRD exactly and explains the intent: automation accelerates configuration, but a human still validates what becomes active policy in the system."
+        },
+        {
+          "text": "We can make automatic activation the default and let admins opt out if they want review. That keeps the experience fast for most customers while still giving cautious customers a manual mode.",
+          "correct": false,
+          "explanation": "The requirement does not describe admin review as an optional mode. It is the expected flow that extracted rules are reviewed and editable before application."
+        }
+      ]
+    },
+    {
+      "id": "rp-ere-4",
+      "prompt": "The CTO asks a sequencing question: \"Can we have one team start the extraction feature now while another team works on the rules engine, or is there a hard dependency between them?\" Product is pushing for parallelism. How should you respond?",
+      "options": [
+        {
+          "text": "There is no meaningful dependency. Extraction is just document understanding, so one team can build that feature independently and hand off the output later when the rules engine is ready to consume it.",
+          "correct": false,
+          "explanation": "The extraction PRD is more specific than that. It says the rules engine needs to be built before the extraction work can be carried out. Discovery and design can happen in parallel, but the feature dependency is real because extraction needs a target rule model and review flow."
+        },
+        {
+          "text": "There is a real dependency at the feature level. The rules engine needs to exist first because extraction is not useful in the abstract; it needs a defined rule model, a place for those rules to live, and a review-and-edit path for admins. We can parallelise some discovery and design work, but I would not treat extraction as independently shippable ahead of the engine.",
+          "correct": true,
+          "explanation": "This is the correct answer. It respects the explicit milestone dependency while still allowing sensible parallel preparatory work. That is the nuanced architectural position, not a simplistic 'no parallelism ever' answer."
+        },
+        {
+          "text": "We should ignore the dependency and build the extraction UI first because that is what customers will understand. The rules engine can remain a hidden technical service that catches up later once the UI is already validated.",
+          "correct": false,
+          "explanation": "This reverses the intended sequence. The dependency matters because the extraction UI only makes sense if the underlying rule representation and enforcement foundation already exist."
+        }
+      ]
+    },
+    {
+      "id": "rp-ere-5",
+      "prompt": "A senior engineer says: \"Let us keep the extracted output very loose. We can store free-text snippets from the policy and let the enforcement service interpret them at runtime. Structured rule types are premature.\" How should you respond?",
+      "options": [
+        {
+          "text": "That is a good approach because it keeps the extraction problem simple. The system only needs to capture the relevant wording, and runtime interpretation gives us flexibility if policies vary between customers.",
+          "correct": false,
+          "explanation": "Loose free-text storage would make review, editing, and enforcement far harder. The extraction PRD names specific categories such as maximum amounts, category-specific thresholds, VAT rules, and scenario-based allowances. That implies a structured rule model rather than runtime interpretation of snippets."
+        },
+        {
+          "text": "We need a structured representation of the extracted rules, not just policy snippets. The sysadmin has to review and edit the output in an understandable way, and enforcement later depends on explicit rule types. That means the extraction model needs to capture things like maximum amounts, category thresholds, VAT rules, and scenario-based allowances as first-class concepts, while still preserving a trace back to the source text.",
+          "correct": true,
+          "explanation": "This is the correct answer. It ties together the extraction scope, the admin review requirement, and the later enforcement need. Structure is not premature here; it is what makes the feature usable and trustworthy."
+        },
+        {
+          "text": "We should start with free-text snippets for speed and then manually translate them into structured rules during implementation. The extraction feature does not need to solve the full modelling problem itself.",
+          "correct": false,
+          "explanation": "That would shift the hard work back onto the team or the customer and undermine the value of automated extraction. The feature is meant to produce extracted rules and limits that the sysadmin can review and edit directly, not a bag of text fragments requiring manual interpretation."
+        }
+      ]
+    }
+  ]
+}

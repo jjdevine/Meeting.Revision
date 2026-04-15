@@ -1,0 +1,112 @@
+{
+  "id": "rp-expenses-mileage-analytics-integrations",
+  "title": "The Miles, the Metrics, and the Money",
+  "context": "A cross-functional review is being held for the later Expenses capabilities that tie the module into the wider platform. Payroll owns mileage rate tables. Data wants to know what must be captured in the background. Fraud wants anomaly detection. Finance cares about where approved claims land. Product wants a deliverable roadmap that still feels coherent to customers. You are the solution architect. The General Manager is chairing.",
+  "questions": [
+    {
+      "id": "rp-emi-1",
+      "prompt": "The Payroll Lead says: \"We already maintain mileage schemes as rate tables in Payroll. Customers should not have to recreate those rates in Expenses just to reimburse mileage claims. The module should use what Payroll already knows.\" How should you respond?",
+      "options": [
+        {
+          "text": "I would still give Expenses its own mileage-rate setup because the module needs to stand alone. Re-entering the rates may be repetitive, but it avoids a dependency on Payroll and keeps the feature self-contained for implementation.",
+          "correct": false,
+          "explanation": "That contradicts the mileage requirement. The module is supposed to use payroll-defined mileage rate tables automatically, without requiring additional setup or configuration from customers."
+        },
+        {
+          "text": "That should be the design principle. The mileage feature is meant to consume the rate tables already defined in Payroll and apply them automatically inside Expenses, rather than asking customers to duplicate configuration. The architectural work is about reliable reuse of those payroll-defined rates, not rebuilding the same setup screen in another module.",
+          "correct": true,
+          "explanation": "This is the correct response because it aligns directly with the requirement that Payroll remains the source of mileage rates and that customers should not need extra configuration in Expenses."
+        },
+        {
+          "text": "We can compromise by importing the payroll rate table once into Expenses during setup and then letting the two systems drift independently. That keeps day-one configuration light without forcing a runtime dependency between the products.",
+          "correct": false,
+          "explanation": "A one-time copy is not the same as using payroll-defined rates automatically. The requirement positions Payroll as the maintained source of the schemes, which argues against duplicating and drifting the data into Expenses."
+        }
+      ]
+    },
+    {
+      "id": "rp-emi-2",
+      "prompt": "The Product Manager says: \"Mileage is taking on too much complexity. For the first release, let us just ask users to type the number of miles and reimburse a single rate. Start and end locations, annual thresholds, and remaining allowance can all wait.\" How should you respond?",
+      "options": [
+        {
+          "text": "That is a fair simplification because most users already know how many miles they have travelled. The advanced logic can come later, and a flat-rate MVP still proves that mileage reimbursement belongs inside Expenses.",
+          "correct": false,
+          "explanation": "This strips out several core requirements of the mileage feature. The PRD calls for journey start and end capture, automatic distance calculation, tracking accumulated mileage and remaining allowance, and automatically applying the correct rate when annual thresholds are crossed."
+        },
+        {
+          "text": "I would be careful about simplifying away the very things that make the mileage feature accurate. The requirement is not just 'reimburse miles'; it is to calculate point-to-point mileage from journey data, track accumulated mileage through the year, show the remaining allowance, and change the reimbursement rate automatically once the threshold is reached. A flat manual figure with one rate is a different product.",
+          "correct": true,
+          "explanation": "This is the correct response. It explains why the proposed cut is not merely a smaller version of the same feature but a shift away from the intended behaviour and value."
+        },
+        {
+          "text": "We should keep the single-rate approach but ask employees to attach supporting route screenshots as evidence. That gives us enough assurance for accuracy without implementing automated calculation or threshold logic in the first release.",
+          "correct": false,
+          "explanation": "That introduces manual evidence gathering instead of delivering the automated point-to-point calculation and threshold-aware reimbursement the PRD describes."
+        }
+      ]
+    },
+    {
+      "id": "rp-emi-3",
+      "prompt": "Customer Success says: \"Home-to-work mileage deduction is edge-case territory. Can we just hard-code one behaviour globally and avoid confusing admins with another setting?\" The payroll analyst points out that customer policies differ. How should you respond?",
+      "options": [
+        {
+          "text": "Yes. A global rule is the safest answer because it eliminates configuration errors and gives every customer the same predictable behaviour, even if their policies vary.",
+          "correct": false,
+          "explanation": "The mileage PRD explicitly says the sysadmin should be able to indicate in settings whether home-to-work mileage is deductible. A single global hard-coded behaviour would ignore that requirement."
+        },
+        {
+          "text": "This needs to stay configurable because the requirement specifically gives admins a setting for whether home-to-work mileage is deductible. Where that deduction applies, the system should enforce it using the employee's stored home and work addresses from People First. That is exactly the kind of policy variability the module is supposed to handle rather than flatten.",
+          "correct": true,
+          "explanation": "This is the correct answer. It preserves both the configuration requirement and the enforcement mechanism that depends on People First address data."
+        },
+        {
+          "text": "We should remove the admin setting and let the policy-guidance assistant explain the customer's home-to-work rule instead. Employees can then self-police whether they include those miles in the claim.",
+          "correct": false,
+          "explanation": "The requirement is not just to explain the rule; it is to configure and enforce it during mileage calculation. Replacing system behaviour with advisory text would underdeliver significantly."
+        }
+      ]
+    },
+    {
+      "id": "rp-emi-4",
+      "prompt": "The Data Lead says: \"Anomaly detection is a future feature. We do not need to worry about background analytics now; once the module is live we can decide later what data to aggregate.\" Fraud disagrees. How should you respond?",
+      "options": [
+        {
+          "text": "That is reasonable because anomaly detection can be added after we have real usage data. It is better to avoid instrumenting too much up front and only decide what metrics matter once customers are actually using the module.",
+          "correct": false,
+          "explanation": "The analytics PRD says the data should be captured in the background specifically to drive later features such as anomaly detection, and the anomaly-detection PRD says that work is contingent on analytics being established first. Deferring the data capture would weaken that dependency chain."
+        },
+        {
+          "text": "We need the background analytics from the start because they are the precursor to anomaly detection, not an optional reporting extra. The PRD already names the kinds of data we should be capturing: claim counts and values over time, department-level patterns, miles travelled, number of journeys, out-of-policy submissions, out-of-policy decisions, and rejected claims. If we skip that instrumentation now, the anomaly feature arrives later with no foundation.",
+          "correct": true,
+          "explanation": "This is the correct answer. It uses both PRDs together: analytics exists to create the data layer that later anomaly detection depends on."
+        },
+        {
+          "text": "We should start with anomaly detection rules first and then backfill analytics once we know which suspicious patterns we actually care about. The detection logic should drive the data model, not the other way around.",
+          "correct": false,
+          "explanation": "The sequencing in the requirements runs the other way. Analytics is the precursor because the system needs data to aggregate before it can evaluate meaningful anomaly patterns."
+        }
+      ]
+    },
+    {
+      "id": "rp-emi-5",
+      "prompt": "The Integrations Manager says: \"At launch we should say Expenses integrates natively with every external payroll and finance system. If the customer can export via API, that is basically the same thing from their point of view.\" Finance asks whether that language is accurate. How should you respond?",
+      "options": [
+        {
+          "text": "Yes, that is close enough. Customers care that data gets out of the module, not whether we call it an integration or an API connection. Marketing should use the stronger wording because it is easier to sell.",
+          "correct": false,
+          "explanation": "The requirement is more precise: the module passes data to internal People First systems and connects to external payroll and finance systems through API, not through a true integration. Calling every external connection a native integration would overstate what is being delivered."
+        },
+        {
+          "text": "We should describe it accurately. Internally, Expenses is meant to pass data into People First Payroll, People First Finance, and Data Explorer. Externally, the requirement says connections are done through API rather than as full native integrations. That distinction matters because it sets the right expectation about what the product does and does not own.",
+          "correct": true,
+          "explanation": "This is the correct response. It preserves the real scope of the feature and avoids turning an API handoff capability into an exaggerated product claim."
+        },
+        {
+          "text": "We should avoid any external integration story at launch and keep the module entirely self-contained until we can build true out-of-the-box connectors for the main finance and payroll vendors. Anything less will create too much implementation variability.",
+          "correct": false,
+          "explanation": "The PRD already includes external API connections in scope, so the answer is not to remove the capability. The right move is to describe it faithfully rather than overselling it or cutting it altogether."
+        }
+      ]
+    }
+  ]
+}
