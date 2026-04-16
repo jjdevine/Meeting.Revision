@@ -344,8 +344,27 @@
   function filterAndShow() {
     const deck = decks[currentDeckId];
     const cat = categoryFilter.value;
-    currentCards =
+    const filtered =
       cat === "all" ? [...deck.cards] : deck.cards.filter((c) => c.category === cat);
+
+    // Assign priority: 0 = unseen, 1 = hard (rating 1), 2 = everything else
+    function cardPriority(c) {
+      const p = progress[c.id];
+      if (!p || !p.seen) return 0;
+      if (p.rating === 1) return 1;
+      return 2;
+    }
+
+    // Shuffle each priority group independently, then concatenate
+    const groups = [[], [], []];
+    for (const c of filtered) groups[cardPriority(c)].push(c);
+    for (const g of groups) {
+      for (let i = g.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [g[i], g[j]] = [g[j], g[i]];
+      }
+    }
+    currentCards = [...groups[0], ...groups[1], ...groups[2]];
     currentIndex = 0;
     renderCard();
     updateProgress();
@@ -798,13 +817,21 @@
     // Study card flip
     $("#study-card").addEventListener("click", (e) => {
       if (e.target.closest(".card-notes") || e.target.tagName === "SUMMARY") return;
-      $("#study-card").classList.toggle("flipped");
+      const studyCard = $("#study-card");
+      studyCard.classList.toggle("flipped");
+      if (studyCard.classList.contains("flipped")) {
+        setTimeout(() => studyCard.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+      }
     });
 
     // Followup card flip
     $("#followup-card").addEventListener("click", (e) => {
       if (e.target.closest(".card-notes") || e.target.tagName === "SUMMARY") return;
-      $("#followup-card").classList.toggle("flipped");
+      const fuCard = $("#followup-card");
+      fuCard.classList.toggle("flipped");
+      if (fuCard.classList.contains("flipped")) {
+        setTimeout(() => fuCard.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+      }
     });
 
     // Study nav
