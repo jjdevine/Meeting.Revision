@@ -15,7 +15,7 @@
         {
           "text": "We should not let the assistant invent policy. The requirement is that responses are grounded in the uploaded or linked policy, and if the policy does not contain an answer the system should indicate that rather than guessing. In this feature, trustworthiness is more important than conversational fluency.",
           "correct": true,
-          "explanation": "This is the correct response. It aligns with the explicit requirement that all AI responses must be sourced from the customer's policy content and that the system must not guess when the content is missing."
+          "explanation": "This is the correct response. It defines the trust boundary of the AI system: the retrieval scope is limited to the customer's uploaded policy content, and the system must indicate when the content does not contain an answer rather than falling back to general knowledge. This boundary is an architectural constraint, not just a product preference, because it determines what data the retrieval pipeline indexes and how the system handles queries with no matching content."
         },
         {
           "text": "We can use general best practice only for low-risk questions like receipt evidence or mileage, and reserve policy grounding for higher-risk questions like financial limits. That gives us a sensible middle ground between usability and compliance.",
@@ -26,43 +26,43 @@
     },
     {
       "id": "rp-epg-2",
-      "prompt": "The UX Lead says: \"Showing source references under every answer will clutter the interface. People just want the answer. Let us make references optional behind a 'show details' link, or remove them entirely in the approval flow.\" How should you respond?",
+      "prompt": "The Engineering Lead says: \"We can keep the implementation simple. Modern LLMs have large enough context windows to accept a full policy document alongside each user question. We do not need a retrieval layer or a search index; we just pass the document in and let the model answer.\" The AI Lead looks doubtful. How should you respond?",
       "options": [
         {
-          "text": "I agree. Source references are mainly an implementation concern, not a user need. If the answer quality is good enough, surfacing citations will only make the experience look less polished and more defensive.",
+          "text": "That is the most pragmatic approach for phase one. A single document-in-context model avoids the complexity of building and maintaining a retrieval pipeline, a vector store, and a chunking strategy. If performance is acceptable and the model can answer accurately, we have eliminated an entire infrastructure layer.",
           "correct": false,
-          "explanation": "The requirement is explicit that when providing an answer, the AI agent must show the user where in the policy the information came from. The references are not cosmetic; they are part of how the feature establishes trust and traceability."
+          "explanation": "This ignores several architectural risks. Policy documents vary significantly in size across customers and may exceed context limits. Full-document context also makes source traceability harder because the model is less precise about where in the document the answer came from. A retrieval layer is not just an optimisation; it is the mechanism that enables grounded, traceable answers from specific policy sections."
         },
         {
-          "text": "We need visible source traceability because that is part of the product promise, not an internal debug aid. The requirement says the AI agent must show where in the policy the answer came from. We can design that elegantly, but we should not hide or remove it, especially in the moments where employees and managers are deciding whether to submit or approve a claim.",
+          "text": "A retrieval layer is not optional here. Policy documents vary in length across customers, some will exceed practical context limits, and even where they fit, retrieval-based grounding gives us precision: the system retrieves the relevant policy sections, the model answers from those sections, and we can trace the answer back to specific source content. Without that, we lose the traceability the feature requires and the grounding quality degrades as documents get longer.",
           "correct": true,
-          "explanation": "This is the right response. It preserves a mandatory behaviour while still leaving room for good UX design. The references matter because the assistant is meant to guide real expense decisions at the point of need."
+          "explanation": "This is the correct response because it identifies the retrieval layer as architecturally necessary rather than a nice-to-have. It connects chunked retrieval to two key requirements: source traceability and grounded answers. It also flags the variability of customer policy documents as a reason the architecture cannot assume a single document will always fit in context."
         },
         {
-          "text": "We can remove references from the chat itself as long as the answer is generated from policy content. If Compliance later needs traceability, we can store the underlying source passages in an audit log without exposing them to users.",
+          "text": "We should split the difference by passing the full document into context for small policies and switching to retrieval for larger ones. That way we avoid building retrieval infrastructure for the majority of customers who have short policies, and only pay the complexity cost when the document forces us to.",
           "correct": false,
-          "explanation": "Internal audit logging is not a substitute for user-facing traceability. The requirement is specifically about what the user sees when the assistant provides an answer."
+          "explanation": "A dual-path architecture adds more complexity than it saves. The retrieval approach works for both small and large documents, while the full-context approach only works for small ones. Building and maintaining two answer paths means two sets of behaviour to test, two quality profiles to monitor, and inconsistent traceability across customers."
         }
       ]
     },
     {
       "id": "rp-epg-3",
-      "prompt": "The Service Design Lead says: \"To keep the submission screens simple, let us launch the policy assistant as a separate help-centre page. Users can navigate out to it when they are unsure. Embedding it directly in submission and approval can come later.\" How should you respond?",
+      "prompt": "The Platform Architect says: \"We are already investing in a general-purpose AI assistant for the platform. The Expenses policy feature should be a prompt template on top of that shared service rather than a standalone component. One AI investment serves every module.\" How should you respond?",
       "options": [
         {
-          "text": "That makes sense because it keeps the claim flow clean and avoids squeezing AI components into the main product surface. If users really need policy help, they will be willing to open another page and come back.",
+          "text": "That is the right reuse strategy. A shared AI assistant reduces infrastructure duplication, gives every module access to conversational capability, and means the Expenses team does not need its own AI expertise. We can parameterise the shared service with the right policy document and expose it inside the Expenses UI.",
           "correct": false,
-          "explanation": "This misses a core requirement of the feature. The policy agent is meant to provide guidance in the moment, directly within the expense submission flow, so users can get help before completing their claim. Moving it out to a separate help centre recreates the very friction the feature is supposed to remove."
+          "explanation": "This underestimates the domain-specific requirements of the policy assistant. The feature requires grounding exclusively to uploaded policy content with no fallback to general knowledge, source traceability back to specific policy sections, contextualisation using employee data, and a defined behaviour when the policy does not contain an answer. These constraints are more than a prompt template difference; they define the service's trust and safety model."
         },
         {
-          "text": "I would keep the assistant at the point of need. The whole problem statement here is that people struggle to find and interpret policy while they are submitting or approving expenses. A separate help centre preserves the old context-switch. The right design goal is an embedded assistant that gives sourced guidance without forcing users to leave the workflow they are already in.",
+          "text": "The policy assistant has domain-specific constraints that do not fit a generic assistant pattern. It must ground exclusively to uploaded policy content, refuse to answer outside that content, trace every answer back to a source section, and incorporate employee context when applying rules. Those are not prompt-template differences; they define the retrieval pipeline, the safety boundary, and the data access model. This should be a purpose-built domain service, even if it shares lower-level AI infrastructure like model access and embedding generation.",
           "correct": true,
-          "explanation": "This is the correct answer. It ties the architectural choice back to the user problem and matches the explicit requirement that the AI policy agent should sit directly within the submission flow."
+          "explanation": "This is the correct response because it distinguishes between reusing infrastructure and reusing service behaviour. Shared model endpoints and embedding services are sensible, but the retrieval logic, grounding rules, and trust boundary of the policy assistant are domain-specific and should be owned by the Expenses domain."
         },
         {
-          "text": "We should do both from day one: a separate help centre for discoverability and a floating assistant across the whole product. That way every user journey is covered and we are not forced to choose one entry point.",
+          "text": "We should build the policy assistant as a standalone service now and plan to migrate it onto the shared platform assistant later once that service matures. That gives us speed now without blocking on the platform team's roadmap.",
           "correct": false,
-          "explanation": "This sounds comprehensive but it adds scope without solving the central design question. The requirement is specifically about the assistant being situated where users need it during submission or approval, not about maximising the number of entry points."
+          "explanation": "This creates a throwaway service on the assumption that a future platform assistant will eventually meet the domain-specific requirements. The better position is to recognise that the domain requirements justify a purpose-built service regardless of the platform timeline, while still consuming shared infrastructure where appropriate."
         }
       ]
     },
@@ -78,7 +78,7 @@
         {
           "text": "The design should support either an uploaded policy document or a SharePoint link as the source of truth. When the policy is updated, the new content should apply from that point onward, but the feature does not retroactively reindex previous questions. That gives admins a maintainable source without pretending the past conversation happened against a different policy than the one in force at the time.",
           "correct": true,
-          "explanation": "This is the correct response because it combines both parts of the requirement accurately: document upload and SharePoint link are both supported, and updates take effect going forward rather than rewriting prior answers."
+          "explanation": "This is the correct response because it addresses two architectural decisions. First, the content ingestion pipeline must support both uploaded documents and linked sources like SharePoint, treating both as valid policy sources for indexing. Second, the index lifecycle is append-forward: re-indexing applies only to new queries, preserving the integrity of prior answers against the policy version in force at the time. This avoids the complexity and auditability problems of retrospective re-indexing."
         },
         {
           "text": "We can support both uploads and SharePoint, but if the source changes we really should rerun the index and rewrite prior answers automatically. Otherwise users may read older guidance that is now superseded, which makes the system inconsistent.",
@@ -89,22 +89,22 @@
     },
     {
       "id": "rp-epg-5",
-      "prompt": "An HR stakeholder says: \"A plain answer is not enough. If an employee asks about mileage, the assistant should take account of whether they have a car allowance and answer accordingly. Otherwise it will still feel generic.\" The AI Lead worries that this starts to look like personalisation rather than policy guidance. How should you respond?",
+      "prompt": "The AI Lead says: \"To give contextualised answers, the policy assistant should query the People system directly at inference time. If it knows the employee's grade, car allowance status, and department, it can tailor the policy response accordingly. Direct access keeps the architecture simple.\" How should you respond?",
       "options": [
         {
-          "text": "We should avoid using any employee context because once the assistant starts personalising answers it becomes too hard to explain or govern. It is safer to provide the same generic answer to everyone and let employees work out which rule applies to them.",
+          "text": "Direct access is the cleanest approach. The assistant needs employee data to answer accurately, so giving it read access to People eliminates an integration layer. We can scope the access to the specific fields the assistant needs and add appropriate access controls.",
           "correct": false,
-          "explanation": "The requirement explicitly allows contextualised answers, including the example of choosing mileage rates depending on whether the employee has a car allowance. Refusing all context would underdeliver against the feature intent."
+          "explanation": "Direct coupling between the policy assistant and the People system creates a hidden runtime dependency, increases inference latency, and means the AI service needs its own read access to employee PII. It also makes the assistant harder to test and reason about because its behaviour depends on live data from another domain."
         },
         {
-          "text": "Contextualisation is part of the value here, as long as the answer is still grounded in the policy. The requirement even gives mileage rates and car allowance status as an example of using employee knowledge to tailor the response. So the principle should be: personalise the application of the rule, but do not invent rules that are not present in the source policy.",
+          "text": "The policy assistant should receive relevant employee context as input from the calling application rather than querying People directly. The Expenses submission flow already has access to the employee's profile, so it can pass the relevant attributes when it invokes the assistant. That keeps the assistant stateless, avoids a direct dependency on People, and means the AI service does not need its own access to employee PII.",
           "correct": true,
-          "explanation": "This is the right answer because it balances the two constraints: the assistant can use employee context to apply the policy more helpfully, but the underlying rule still has to come from the uploaded or linked policy content."
+          "explanation": "This is the correct response because it preserves the architectural boundary between the AI service and the People domain. The calling application is already authenticated and authorised for the employee's data, so forwarding the relevant context is simpler, faster, and more secure than giving the assistant independent data access."
         },
         {
-          "text": "We should leave contextualisation to a later release because it couples the assistant too tightly to People data. For phase one, the fastest route is a pure document Q&A experience with no awareness of the current user at all.",
+          "text": "We should cache a copy of the relevant employee attributes inside the policy service so it can personalise answers without calling People at query time. A nightly sync would keep the data fresh enough for policy guidance purposes.",
           "correct": false,
-          "explanation": "This may be simpler technically, but it steps back from a stated requirement. The PRD specifically calls out applying knowledge of the employee when answering relevant policy questions."
+          "explanation": "Replicating employee PII into the AI service creates a second store of sensitive data with its own retention, access control, and staleness concerns. It also does not solve the coupling problem; it just makes it asynchronous. Context injection from the caller avoids all of these issues."
         }
       ]
     }

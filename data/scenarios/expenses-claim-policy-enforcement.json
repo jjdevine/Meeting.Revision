@@ -5,22 +5,22 @@
   "questions": [
     {
       "id": "rp-ecp-1",
-      "prompt": "The UX Lead says: \"Out-of-policy values should hard-stop submission. If someone types a number above the limit, the system should block them completely. Warnings are too weak.\" The manager representative says they still want visibility of unusual claims. How should you respond?",
+      "prompt": "The UX Lead says: \"Out-of-policy values should be blocked at the UI. If the system knows a value is wrong, why let it travel through the workflow at all? We should enforce policy as early as possible.\" The Operations Lead points out that managers still need visibility of unusual claims and that some policies have configurable thresholds. How should you respond?",
       "options": [
         {
-          "text": "I agree that hard blocking is cleaner. If the system already knows a value is out of policy, there is no reason to let the claim continue through the workflow. That reduces noise for managers and makes the policy feel enforceable.",
+          "text": "The UX Lead is right that early enforcement is cleaner. If the system already has the policy rules at the client layer, blocking at submission avoids unnecessary workflow processing and keeps invalid data out of the system entirely. We can always add exceptions later if managers request them.",
           "correct": false,
-          "explanation": "This overstates what the requirement says. The employee journey explicitly calls for a warning when the employee enters an out-of-policy number, with a link to the relevant policy detail. The broader feature also includes manager visibility of out-of-policy claims and configurable auto-accept or auto-reject rules, which means the response should not be a blanket hard stop."
+          "explanation": "This places enforcement logic in the wrong layer. Hard UI blocks assume every policy rule is binary and unconditional, but the broader system includes configurable auto-accept and auto-reject rules, manager visibility of out-of-policy claims, and the ability to override in defined circumstances. Moving all enforcement to the UI collapses several distinct concerns into a single decision point that cannot accommodate downstream configuration."
         },
         {
-          "text": "I would not treat every out-of-policy value as an automatic hard block. The current requirement is that the employee gets a warning, plus a link to the relevant policy detail, and that managers can still view out-of-policy claims. Actual acceptance or rejection can then be driven by configured rules rather than an unconditional UI block at data entry time.",
+          "text": "Policy enforcement should be distributed across the right layers rather than collapsed into the UI. At submission time, the employee should get a warning and a link to the relevant policy detail, which is a guidance concern. Actual acceptance or rejection should be driven by configurable rules downstream, where the sysadmin has set the auto-accept, auto-reject, or manual-review behaviour. The UI warns; the workflow decides. That separation lets us change enforcement behaviour through configuration without rewriting UI logic.",
           "correct": true,
-          "explanation": "This is the correct response because it preserves the specific employee-facing behaviour in the PRD while leaving room for configurable policy enforcement downstream."
+          "explanation": "This is the correct response because it separates guidance from enforcement and places each in the appropriate architectural layer. The UI handles user-facing warnings. The workflow engine handles configurable policy decisions. This separation means enforcement behaviour can be changed by sysadmins through configuration rather than requiring code changes at the client layer."
         },
         {
-          "text": "We should allow submission silently and only tell the employee later if the claim is rejected. That keeps the form lightweight and avoids distracting users with policy messages before they have even finished completing the claim.",
+          "text": "We should skip UI-level validation entirely and let the workflow engine handle all policy enforcement after submission. Warnings at the form level add complexity to the client and might confuse employees who do not understand the policy thresholds. It is simpler to let claims flow through and have the system accept or reject them based on the configured rules.",
           "correct": false,
-          "explanation": "This discards a required part of the journey. The requirement explicitly says the employee should be warned when they type a number that is out of policy, and the warning should link to the relevant policy detail."
+          "explanation": "This removes a required part of the employee journey. The employee should be warned at the point of entry when they type an out-of-policy value, with a link to the relevant policy detail. Removing that feedback and making the employee wait for a post-submission decision misses the guidance intent of the feature."
         }
       ]
     },
@@ -68,43 +68,43 @@
     },
     {
       "id": "rp-ecp-4",
-      "prompt": "The Engineering Manager says: \"If an employee has multiple jobs, we should just default the claim to their primary assignment. Asking them to choose adds friction and most people will not care.\" The payroll analyst looks doubtful. How should you respond?",
+      "prompt": "The Engineering Manager says: \"Multi-job selection adds complexity to the domain model. Every claim needs a job reference, validation against assignment data, and downstream routing to the correct payroll context. For simplicity, can we just default to the primary assignment and avoid that complexity?\" How should you respond?",
       "options": [
         {
-          "text": "That is acceptable for a first release because primary assignment will be right most of the time, and the reporting can correct any mistakes later. It is better to optimise for speed than add another mandatory field to the claim form.",
+          "text": "That simplification is safe for phase one. The primary assignment will be correct for most employees, and the few multi-job cases can be corrected manually by payroll. Adding a job-selection step to the claim model complicates the data flow for a minority case that can be handled operationally.",
           "correct": false,
-          "explanation": "The requirement is more specific than that. It says that if an employee has more than one job, they should select which job the expense is for. Defaulting silently to a primary assignment would override a deliberate business requirement."
+          "explanation": "Silently defaulting to the primary assignment creates a data correctness problem that surfaces late. Expenses claimed against the wrong job will flow into the wrong payroll context, affect the wrong cost centre, and produce incorrect reporting. The requirement calls out multi-job selection explicitly because downstream correctness depends on the claim being associated with the right employment context from the start."
         },
         {
-          "text": "We should let the employee choose when they have more than one job. The requirement calls that out explicitly, which suggests it is important for downstream correctness. We can still make the UX efficient by preselecting a likely option or keeping the choice lightweight, but we should not remove the decision entirely.",
+          "text": "The claim domain model needs to carry the correct employment context because downstream systems depend on it for payroll processing, cost allocation, and reporting. If an employee has more than one job, the claim should capture which job the expense relates to. We can keep the interaction lightweight by defaulting to a likely option and only surfacing the choice when multiple assignments exist, but the data model must support the association rather than assuming it.",
           "correct": true,
-          "explanation": "This is the right answer because it preserves the requirement while still acknowledging UX concerns. The architecturally important point is that the system cannot silently assume the correct employment context for every claim."
+          "explanation": "This is the correct response because it frames the requirement as a domain model concern rather than a UI concern. The architectural point is that the claim entity must carry a valid employment context reference because payroll processing, cost allocation, and reporting all depend on it. The UX can be optimised, but the model cannot omit the relationship."
         },
         {
-          "text": "We should hide the job choice from the employee and let the manager assign the claim to the right job during approval. Managers are better placed to make that call and it keeps the submission flow shorter.",
+          "text": "We should resolve the job context automatically by inferring it from the expense category and the employee's assignment history. If we can match the claim type to the most likely job, the employee never has to make the selection and the model still carries the correct reference.",
           "correct": false,
-          "explanation": "That shifts a required employee action into a later stage of the process and creates extra approval friction. The requirement says the employee should select the relevant job when they have more than one."
+          "explanation": "Automated inference without employee confirmation introduces a different kind of correctness risk. The system may infer incorrectly, and there is no verification step to catch the mistake. The employee is the person who knows which job the expense relates to, so the selection belongs with them."
         }
       ]
     },
     {
       "id": "rp-ecp-5",
-      "prompt": "The Product Manager says: \"To keep scope tight, if a claim is rejected the employee can just create a new one from scratch. Reopening and resubmitting the original claim is nice to have.\" Customer Success says that will irritate users. How should you respond?",
+      "prompt": "The Product Manager says: \"To keep the claim model simple, rejected claims should be terminal. If the employee wants to try again, they create a new claim. Supporting edit-and-resubmit on a rejected claim means the claim entity has to support state transitions back from rejected to submitted, which complicates the state machine and the audit trail.\" How should you respond?",
       "options": [
         {
-          "text": "I would accept that simplification. Rejected claims are a minority case, and reusing the original submission adds state-management complexity that is not worth it for an initial release.",
+          "text": "A terminal rejected state is the cleanest model. Each claim has a linear lifecycle: draft, submitted, approved or rejected. Allowing re-entry from rejected to submitted adds a loop that complicates state management, event history, and reporting. A new claim referencing the original is simpler to implement and easier to audit.",
           "correct": false,
-          "explanation": "The employee journey requirement specifically says that if a claim is rejected, the employee should have the option to edit and resubmit it rather than having to start again. Removing that behaviour would be a direct requirement miss."
+          "explanation": "While a simpler state machine is attractive, forcing the employee to recreate a claim from scratch after rejection adds friction the module is designed to eliminate. The requirement explicitly calls for the employee to be able to edit and resubmit a rejected claim. The state machine needs to accommodate that transition, and the audit trail should capture each version, but that is a solvable design problem rather than a reason to remove the capability."
         },
         {
-          "text": "We should support edit-and-resubmit for rejected claims. That behaviour is explicitly called out in the employee journey, and it matters because the module is meant to reduce friction, not send users back to the beginning every time something is wrong. If we need to simplify, we should simplify elsewhere rather than discarding this recovery path.",
+          "text": "The claim lifecycle needs to support re-entry from rejected to a draft or resubmitted state because that is part of the required employee journey. The state machine is slightly more complex, but it is well-understood: rejected claims transition to an editable state, the employee modifies and resubmits, and the audit trail records each version. Forcing a new claim discards the history and the context of the original submission, which makes the approval trail harder to follow, not easier.",
           "correct": true,
-          "explanation": "This is the correct response. It protects a named part of the journey and ties it back to the broader usability goals of the module."
+          "explanation": "This is the correct response because it treats the state machine as a design problem to solve rather than a reason to cut the feature. The architectural point is that a claim's audit trail is richer and more traceable when edits are recorded against the same entity rather than scattered across unrelated claims. The lifecycle loop is a normal pattern for approval workflows."
         },
         {
-          "text": "We can avoid the issue by preventing managers from rejecting claims outright. They can only request changes, and the employee edits the claim in place without a formal reject state.",
+          "text": "We should avoid the issue by replacing rejection with a request-changes status. The manager annotates the claim, and the employee edits it in place without a formal rejection state. That keeps the state machine linear while still letting the employee correct the claim.",
           "correct": false,
-          "explanation": "That changes the workflow semantics rather than meeting the requirement. The PRD discusses claims being accepted or rejected and notifying the employee accordingly, so the design should handle rejected claims properly rather than trying to redefine them away."
+          "explanation": "Redefining rejection as request-changes alters the workflow semantics rather than addressing the requirement. The system needs to handle claims that are genuinely rejected and notify the employee accordingly. A request-changes status may be a useful addition, but it does not replace the need for a rejection state and the ability to recover from it."
         }
       ]
     }

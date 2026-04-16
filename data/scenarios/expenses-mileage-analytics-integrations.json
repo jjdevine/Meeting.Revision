@@ -26,22 +26,22 @@
     },
     {
       "id": "rp-emi-2",
-      "prompt": "The Product Manager says: \"Mileage is taking on too much complexity. For the first release, let us just ask users to type the number of miles and reimburse a single rate. Start and end locations, annual thresholds, and remaining allowance can all wait.\" How should you respond?",
+      "prompt": "The Product Manager says: \"Mileage is taking on too much complexity. For the first release, let us just accept a distance and a flat rate. Point-to-point calculation, threshold tracking, and rate changes can come later.\" The Payroll analyst says that without thresholds the reimbursement amounts will be wrong. How should you respond?",
       "options": [
         {
-          "text": "That is a fair simplification because most users already know how many miles they have travelled. The advanced logic can come later, and a flat-rate MVP still proves that mileage reimbursement belongs inside Expenses.",
+          "text": "A flat-rate model is a valid MVP. Most employees will enter reasonable distances and the financial difference from threshold-based rates will be small enough to correct later. Shipping a simpler calculation model first lets us validate the rest of the claim flow without the mileage engine becoming the critical path.",
           "correct": false,
-          "explanation": "This strips out several core requirements of the mileage feature. The PRD calls for journey start and end capture, automatic distance calculation, tracking accumulated mileage and remaining allowance, and automatically applying the correct rate when annual thresholds are crossed."
+          "explanation": "A flat-rate model is not a simpler version of the same feature; it is a different feature. The mileage requirement specifies point-to-point journey capture, automatic distance calculation, accumulated mileage tracking through the year, remaining allowance visibility, and automatic rate changes when annual thresholds are crossed. Removing all of that delivers a manual input field with a multiplier, which does not match the intended value or accuracy."
         },
         {
-          "text": "I would be careful about simplifying away the very things that make the mileage feature accurate. The requirement is not just 'reimburse miles'; it is to calculate point-to-point mileage from journey data, track accumulated mileage through the year, show the remaining allowance, and change the reimbursement rate automatically once the threshold is reached. A flat manual figure with one rate is a different product.",
+          "text": "The mileage feature is inherently stateful. It needs to track accumulated mileage per employee through the year, know the remaining allowance, and change the reimbursement rate automatically when a threshold is crossed. That is not optional complexity; it is the computation model that makes the reimbursement accurate. A flat-rate input would produce incorrect payments for any employee who crosses a threshold boundary, and the error would compound silently over the year.",
           "correct": true,
-          "explanation": "This is the correct response. It explains why the proposed cut is not merely a smaller version of the same feature but a shift away from the intended behaviour and value."
+          "explanation": "This is the correct response because it identifies the mileage feature as a stateful computation problem rather than a simple input-and-multiply operation. The architectural implication is that the service must maintain per-employee mileage state across the financial year and apply rate changes at the correct thresholds, which is fundamentally different from a stateless flat-rate calculation."
         },
         {
-          "text": "We should keep the single-rate approach but ask employees to attach supporting route screenshots as evidence. That gives us enough assurance for accuracy without implementing automated calculation or threshold logic in the first release.",
+          "text": "We should keep the simple model but add a reconciliation batch job at the end of each month that recalculates reimbursements using the correct thresholds. Employees get a flat rate at submission time and any difference is adjusted in the next pay run. That gives us the speed of a simple model with the accuracy of threshold-based rates.",
           "correct": false,
-          "explanation": "That introduces manual evidence gathering instead of delivering the automated point-to-point calculation and threshold-aware reimbursement the PRD describes."
+          "explanation": "Monthly reconciliation introduces payment corrections that confuse employees and create payroll complexity. The requirement is that the system applies the correct rate at the point of claim, not that it corrects itself later. An after-the-fact adjustment also undermines the remaining-allowance visibility the feature is supposed to provide."
         }
       ]
     },
@@ -89,22 +89,22 @@
     },
     {
       "id": "rp-emi-5",
-      "prompt": "The Integrations Manager says: \"At launch we should say Expenses integrates natively with every external payroll and finance system. If the customer can export via API, that is basically the same thing from their point of view.\" Finance asks whether that language is accurate. How should you respond?",
+      "prompt": "The Integrations Manager says: \"We should build direct connectors to external payroll and finance systems so approved claims flow through automatically. Customers expect seamless data movement, not an API they have to integrate with themselves.\" The Platform Architect points out the scope implications. How should you respond?",
       "options": [
         {
-          "text": "Yes, that is close enough. Customers care that data gets out of the module, not whether we call it an integration or an API connection. Marketing should use the stronger wording because it is easier to sell.",
+          "text": "Direct connectors are the right goal. If we build and maintain integrations to the major external payroll and finance vendors, customers get a turnkey experience and we differentiate on ease of implementation. The initial investment is high but it pays back across the customer base.",
           "correct": false,
-          "explanation": "The requirement is more precise: the module passes data to internal People First systems and connects to external payroll and finance systems through API, not through a true integration. Calling every external connection a native integration would overstate what is being delivered."
+          "explanation": "Building and maintaining direct connectors to external vendor systems is a significant ongoing commitment that goes beyond the current scope. The requirement distinguishes between internal integration, where Expenses passes data to People First Payroll, People First Finance, and Data Explorer, and external connectivity, where connections to third-party systems are provided through API rather than as maintained native integrations."
         },
         {
-          "text": "We should describe it accurately. Internally, Expenses is meant to pass data into People First Payroll, People First Finance, and Data Explorer. Externally, the requirement says connections are done through API rather than as full native integrations. That distinction matters because it sets the right expectation about what the product does and does not own.",
+          "text": "We should distinguish between internal and external integration architectures. Internally, Expenses should pass approved claim data into People First Payroll, People First Finance, and Data Explorer through direct service integration because we own both sides. Externally, the requirement is API-based connectivity, meaning we expose well-documented APIs that external payroll and finance systems can consume, rather than building and maintaining point-to-point connectors to third-party products. That boundary matters because it defines what we own and what the customer or partner owns.",
           "correct": true,
-          "explanation": "This is the correct response. It preserves the real scope of the feature and avoids turning an API handoff capability into an exaggerated product claim."
+          "explanation": "This is the correct response because it draws a clear architectural boundary between internal service integration and external API exposure. Internal integration is tightly coupled because both services are within the platform. External connectivity is loosely coupled through APIs because the product cannot own the integration lifecycle for every third-party system."
         },
         {
-          "text": "We should avoid any external integration story at launch and keep the module entirely self-contained until we can build true out-of-the-box connectors for the main finance and payroll vendors. Anything less will create too much implementation variability.",
+          "text": "We should avoid external connectivity entirely in the first release and keep the module self-contained. If customers need data to reach external systems, they can export it manually until we have a proper integration strategy. That keeps the scope tight and avoids committing to API contracts before we understand the real demand.",
           "correct": false,
-          "explanation": "The PRD already includes external API connections in scope, so the answer is not to remove the capability. The right move is to describe it faithfully rather than overselling it or cutting it altogether."
+          "explanation": "The requirement already includes external API connectivity as part of the feature scope. Removing it entirely would underdeliver. The right move is not to cut the capability but to describe it accurately: API-based connectivity rather than maintained native integrations."
         }
       ]
     }

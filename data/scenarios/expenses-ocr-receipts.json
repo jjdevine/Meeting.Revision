@@ -5,64 +5,64 @@
   "questions": [
     {
       "id": "rp-eor-1",
-      "prompt": "The OCR vendor says: \"Our strongest selling point is straight-through automation. User review slows everything down, so the best experience is to scan the receipt, populate the fields, and submit automatically unless the image is completely unreadable.\" Product looks impressed. How should you respond?",
+      "prompt": "The OCR vendor says: \"Our platform handles the full pipeline end to end: capture, extraction, field mapping, and claim creation. You just call our API and we return a completed claim object. Your system does not need its own extraction logic or confidence model.\" Engineering is attracted to the simplicity. How should you respond?",
       "options": [
         {
-          "text": "That is exactly the level of automation we should aim for. If the OCR confidence is high, there is little value in making the employee review the claim. Removing manual confirmation is how we make the feature feel modern and differentiated.",
+          "text": "That is the fastest path to delivery. If the vendor handles capture through to claim creation, we avoid building extraction logic, confidence scoring, and field mapping ourselves. We can treat the vendor as a black box and focus our engineering effort on the rest of the module.",
           "correct": false,
-          "explanation": "The PRD does not support a no-review model. Employees must be able to edit OCR output, low-confidence fields should be highlighted for confirmation, and if the service cannot interpret the image the user should be prompted to retake the photo or enter details manually."
+          "explanation": "Delegating the entire pipeline to a vendor creates a black-box dependency at a critical point in the claim journey. The system needs its own confidence model to decide when to highlight fields for user confirmation, its own fallback path when images cannot be interpreted, and its own mapping logic to connect extracted data to internal domain concepts like payslip items and VAT treatment. Outsourcing all of that means the product cannot control the user experience at the point where accuracy matters most."
         },
         {
-          "text": "Automation is valuable, but the product still needs an explicit user intervention path. The OCR should populate the claim and reduce effort, not remove user control. When confidence is low we need to highlight fields for confirmation, and if the receipt cannot be interpreted the user should be able to retake the photo or enter the details manually.",
+          "text": "We should own the confidence model and the user intervention logic even if we use a vendor for raw text extraction. The product needs to decide when to highlight low-confidence fields for confirmation, how to prompt the user to retake a photo or enter details manually, and how to map extracted values to our own domain model. Those are product behaviours, not vendor behaviours. The extraction engine is a replaceable input; the decision and mapping layer is ours.",
           "correct": true,
-          "explanation": "This is the correct response because it captures the required balance: strong automation with clear user correction and fallback paths."
+          "explanation": "This is the correct response because it draws a clean boundary between commodity extraction and domain-specific logic. The vendor can provide OCR and text extraction, but confidence thresholds, user intervention paths, fallback behaviour, and domain mapping must be owned by the product because they determine the quality and reliability of the claim creation experience."
         },
         {
-          "text": "We should reject low-confidence scans entirely and force the employee to start again from the first screen. That is safer than allowing manual correction because it avoids bad OCR data entering the system.",
+          "text": "We should avoid the vendor entirely and build the OCR pipeline in-house. Receipt scanning is a core capability of the module, and outsourcing it creates a strategic dependency we will regret as the feature matures and we need more control over accuracy and speed.",
           "correct": false,
-          "explanation": "The requirement is not to reject imperfect scans automatically. It is to let users intervene: confirm uncertain fields, retake the photo if necessary, or manually enter the details when the OCR service cannot interpret the image."
+          "explanation": "Building raw OCR and text extraction in-house is a significant investment in a commodity capability. The architectural principle is to use external services for commodity extraction while owning the domain logic that sits above it. The decision is not build-everything versus buy-everything; it is about drawing the right boundary between replaceable infrastructure and product-specific behaviour."
         }
       ]
     },
     {
       "id": "rp-eor-2",
-      "prompt": "The Tax Lead says: \"For phase one, do we really need more than merchant, date, and total? The rest feels like a later optimisation.\" Finance is nervous because VAT recovery matters. How should you respond?",
+      "prompt": "The Tax Lead says: \"For VAT compliance, the extracted data needs to include VAT amount, VAT rate, supplier VAT registration number where present, and the split between taxable and non-taxable elements. That is a lot of structure from a receipt photo.\" Engineering asks whether the OCR output schema should be kept minimal and let downstream services infer the tax treatment. How should you respond?",
       "options": [
         {
-          "text": "Yes, merchant, date, and total are enough for an MVP. We can treat VAT as a manual downstream concern because trying to capture full tax detail through OCR will only slow delivery and increase error rates.",
+          "text": "The OCR output should stay minimal. Extracting merchant, date, total, and line items is already challenging enough from receipt images. Tax classification is a business rules problem, not an image processing problem, and should be handled by a downstream tax service that knows the HMRC rules.",
           "correct": false,
-          "explanation": "This misses a central requirement. The OCR engine must detect VAT-compliant information and map VAT amount, VAT rate, supplier VAT registration number where present, and taxable versus non-taxable elements into the claim in line with HMRC expectations."
+          "explanation": "This separates extraction from VAT detection in a way that loses information. Some VAT-relevant data is only available on the receipt itself, such as the supplier's VAT registration number and the explicit VAT breakdown. If the extraction schema does not capture these fields, a downstream service cannot reconstruct them without re-processing the image."
         },
         {
-          "text": "We do need richer extraction because HMRC-relevant VAT handling is part of the release scope, not a stretch goal. The OCR output has to support things like VAT amount, VAT rate, supplier VAT registration number where present, and taxable versus non-taxable elements, in addition to the basic transaction fields. Otherwise we would be delivering a capture gimmick rather than a compliant expense process.",
+          "text": "The extraction schema needs to capture the VAT-relevant fields at scan time because that information is on the receipt and will not be available later unless we store and re-process the image. The OCR output model should include VAT amount, VAT rate, supplier VAT registration number where present, and the taxable versus non-taxable split. A downstream service can then validate and apply HMRC rules, but it needs the raw extracted values to work from.",
           "correct": true,
-          "explanation": "This is the correct answer. It ties OCR design back to the explicit VAT-handling requirements and the broader compliance promise of the module."
+          "explanation": "This is the correct response because it recognises that the extraction schema must be rich enough to support downstream compliance processing. The architectural point is that the OCR pipeline is the only stage with direct access to the receipt image, so any data that originates from the physical receipt must be captured in the extraction output rather than deferred to a service that only sees structured data."
         },
         {
-          "text": "We should let users manually mark whether a receipt is VAT-compliant and keep OCR focused only on the visible total. VAT recovery is really a finance workflow issue rather than a capture issue.",
+          "text": "We should store the original receipt image and let a specialised tax service re-read it later with its own OCR pass focused specifically on VAT fields. That way the initial extraction stays fast and simple, and the tax service can apply its own purpose-built model to find what it needs.",
           "correct": false,
-          "explanation": "The requirement says the system should detect whether a receipt includes VAT-compliant information and map the relevant details accurately into the claim. That responsibility sits with the OCR capability, not only with later manual finance handling."
+          "explanation": "Running two separate OCR passes over the same image adds latency, cost, and complexity without a clear benefit. The extraction pipeline should produce a single rich output that captures all required fields in one pass. The image should be stored as evidence, but it should not be the primary mechanism for tax-relevant data extraction."
         }
       ]
     },
     {
       "id": "rp-eor-3",
-      "prompt": "The Payroll analyst says: \"Even if OCR extracts the receipt details, employees should still choose the claim type manually. Mapping to payslip items is too domain-specific for the scanner and we can avoid that complexity for now.\" How should you respond?",
+      "prompt": "The Engineering Lead says: \"OCR extraction should produce a generic key-value output. Mapping to payslip items, expense categories, and VAT treatment should happen in a separate downstream service. That keeps the OCR component clean and reusable.\" The Payroll analyst says they need the mapping to happen before the employee sees the claim. How should you respond?",
       "options": [
         {
-          "text": "That is the pragmatic choice. OCR should stay limited to text extraction and not try to infer downstream payroll meaning. Asking the employee to pick the right claim type is a small price to pay for faster delivery.",
+          "text": "A generic key-value output is the right first step. If we keep OCR decoupled from domain concepts, we can reuse the extraction component across other modules in future. The mapping service can consume the output and enrich it before claim creation, and the employee will not notice the difference.",
           "correct": false,
-          "explanation": "This would underdeliver against a named requirement. The system should automatically map OCR output to existing payslip items so the correct claim type is created without requiring manual selection by the employee."
+          "explanation": "While separation of concerns is generally sound, the timing matters here. The mapping to payslip items and claim type needs to happen before the employee reviews the pre-populated claim, because the goal is to reduce claim creation effort end to end. If the employee has to classify the claim manually after scanning because the mapping has not run yet, the feature loses most of its value."
         },
         {
-          "text": "Automatic mapping to the relevant payslip item is part of the requirement, because the value of OCR is not just reading text but reducing claim creation effort end to end. We should still keep user correction available where confidence is low, but the default path should not require the employee to classify the claim manually after scanning.",
+          "text": "The extraction and domain mapping need to complete as a single pipeline before the claim is presented to the employee. The employee should see a pre-populated claim with the correct type and category already resolved, not a bag of raw fields they have to classify themselves. We can still separate extraction from mapping internally as distinct responsibilities, but from the user's perspective the pipeline must complete before they review the result.",
           "correct": true,
-          "explanation": "This is the correct answer. It connects the extraction capability to the downstream claim-type requirement while preserving the user-intervention model where needed."
+          "explanation": "This is the correct response because it recognises that architectural separation does not mean the steps can happen at different lifecycle stages. Extraction and mapping can be distinct services, but they must execute as a synchronous pipeline that completes before the claim is shown to the employee. The system should automatically map OCR output to the relevant payslip item so the employee does not have to select the claim type manually."
         },
         {
-          "text": "We should postpone both mapping and classification until after manager approval. Once the manager sees the receipt, they can decide which payslip item it belongs to and that removes the need for OCR to understand the domain at submission time.",
+          "text": "We should combine extraction and mapping into a single monolithic service to guarantee they always execute together. Separating them just creates an integration point that can fail and adds latency to the scan experience.",
           "correct": false,
-          "explanation": "That would push work later in the process and undermine the promise of automated, intelligent claim creation. The PRD places the mapping behaviour in the OCR-assisted submission flow itself."
+          "explanation": "Collapsing the two concerns into one service trades architectural clarity for a coupling guarantee that can be achieved more cleanly with a synchronous pipeline. Keeping extraction and mapping as distinct responsibilities makes each one independently testable, replaceable, and evolvable, while a pipeline orchestrator ensures they always run in sequence before presenting results."
         }
       ]
     },
@@ -89,22 +89,22 @@
     },
     {
       "id": "rp-eor-5",
-      "prompt": "The Fraud Lead says: \"Duplicate receipt detection can sit with anomaly detection later. Let the OCR feature focus only on capture and extraction for now.\" Product wonders whether that is a reasonable scope cut. How should you respond?",
+      "prompt": "The Data Architect says: \"Duplicate detection should sit in the analytics layer where we have the full claim history and can run sophisticated matching. Putting detection logic inside the OCR pipeline means maintaining duplicate-matching code in two places once anomaly detection arrives.\" How should you respond?",
       "options": [
         {
-          "text": "That is a sensible split. Duplicate checking is an analytics concern and does not belong in the capture workflow. We can let the claim proceed and rely on later anomaly rules to catch suspicious repeats.",
+          "text": "That is architecturally cleaner. If anomaly detection will eventually own pattern matching across the claim history, building a separate duplicate check inside OCR creates redundancy. We should accept the short-term gap and wait for the analytics layer to handle it properly.",
           "correct": false,
-          "explanation": "The OCR PRD already includes duplicate detection in this feature. It says the system will detect potential duplicate receipts and alert the user if the image or extracted data appears similar to an existing claim."
+          "explanation": "Deferring duplicate detection to an analytics layer means duplicates enter the system and are only caught after submission, review, or even approval. The OCR requirement is specifically about alerting the user at the point of entry when the receipt appears similar to an existing claim. That is a different concern from post-hoc anomaly detection and serves a different purpose: preventing accidental resubmission before it creates downstream work."
         },
         {
-          "text": "Duplicate detection belongs here as well. The OCR feature is not only about reading the receipt; it also uses the image and extracted data to help prevent obvious submission mistakes or abuse at the point of entry. The requirement explicitly says the user should be alerted when the receipt appears similar to an existing claim.",
+          "text": "These are two different concerns operating at different points in the lifecycle. Submission-time duplicate detection alerts the employee before they complete a claim, which prevents accidental resubmission and reduces noise for managers. Analytics-layer anomaly detection operates after the fact across the full claim population to find suspicious patterns. Both are needed, and they do not duplicate each other because they serve different users at different times with different response models.",
           "correct": true,
-          "explanation": "This is the correct answer. It keeps the submission-time safeguard where the PRD places it instead of deferring everything to later anomaly processing."
+          "explanation": "This is the correct response because it separates the two concerns by lifecycle stage and purpose. Submission-time detection is a user-facing guard that prevents obvious mistakes. Analytics-layer detection is a back-office capability that identifies statistical anomalies. Conflating them would leave a gap at the point of entry where the user can still be helped."
         },
         {
-          "text": "We should block any suspected duplicate automatically and prevent the employee from proceeding. That is the cleanest anti-fraud posture and means we do not need later review logic.",
+          "text": "We should build duplicate detection only at submission time and skip the analytics-layer version entirely. If the OCR pipeline catches duplicates before they enter the system, there is no need for a second check downstream.",
           "correct": false,
-          "explanation": "The PRD says the system should alert the user when a potential duplicate is detected. It does not say every suspected duplicate should be hard-blocked without further review."
+          "explanation": "Submission-time detection catches obvious duplicates based on image or field similarity, but it cannot detect the kinds of cross-claim patterns that anomaly detection is designed to find, such as systematic over-claiming or coordinated duplicates across different employees. Both layers serve distinct purposes."
         }
       ]
     }
