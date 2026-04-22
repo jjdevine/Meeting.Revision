@@ -824,7 +824,7 @@
       const inner = studyCard.querySelector(".card-inner");
       if (studyCard.classList.contains("flipped")) {
         const back = studyCard.querySelector(".card-back");
-        inner.style.minHeight = back.scrollHeight + "px";
+        if (back) inner.style.minHeight = back.scrollHeight + "px";
         setTimeout(() => studyCard.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
       } else {
         inner.style.minHeight = "";
@@ -839,7 +839,7 @@
       const inner = fuCard.querySelector(".card-inner");
       if (fuCard.classList.contains("flipped")) {
         const back = fuCard.querySelector(".card-back");
-        inner.style.minHeight = back.scrollHeight + "px";
+        if (back) inner.style.minHeight = back.scrollHeight + "px";
         setTimeout(() => fuCard.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
       } else {
         inner.style.minHeight = "";
