@@ -411,6 +411,7 @@
   function renderStudyCard(card) {
     const studyCard = $("#study-card");
     studyCard.classList.remove("flipped");
+    studyCard.querySelector(".card-inner").style.minHeight = "";
 
     $("#card-type-badge").textContent = typeName(card.type);
     $("#card-category-badge").textContent = card.category;
@@ -531,6 +532,7 @@
     if (prefix === "study") {
       const fuCard = $("#followup-card");
       fuCard.classList.remove("flipped");
+      fuCard.querySelector(".card-inner").style.minHeight = "";
       $("#followup-question").textContent = fu.question;
       $("#followup-answer").textContent = fu.answer;
       if (fu.notes) {
@@ -819,8 +821,13 @@
       if (e.target.closest(".card-notes") || e.target.tagName === "SUMMARY") return;
       const studyCard = $("#study-card");
       studyCard.classList.toggle("flipped");
+      const inner = studyCard.querySelector(".card-inner");
       if (studyCard.classList.contains("flipped")) {
+        const back = studyCard.querySelector(".card-back");
+        if (back) inner.style.minHeight = back.scrollHeight + "px";
         setTimeout(() => studyCard.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+      } else {
+        inner.style.minHeight = "";
       }
     });
 
@@ -829,8 +836,13 @@
       if (e.target.closest(".card-notes") || e.target.tagName === "SUMMARY") return;
       const fuCard = $("#followup-card");
       fuCard.classList.toggle("flipped");
+      const inner = fuCard.querySelector(".card-inner");
       if (fuCard.classList.contains("flipped")) {
+        const back = fuCard.querySelector(".card-back");
+        if (back) inner.style.minHeight = back.scrollHeight + "px";
         setTimeout(() => fuCard.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+      } else {
+        inner.style.minHeight = "";
       }
     });
 
