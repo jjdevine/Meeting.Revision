@@ -1,110 +1,110 @@
 {
   "id": "rp-expenses-mileage-analytics-integrations",
   "title": "The Miles, the Metrics, and the Money",
-  "context": "A cross-functional review is being held for the later Expenses capabilities that tie the module into the wider platform. Payroll owns mileage rate tables. Data wants to know what must be captured in the background. Fraud wants anomaly detection. Finance cares about where approved claims land. Product wants a deliverable roadmap that still feels coherent to customers. You are the solution architect. The General Manager is chairing.",
+  "context": "A cross-functional steering discussion has been called for the next wave of Expenses capabilities. The Payroll Director owns reimbursement rates. The Data Lead wants event capture that supports future analytics, the Fraud Lead wants anomaly detection on the roadmap, and the Integrations Manager is under pressure from partners who expect cleaner downstream flows. The architect must keep the room from solving four different problems with one heavy answer.",
   "questions": [
     {
       "id": "rp-emi-1",
-      "prompt": "The Payroll Lead says: \"We already maintain mileage schemes as rate tables in Payroll. Customers should not have to recreate those rates in Expenses just to reimburse mileage claims. The module should use what Payroll already knows.\" How should you respond?",
+      "prompt": "The Payroll Director says: \"Mileage rates already change in Payroll. Expenses should consume them rather than own a second rate table.\" How do you respond?",
       "options": [
         {
-          "text": "I would still give Expenses its own mileage-rate setup because the module needs to stand alone. Re-entering the rates may be repetitive, but it avoids a dependency on Payroll and keeps the feature self-contained for implementation.",
+          "text": "We should mirror the rates into Expenses and let the team manage them there for speed. A local copy gives the module more autonomy, removes a dependency on Payroll, and makes it easier to change the experience later.",
           "correct": false,
-          "explanation": "That contradicts the mileage requirement. The module is supposed to use payroll-defined mileage rate tables automatically, without requiring additional setup or configuration from customers."
+          "explanation": "The autonomy concern is understandable. This is failure mode A — over-agreement: it creates duplicate ownership before testing whether the business really wants a second source for the same commercial rule."
         },
         {
-          "text": "That should be the design principle. The mileage feature is meant to consume the rate tables already defined in Payroll and apply them automatically inside Expenses, rather than asking customers to duplicate configuration. The architectural work is about reliable reuse of those payroll-defined rates, not rebuilding the same setup screen in another module.",
+          "text": "I would keep rate ownership with Payroll and design Expenses to consume that authority in a way that meets the user experience need. If latency or resilience becomes a concern, we can solve that with caching or a read model without moving rule ownership into a second domain.",
           "correct": true,
-          "explanation": "This is the correct response because it aligns directly with the requirement that Payroll remains the source of mileage rates and that customers should not need extra configuration in Expenses."
+          "explanation": "This demonstrates applying ownership and latency criteria together. The answer keeps the business authority clear while still acknowledging the operational need for a good user experience."
         },
         {
-          "text": "We can compromise by importing the payroll rate table once into Expenses during setup and then letting the two systems drift independently. That keeps day-one configuration light without forcing a runtime dependency between the products.",
+          "text": "That dependency sounds inconvenient, so I would avoid building mileage in phase one. If Payroll remains the owner, it may be simpler to keep mileage outside Expenses until a later programme can redesign the boundary properly.",
           "correct": false,
-          "explanation": "A one-time copy is not the same as using payroll-defined rates automatically. The requirement positions Payroll as the maintained source of the schemes, which argues against duplicating and drifting the data into Expenses."
+          "explanation": "The concern about dependency is reasonable. This is failure mode B — correct instinct, wrong execution: it treats a manageable boundary decision as a reason to defer the capability instead of framing a workable integration approach."
         }
       ]
     },
     {
       "id": "rp-emi-2",
-      "prompt": "The Product Manager says: \"Mileage is taking on too much complexity. For the first release, let us just accept a distance and a flat rate. Point-to-point calculation, threshold tracking, and rate changes can come later.\" The Payroll analyst says that without thresholds the reimbursement amounts will be wrong. How should you respond?",
+      "prompt": "The Data Lead says: \"Anomaly detection is later, so background event capture can wait too. We should not design data collection until the analytics feature is funded.\" What do you say?",
       "options": [
         {
-          "text": "A flat-rate model is a valid MVP. Most employees will enter reasonable distances and the financial difference from threshold-based rates will be small enough to correct later. Shipping a simpler calculation model first lets us validate the rest of the claim flow without the mileage engine becoming the critical path.",
+          "text": "That is fair. If anomaly detection is not in the immediate release, there is no reason to think about the event shape now, and we can revisit the data model when the analytics work becomes real.",
           "correct": false,
-          "explanation": "A flat-rate model is not a simpler version of the same feature; it is a different feature. The mileage requirement specifies point-to-point journey capture, automatic distance calculation, accumulated mileage tracking through the year, remaining allowance visibility, and automatic rate changes when annual thresholds are crossed. Removing all of that delivers a manual input field with a multiplier, which does not match the intended value or accuracy."
+          "explanation": "The desire to avoid speculative work is understandable. This is failure mode C — unnecessary deferral: it ignores the architect's chance to separate event capture from downstream analytics platform decisions."
         },
         {
-          "text": "The mileage feature is inherently stateful. It needs to track accumulated mileage per employee through the year, know the remaining allowance, and change the reimbursement rate automatically when a threshold is crossed. That is not optional complexity; it is the computation model that makes the reimbursement accurate. A flat-rate input would produce incorrect payments for any employee who crosses a threshold boundary, and the error would compound silently over the year.",
+          "text": "I would separate operational event capture from the eventual analytics implementation. If fraud and insight use cases are credible next steps, we should emit the right events now while keeping the analytics platform choice open. Capturing events is a lighter decision than committing to a full analytics stack.",
           "correct": true,
-          "explanation": "This is the correct response because it identifies the mileage feature as a stateful computation problem rather than a simple input-and-multiply operation. The architectural implication is that the service must maintain per-employee mileage state across the financial year and apply rate changes at the correct thresholds, which is fundamentally different from a stateless flat-rate calculation."
+          "explanation": "This demonstrates separating operational reporting needs from later cross-domain analytics choices. The answer protects future reuse without letting the data platform debate take over the meeting."
         },
         {
-          "text": "We should keep the simple model but add a reconciliation batch job at the end of each month that recalculates reimbursements using the correct thresholds. Employees get a flat rate at submission time and any difference is adjusted in the next pay run. That gives us the speed of a simple model with the accuracy of threshold-based rates.",
+          "text": "If analytics matters at all, we should probably design the full pipeline now, including the lakehouse model, anomaly engine inputs, and downstream reporting semantics. That avoids redesign once the fraud use case arrives.",
           "correct": false,
-          "explanation": "Monthly reconciliation introduces payment corrections that confuse employees and create payroll complexity. The requirement is that the system applies the correct rate at the point of claim, not that it corrects itself later. An after-the-fact adjustment also undermines the remaining-allowance visibility the feature is supposed to provide."
+          "explanation": "The wish to avoid rework is understandable. This is failure mode D — scope explosion: it uses a plausible future use case to justify a much heavier programme than the current question requires."
         }
       ]
     },
     {
       "id": "rp-emi-3",
-      "prompt": "Customer Success says: \"Home-to-work mileage deduction is edge-case territory. Can we just hard-code one behaviour globally and avoid confusing admins with another setting?\" The payroll analyst points out that customer policies differ. How should you respond?",
+      "prompt": "The Integrations Manager says: \"Customers will expect approved mileage claims to flow straight into every finance and payroll package we support. Let us plan direct connectors to all major vendors now.\" How do you respond?",
       "options": [
         {
-          "text": "Yes. A global rule is the safest answer because it eliminates configuration errors and gives every customer the same predictable behaviour, even if their policies vary.",
+          "text": "That is the right ambition, and we should commit to the connector roadmap now. The fastest way to satisfy the market is to begin building direct integrations for the full vendor set rather than inserting another layer in the middle.",
           "correct": false,
-          "explanation": "The mileage PRD explicitly says the sysadmin should be able to indicate in settings whether home-to-work mileage is deductible. A single global hard-coded behaviour would ignore that requirement."
+          "explanation": "The market pressure is understandable. This is failure mode A — over-agreement: it accepts a broad connector commitment before separating internal handoff architecture from external partner delivery choices."
         },
         {
-          "text": "This needs to stay configurable because the requirement specifically gives admins a setting for whether home-to-work mileage is deductible. Where that deduction applies, the system should enforce it using the employee's stored home and work addresses from People First. That is exactly the kind of policy variability the module is supposed to handle rather than flatten.",
+          "text": "I would separate the internal contract from the external connector strategy. The core architecture question is how approved claims leave Expenses cleanly. Once that boundary is stable, we can decide which vendor connectors are worth productising and which belong to partners or implementation layers.",
           "correct": true,
-          "explanation": "This is the correct answer. It preserves both the configuration requirement and the enforcement mechanism that depends on People First address data."
+          "explanation": "This demonstrates naming the domain and keeping a platform decision from swallowing a product one. The answer prevents external connector pressure from dictating the internal architecture prematurely."
         },
         {
-          "text": "We should remove the admin setting and let the policy-guidance assistant explain the customer's home-to-work rule instead. Employees can then self-police whether they include those miles in the claim.",
+          "text": "We need a wider partner strategy review before we can say anything meaningful here. Until Commercial and Partnerships agree the target list, there is no architectural answer to give.",
           "correct": false,
-          "explanation": "The requirement is not just to explain the rule; it is to configure and enforce it during mileage calculation. Replacing system behaviour with advisory text would underdeliver significantly."
+          "explanation": "The wish for alignment is understandable. This is failure mode C — unnecessary deferral: the architect can still frame the internal boundary now without pretending the entire partner roadmap must be settled first."
         }
       ]
     },
     {
       "id": "rp-emi-4",
-      "prompt": "The Data Lead says: \"Anomaly detection is a future feature. We do not need to worry about background analytics now; once the module is live we can decide later what data to aggregate.\" Fraud disagrees. How should you respond?",
+      "prompt": "The Fraud Lead says: \"If anomaly detection is on the roadmap, make it real-time so suspicious mileage claims are scored before employees submit them.\" What is your response?",
       "options": [
         {
-          "text": "That is reasonable because anomaly detection can be added after we have real usage data. It is better to avoid instrumenting too much up front and only decide what metrics matter once customers are actually using the module.",
+          "text": "Yes, if we care about fraud we should do the scoring before submission. That is the strongest control point, and real-time detection will also give the programme a more strategic story for leadership.",
           "correct": false,
-          "explanation": "The analytics PRD says the data should be captured in the background specifically to drive later features such as anomaly detection, and the anomaly-detection PRD says that work is contingent on analytics being established first. Deferring the data capture would weaken that dependency chain."
+          "explanation": "The control instinct is understandable. This is failure mode A — over-agreement: it accepts 'real-time' as the answer before translating whether the actual requirement is pre-submit blocking, fast review, or better post-submit visibility."
         },
         {
-          "text": "We need the background analytics from the start because they are the precursor to anomaly detection, not an optional reporting extra. The PRD already names the kinds of data we should be capturing: claim counts and values over time, department-level patterns, miles travelled, number of journeys, out-of-policy submissions, out-of-policy decisions, and rejected claims. If we skip that instrumentation now, the anomaly feature arrives later with no foundation.",
+          "text": "I would translate 'real-time' into the actual decision point we need. If the near-term need is rapid review or prioritisation, near-real-time post-submission scoring may be enough. We should only move the score into the submission path if the risk model truly needs that latency and the false-positive cost is acceptable.",
           "correct": true,
-          "explanation": "This is the correct answer. It uses both PRDs together: analytics exists to create the data layer that later anomaly detection depends on."
+          "explanation": "This demonstrates translating a slogan into a requirement and anchoring on latency. The answer keeps the room from assuming that faster always means better architecture."
         },
         {
-          "text": "We should start with anomaly detection rules first and then backfill analytics once we know which suspicious patterns we actually care about. The detection logic should drive the data model, not the other way around.",
+          "text": "Fraud models are uncertain anyway, so I would keep anomaly detection out of the design conversation entirely until we have a mature data science team ready to own it.",
           "correct": false,
-          "explanation": "The sequencing in the requirements runs the other way. Analytics is the precursor because the system needs data to aggregate before it can evaluate meaningful anomaly patterns."
+          "explanation": "The caution about model quality is reasonable. This is failure mode B — correct instinct, wrong execution: it avoids the hard question instead of framing the latency and control trade-off in a useful way."
         }
       ]
     },
     {
       "id": "rp-emi-5",
-      "prompt": "The Integrations Manager says: \"We should build direct connectors to external payroll and finance systems so approved claims flow through automatically. Customers expect seamless data movement, not an API they have to integrate with themselves.\" The Platform Architect points out the scope implications. How should you respond?",
+      "prompt": "The group asks you to close. Which summary is strongest?",
       "options": [
         {
-          "text": "Direct connectors are the right goal. If we build and maintain integrations to the major external payroll and finance vendors, customers get a turnkey experience and we differentiate on ease of implementation. The initial investment is high but it pays back across the customer base.",
-          "correct": false,
-          "explanation": "Building and maintaining direct connectors to external vendor systems is a significant ongoing commitment that goes beyond the current scope. The requirement distinguishes between internal integration, where Expenses passes data to People First Payroll, People First Finance, and Data Explorer, and external connectivity, where connections to third-party systems are provided through API rather than as maintained native integrations."
-        },
-        {
-          "text": "We should distinguish between internal and external integration architectures. Internally, Expenses should pass approved claim data into People First Payroll, People First Finance, and Data Explorer through direct service integration because we own both sides. Externally, the requirement is API-based connectivity, meaning we expose well-documented APIs that external payroll and finance systems can consume, rather than building and maintaining point-to-point connectors to third-party products. That boundary matters because it defines what we own and what the customer or partner owns.",
+          "text": "We are keeping payroll-owned rates authoritative, capturing events now without forcing an analytics platform decision, separating the internal approved-claim contract from any broader connector roadmap, and treating anomaly detection latency as a requirement question rather than a slogan. That gives each team a clearer boundary for the next design step.",
           "correct": true,
-          "explanation": "This is the correct response because it draws a clear architectural boundary between internal service integration and external API exposure. Internal integration is tightly coupled because both services are within the platform. External connectivity is loosely coupled through APIs because the product cannot own the integration lifecycle for every third-party system."
+          "explanation": "This demonstrates strong meeting closure. The answer summarises the decisions and the framing logic behind them, so the room leaves with aligned boundaries rather than a bundle of partial ideas."
         },
         {
-          "text": "We should avoid external connectivity entirely in the first release and keep the module self-contained. If customers need data to reach external systems, they can export it manually until we have a proper integration strategy. That keeps the scope tight and avoids committing to API contracts before we understand the real demand.",
+          "text": "There are too many adjacent topics here, so the better call is to avoid deciding anything until the fraud, data, and integrations roadmaps are all fully reconciled. A single consolidated plan will be cleaner.",
           "correct": false,
-          "explanation": "The requirement already includes external API connectivity as part of the feature scope. Removing it entirely would underdeliver. The right move is not to cut the capability but to describe it accurately: API-based connectivity rather than maintained native integrations."
+          "explanation": "The desire for coherence is understandable. This is failure mode C — unnecessary deferral: the architect's job is to separate adjacent concerns so the team can move now, not wait for one perfect mega-plan."
+        },
+        {
+          "text": "To stay ahead of future demand, we should design mileage as a broad platform initiative that includes local rate ownership, streaming analytics, universal vendor connectors, and pre-submit fraud scoring from the outset. That way we will not have to revisit the architecture later.",
+          "correct": false,
+          "explanation": "The future-proofing instinct is understandable. This is failure mode D — scope explosion: it accepts every adjacent concern at once and turns a focused capability discussion into a much larger platform programme."
         }
       ]
     }

@@ -1,110 +1,110 @@
 {
   "id": "rp-expenses-claim-policy-enforcement",
   "title": "A Warning Is Not a Decision",
-  "context": "The Expenses squad is reviewing the first end-to-end claim flow with Product, Payroll, UX, and Operations. Everyone wants a cleaner approval journey, but there is pressure to keep phase one contained and avoid colliding with other payroll roadmap items. You are the solution architect. The Director of Product is chairing.",
+  "context": "An operating-model review has been called for phase-one expense policy enforcement. In the room are the Finance Controller, Product Manager, Payroll Lead, Operations Director, and Engineering Manager. Finance wants stronger control before quarter close. Operations wants managers to keep discretion for edge cases. Engineering wants a design that ships cleanly without turning a focused workflow into a platform rebuild. You are expected to frame the decision in the room.",
   "questions": [
     {
       "id": "rp-ecp-1",
-      "prompt": "The UX Lead says: \"Out-of-policy values should be blocked at the UI. If the system knows a value is wrong, why let it travel through the workflow at all? We should enforce policy as early as possible.\" The Operations Lead points out that managers still need visibility of unusual claims and that some policies have configurable thresholds. How should you respond?",
+      "prompt": "The Finance Controller says: \"Any claim outside policy should be blocked automatically. If we allow submission, people will assume the rule does not matter.\" How do you respond?",
       "options": [
         {
-          "text": "The UX Lead is right that early enforcement is cleaner. If the system already has the policy rules at the client layer, blocking at submission avoids unnecessary workflow processing and keeps invalid data out of the system entirely. We can always add exceptions later if managers request them.",
+          "text": "That is the cleanest control model, so we should make every policy breach a hard stop. It gives Finance consistency, removes manager subjectivity, and keeps the product message simple for employees from the first release onward.",
           "correct": false,
-          "explanation": "This places enforcement logic in the wrong layer. Hard UI blocks assume every policy rule is binary and unconditional, but the broader system includes configurable auto-accept and auto-reject rules, manager visibility of out-of-policy claims, and the ability to override in defined circumstances. Moving all enforcement to the UI collapses several distinct concerns into a single decision point that cannot accommodate downstream configuration."
+          "explanation": "The desire for consistency is understandable. This is failure mode A — over-agreement: it jumps straight to the heaviest control outcome without first separating advisory rules from decision rules."
         },
         {
-          "text": "Policy enforcement should be distributed across the right layers rather than collapsed into the UI. At submission time, the employee should get a warning and a link to the relevant policy detail, which is a guidance concern. Actual acceptance or rejection should be driven by configurable rules downstream, where the sysadmin has set the auto-accept, auto-reject, or manual-review behaviour. The UI warns; the workflow decides. That separation lets us change enforcement behaviour through configuration without rewriting UI logic.",
+          "text": "I would separate warning policies from decision policies before we choose the mechanism. Some breaches may justify a hard stop, but others belong as auditable warnings with manager review. The right split depends on ownership, audit need, and the cost of false negatives versus false positives.",
           "correct": true,
-          "explanation": "This is the correct response because it separates guidance from enforcement and places each in the appropriate architectural layer. The UI handles user-facing warnings. The workflow engine handles configurable policy decisions. This separation means enforcement behaviour can be changed by sysadmins through configuration rather than requiring code changes at the client layer."
+          "explanation": "This demonstrates the framing pattern and the 5 decision criteria. The answer separates the problem before choosing technology and anchors the room on ownership and audit rather than treating every rule as the same kind of control."
         },
         {
-          "text": "We should skip UI-level validation entirely and let the workflow engine handle all policy enforcement after submission. Warnings at the form level add complexity to the client and might confuse employees who do not understand the policy thresholds. It is simpler to let claims flow through and have the system accept or reject them based on the configured rules.",
+          "text": "Blocking everything would create too much friction, so I would avoid it. Managers need room to use judgment, and Finance will have to accept that some policy breaches are part of business reality.",
           "correct": false,
-          "explanation": "This removes a required part of the employee journey. The employee should be warned at the point of entry when they type an out-of-policy value, with a link to the relevant policy detail. Removing that feedback and making the employee wait for a post-submission decision misses the guidance intent of the feature."
+          "explanation": "The concern about user friction is reasonable. This is failure mode B — correct instinct, wrong execution: it pushes back on the hard-stop idea without offering a structured way to decide which policies deserve which treatment."
         }
       ]
     },
     {
       "id": "rp-ecp-2",
-      "prompt": "The Operations Lead says: \"To simplify the MVP, let us make every claim go through the same manual path. No auto-approvals, no auto-rejections, just managers reviewing everything.\" The Sysadmin representative objects that this removes a major efficiency gain. How should you respond?",
+      "prompt": "The Engineering Manager adds: \"If exceptions need routing, we should stand up a workflow engine now so policy breaches can take different paths later.\" What do you say?",
       "options": [
         {
-          "text": "That simplification is worth it. Manual review of every claim is the safest first version because we avoid policy edge cases and do not need any admin configuration beyond basic submission and approval.",
+          "text": "Yes, we should establish the engine now. Once policy breaches exist, different paths, escalations, and timers will follow, so it is more efficient to invest in the general platform than to revisit workflow architecture after launch.",
           "correct": false,
-          "explanation": "While it sounds safer, it drops a stated requirement. The setup section explicitly says the sysadmin should be able to configure the system so that certain claims are auto-rejected or auto-approved."
+          "explanation": "The wish to avoid rework is understandable. This is failure mode D — scope explosion: it uses a plausible future need to justify a heavier platform decision before the current workflow shape has been bounded."
         },
         {
-          "text": "I would keep configurable automation in scope. The PRD explicitly gives sysadmins the ability to set certain claims to auto-accept or auto-reject, and that matters because the feature is meant to reduce manual effort, not just digitise it. We can constrain the initial rule set if needed, but removing the capability entirely would miss the requirement.",
+          "text": "For phase one, I would keep the design tied to the actual approval problem in front of us. If we only need status changes, manager review, and clear audit of who approved an exception, that is not yet evidence for a workflow platform decision. We can name the carve-out criteria now and revisit only if the process becomes materially more stateful.",
           "correct": true,
-          "explanation": "This is the correct answer. It protects an explicit setup capability while still leaving room to limit how ambitious the first rule catalogue is."
+          "explanation": "This demonstrates naming the simpler option and forcing the heavier one to be justified. The answer keeps the room on today's workflow shape and sets criteria for when a platform step-up would be warranted."
         },
         {
-          "text": "We can meet both needs by auto-approving everything that looks in policy and only routing suspicious claims to managers. That way we maximise speed in the first release and do not need sysadmin configuration at all.",
+          "text": "Let us do a technical spike on workflow products and compare several target-state designs before we answer. Once we have that analysis, we can decide whether the exceptions warrant an engine or a lighter path.",
           "correct": false,
-          "explanation": "This replaces admin-configurable behaviour with a hard-coded platform rule. The requirement is specifically that the sysadmin should be able to configure whether claims are auto-approved or auto-rejected."
+          "explanation": "The urge to gather options is understandable. This is failure mode C — unnecessary deferral: the architect already has enough to frame the decision by distinguishing a bounded approval flow from a workflow platform choice."
         }
       ]
     },
     {
       "id": "rp-ecp-3",
-      "prompt": "The Payroll Product Lead says: \"While we are touching approvals, this is the moment to redesign the whole authorisation route inside Expenses. Let us make the module support its own configurable approval chain instead of waiting on Payroll.\" How should you respond?",
+      "prompt": "The Payroll Lead asks: \"Employees with multiple assignments often create ambiguity over which cost centre should absorb an out-of-policy claim. Can we infer the most likely one to keep the flow moving?\" How do you respond?",
       "options": [
         {
-          "text": "That is the right move because approvals are central to the Expenses experience, and relying on another team's roadmap will only slow us down. If we own the authorisation route in Expenses, we control the end-to-end journey.",
+          "text": "We should infer it automatically from the employee's primary assignment and only correct it later if someone spots a problem. That keeps the submission flow smooth and avoids asking employees to make finance decisions they may not understand.",
           "correct": false,
-          "explanation": "This conflicts with the epic-level scope statement. The Expenses module is not meant to introduce changes to the existing employee-to-line-manager authorisation route in this phase; enhanced configurable workflows are being delivered by Payroll separately."
+          "explanation": "The desire to reduce effort is understandable. This is failure mode A — over-agreement: it turns an ambiguous finance choice into silent system behaviour without testing ownership or audit implications."
         },
         {
-          "text": "I would keep the scope boundary intact. The current plan is that Expenses relies on the existing employee-to-line-manager route and then benefits from the enhanced configurable workflows Payroll is delivering later. If we try to build a separate authorisation engine inside Expenses now, we create overlap, delay the module, and move outside the stated release scope.",
+          "text": "I would avoid hidden inference where the business decision is materially ambiguous. If cost attribution matters for approval, reporting, or payroll treatment, the workflow should surface the choice explicitly or route it to the right approver rather than pretend the ambiguity is not there.",
           "correct": true,
-          "explanation": "This is the correct response. It uses the explicit epic boundary to avoid scope creep and duplicate workflow capability inside the module."
+          "explanation": "This demonstrates using ownership and audit criteria in the room. The answer recognises that not every convenience is a safe automation and keeps accountability explicit when the choice has business consequences."
         },
         {
-          "text": "We should do a temporary approval engine in Expenses for phase one and then decommission it once Payroll delivers the richer workflow capability. That gives us independence now without locking us into a permanent architecture.",
+          "text": "That sounds messy enough that we should postpone multi-assignment handling to a later release. Phase one will be cleaner if the feature only works for employees with one assignment and everyone else stays manual for now.",
           "correct": false,
-          "explanation": "Temporary workflow engines have a habit of becoming permanent. More importantly, this still violates the stated scope boundary that Expenses is not changing the authorisation route in this phase."
+          "explanation": "The instinct to protect scope is understandable. This is failure mode C — unnecessary deferral: it gives up control of an important boundary when the architect can still frame a principled answer without redesigning the whole release."
         }
       ]
     },
     {
       "id": "rp-ecp-4",
-      "prompt": "The Engineering Manager says: \"Multi-job selection adds complexity to the domain model. Every claim needs a job reference, validation against assignment data, and downstream routing to the correct payroll context. For simplicity, can we just default to the primary assignment and avoid that complexity?\" How should you respond?",
+      "prompt": "Operations says: \"If a manager rejects a claim because it breaches policy, we should convert that into a request for changes so the employee can edit and resubmit without creating another record.\" What is your response?",
       "options": [
         {
-          "text": "That simplification is safe for phase one. The primary assignment will be correct for most employees, and the few multi-job cases can be corrected manually by payroll. Adding a job-selection step to the claim model complicates the data flow for a minority case that can be handled operationally.",
+          "text": "That is a cleaner experience, so we should redefine rejection that way everywhere. Employees will see a smoother path, and we avoid multiple records for what is effectively the same claim journey.",
           "correct": false,
-          "explanation": "Silently defaulting to the primary assignment creates a data correctness problem that surfaces late. Expenses claimed against the wrong job will flow into the wrong payroll context, affect the wrong cost centre, and produce incorrect reporting. The requirement calls out multi-job selection explicitly because downstream correctness depends on the claim being associated with the right employment context from the start."
+          "explanation": "The product instinct is understandable. This is failure mode A — over-agreement: it prioritises flow neatness before checking whether the business semantics of reject and revise are actually the same."
         },
         {
-          "text": "The claim domain model needs to carry the correct employment context because downstream systems depend on it for payroll processing, cost allocation, and reporting. If an employee has more than one job, the claim should capture which job the expense relates to. We can keep the interaction lightweight by defaulting to a likely option and only surfacing the choice when multiple assignments exist, but the data model must support the association rather than assuming it.",
+          "text": "I would keep the business outcomes explicit. If 'rejected' means the decision was no, we should preserve that audit state and provide a deliberate amend-and-resubmit path if needed. We should not relabel a business decision only because it feels tidier in the UI.",
           "correct": true,
-          "explanation": "This is the correct response because it frames the requirement as a domain model concern rather than a UI concern. The architectural point is that the claim entity must carry a valid employment context reference because payroll processing, cost allocation, and reporting all depend on it. The UX can be optimised, but the model cannot omit the relationship."
+          "explanation": "This demonstrates protecting business semantics and closing off hidden coupling. The answer keeps audit meaning intact and avoids redesigning the workflow vocabulary around a convenience shortcut."
         },
         {
-          "text": "We should resolve the job context automatically by inferring it from the expense category and the employee's assignment history. If we can match the claim type to the most likely job, the employee never has to make the selection and the model still carries the correct reference.",
+          "text": "We should probably take that away and map every outcome state before deciding. Once we have a full lifecycle diagram, we can come back and agree which labels belong in phase one.",
           "correct": false,
-          "explanation": "Automated inference without employee confirmation introduces a different kind of correctness risk. The system may infer incorrectly, and there is no verification step to catch the mistake. The employee is the person who knows which job the expense relates to, so the selection belongs with them."
+          "explanation": "The desire for consistency is reasonable. This is failure mode C — unnecessary deferral: the room already has enough information to decide that semantic clarity matters more than collapsing states for convenience."
         }
       ]
     },
     {
       "id": "rp-ecp-5",
-      "prompt": "The Product Manager says: \"To keep the claim model simple, rejected claims should be terminal. If the employee wants to try again, they create a new claim. Supporting edit-and-resubmit on a rejected claim means the claim entity has to support state transitions back from rejected to submitted, which complicates the state machine and the audit trail.\" How should you respond?",
+      "prompt": "The group looks to you to close. Which summary is strongest?",
       "options": [
         {
-          "text": "A terminal rejected state is the cleanest model. Each claim has a linear lifecycle: draft, submitted, approved or rejected. Allowing re-entry from rejected to submitted adds a loop that complicates state management, event history, and reporting. A new claim referencing the original is simpler to implement and easier to audit.",
-          "correct": false,
-          "explanation": "While a simpler state machine is attractive, forcing the employee to recreate a claim from scratch after rejection adds friction the module is designed to eliminate. The requirement explicitly calls for the employee to be able to edit and resubmit a rejected claim. The state machine needs to accommodate that transition, and the audit trail should capture each version, but that is a solvable design problem rather than a reason to remove the capability."
-        },
-        {
-          "text": "The claim lifecycle needs to support re-entry from rejected to a draft or resubmitted state because that is part of the required employee journey. The state machine is slightly more complex, but it is well-understood: rejected claims transition to an editable state, the employee modifies and resubmits, and the audit trail records each version. Forcing a new claim discards the history and the context of the original submission, which makes the approval trail harder to follow, not easier.",
+          "text": "We have agreed to classify policy checks before automating them, keep phase one on a bounded approval flow rather than a workflow platform, avoid silent inference where cost ownership is ambiguous, and preserve clear business outcomes when managers decide. Product and Operations can now design the journey inside those constraints.",
           "correct": true,
-          "explanation": "This is the correct response because it treats the state machine as a design problem to solve rather than a reason to cut the feature. The architectural point is that a claim's audit trail is richer and more traceable when edits are recorded against the same entity rather than scattered across unrelated claims. The lifecycle loop is a normal pattern for approval workflows."
+          "explanation": "This demonstrates meeting closure and disciplined framing. The summary captures the decisions, the criteria behind them, and the bounded next step without reopening the debate."
         },
         {
-          "text": "We should avoid the issue by replacing rejection with a request-changes status. The manager annotates the claim, and the employee edits it in place without a formal rejection state. That keeps the state machine linear while still letting the employee correct the claim.",
+          "text": "There are enough open questions that we should avoid locking the design today. Each team can return with more examples of policy breaches, and we can decide the automation level once we have broader evidence.",
           "correct": false,
-          "explanation": "Redefining rejection as request-changes alters the workflow semantics rather than addressing the requirement. The system needs to handle claims that are genuinely rejected and notify the employee accordingly. A request-changes status may be a useful addition, but it does not replace the need for a rejection state and the ability to recover from it."
+          "explanation": "The caution is understandable. This is failure mode C — unnecessary deferral: it abandons the architect's job of framing the direction when the room already has enough to set decision boundaries."
+        },
+        {
+          "text": "To stay future-proof, we should design for blocking, exception routing, inferred cost allocation, and editable resubmission from the start so that no policy pattern is excluded later. That gives us one unified control model.",
+          "correct": false,
+          "explanation": "The wish for completeness is understandable. This is failure mode D — scope explosion: it bundles multiple heavier choices together in the name of future-proofing and increases delivery risk without proof they are all needed."
         }
       ]
     }
