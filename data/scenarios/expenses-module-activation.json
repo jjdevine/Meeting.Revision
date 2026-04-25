@@ -1,110 +1,110 @@
 {
   "id": "rp-expenses-module-activation",
   "title": "The Switch That Must Not Surprise Anyone",
-  "context": "The Expenses team is in a go-to-market design review for the first release of the new module. Revenue wants the feature visible everywhere to drive awareness. Payroll is worried that enabling Expenses will confuse customers who already use Claims. Engineering wants the fastest possible implementation path. You are the solution architect for the Expenses initiative. The VP of Product is chairing.",
+  "context": "A launch-readiness steering meeting has been called for the new Expenses module. The VP of Revenue wants conference buzz in six weeks. The Product Manager wants a smooth customer story. The Payroll Director is worried about side effects in the live payroll experience, and Customer Success wants a rollout they can explain without caveats. You are the architect in the room, and everyone is looking for a direction that feels commercially ambitious without creating hidden coupling.",
   "questions": [
     {
       "id": "rp-ema-1",
-      "prompt": "The Revenue Director opens: \"We should show the Expenses toggle to every admin account, even if they have not bought the module yet. Just grey it out and add a tooltip saying 'contact sales'. It is free advertising inside the product.\" The Sysadmin design lead looks uneasy. How should you respond?",
+      "prompt": "The VP of Revenue opens: \"Show the Expenses tab to every admin account now, grey it out for customers who have not bought it, and let Sales use the clicks as pipeline data.\" How do you respond?",
       "options": [
         {
-          "text": "That is a sensible compromise. It keeps the product discoverable, it avoids engineering work around entitlement checks, and a greyed-out toggle still prevents accidental enablement. Admins are used to seeing unavailable settings, so the confusion risk is low. We can add a confirmation modal later if we decide to make the toggle active for entitled customers.",
+          "text": "We can do that and treat the product navigation as a marketing surface. A greyed-out tab keeps the module visible, gives Revenue a clean upsell story, and lets us measure interest before the launch lands. We can work through any entitlement edge cases during delivery. It also gives Revenue a bolder launch narrative and postpones the awkward entitlement questions until after the conference window.",
           "correct": false,
-          "explanation": "This cuts directly against the requirement. The activation control is meant to be an unambiguous 'on switch' for customers who have purchased the module, while preventing accidental enablement for non-entitled customers. Surfacing the switch to everyone turns an entitlement control into a sales banner and makes the status less clear, not more clear."
+          "explanation": "The commercial instinct is understandable in the room. This is failure mode A — over-agreement: it accepts the proposal before testing whether live navigation should represent entitlement, discovery, or both. Mixing those concerns creates avoidable confusion for admins and support teams."
         },
         {
-          "text": "I would keep the entitlement decision authoritative and keep the activation control for customers who have actually purchased the module. The requirement here is not product discovery; it is confident enablement with clear entitlement. If we want in-product upsell, we should solve that somewhere other than the actual admin switch that governs whether the module goes live.",
+          "text": "I would keep entitlement authoritative in the live product and solve demand generation separately. If Revenue wants visibility, we can use release messaging, a marketing page, or admin notifications, but the navigation should reflect what the customer has bought and can use.",
           "correct": true,
-          "explanation": "This is the right response. It protects the core purpose of the feature: a clear, entitlement-based activation point that is only available to purchased customers. It also keeps the semantics clean for admins, which matters because the stated goal is confident enablement rather than teaser marketing."
+          "explanation": "This demonstrates the framing pattern: separate the problem before choosing the solution. The answer distinguishes commercial discovery from entitlement control and names the simpler option that preserves a clean operating boundary."
         },
         {
-          "text": "We can show the toggle to everyone and rely on a warning banner plus a second confirmation step when they click it. That gives Sales the visibility they want while still protecting against accidental enablement. The entitlement check can happen after the admin expresses intent.",
+          "text": "We should not do that because it will confuse customers and create unnecessary questions for support. The safer answer is to leave the module hidden until every commercial and product detail is perfect.",
           "correct": false,
-          "explanation": "A second confirmation step does not solve the underlying problem. The requirement is that customers who have not purchased the module cannot switch it on. Making the control visible and then rejecting the action later still creates ambiguity and support noise around whether the customer is meant to have access."
+          "explanation": "The concern about confusion is reasonable. This is failure mode B — correct instinct, wrong execution: it pushes back without offering a framework or an alternative path for Revenue's underlying goal, so the architect sounds defensive rather than useful."
         }
       ]
     },
     {
       "id": "rp-ema-2",
-      "prompt": "The Engineering Manager says: \"The quickest way to ship is to reuse the existing Claims flag and just relabel the navigation. From the user's perspective they both deal with expenses anyway. We can separate them properly later.\" Payroll immediately asks whether Claims is being replaced. How should you respond?",
+      "prompt": "The Engineering Manager says: \"Claims already has a switch, so the fastest route is to reuse it, relabel the navigation, and sort the model separation out later.\" What do you say?",
       "options": [
         {
-          "text": "That is acceptable for a first release because users care more about getting a working feature than about the internal module boundaries. If the UI makes it look like one consolidated experience, we can sort the entitlement split and the product naming out in a later release once adoption proves the case.",
+          "text": "That is probably the quickest implementation, so we should take it. Users already associate Claims with spending, and reusing the switch means less engineering effort now. We can unwind the coupling after launch if customers push back. It also gives Revenue a bolder launch narrative and postpones the awkward entitlement questions until after the conference window.",
           "correct": false,
-          "explanation": "This breaks a core requirement. Expenses is explicitly additive and does not replace existing Claims capability. Reusing the Claims flag and relabelling the UI would create the exact confusion the PRD is trying to avoid, especially for customers and payroll users who already rely on the current Claims experience."
+          "explanation": "The instinct is understandable in the room. The delivery pressure is real. This is failure mode D — scope explosion through hidden coupling: it trades a short-term shortcut for a muddled domain boundary and assumes the cleanup will be cheap later."
         },
         {
-          "text": "We should not collapse Claims and Expenses into one switch. The requirement is explicit that both modules remain available and that Expenses does not replace Claims. That means separate entitlement and activation semantics, plus clear user-facing language so customers understand they are enabling an additional module rather than renaming an existing one.",
+          "text": "I would keep Claims and Expenses as separate entitlements even if we later present them through a coordinated experience. The question is not only navigation speed; it is whether purchase state, visibility, support ownership, and downstream behaviour stay clear when one module changes and the other does not.",
           "correct": true,
-          "explanation": "This is the right response. It protects the additive nature of the module and avoids a false simplification that would blur product boundaries. The architecture and the UI both need to respect that Claims continues to exist alongside Expenses."
+          "explanation": "This demonstrates naming the domain and forcing the room to justify the heavier option. The answer separates presentation from entitlement and anchors the decision on ownership and change impact rather than implementation convenience alone."
         },
         {
-          "text": "We can reuse the Claims flag behind the scenes as long as we keep two menu entries in the UI. The implementation detail does not matter if the labels are different, and it would let us avoid a separate entitlement path for the first version.",
+          "text": "Let me take that away and map every screen, flag, and customer journey before we decide. Once we have a fuller dependency inventory, we can come back with a recommendation on whether one switch or two is cleaner.",
           "correct": false,
-          "explanation": "The implementation detail does matter here because entitlement, visibility, and lifecycle behaviour are part of the requirement. If both modules are driven by the same flag, you no longer have a clean way to say that Claims remains available regardless of whether Expenses has been purchased and activated."
+          "explanation": "The wish to be thorough is understandable. This is failure mode C — unnecessary deferral: there is already enough information to frame the decision in the room by separating entitlement from presentation before commissioning more analysis."
         }
       ]
     },
     {
       "id": "rp-ema-3",
-      "prompt": "The Payroll Manager asks bluntly: \"When a customer enables Expenses, what changes for Payroll and Payroll Managers on day one? I do not want this module activation causing side effects in the existing payroll experience.\" The room goes quiet. How should you respond?",
+      "prompt": "Customer Success adds: \"Several design partners want to pilot Expenses in one department before going company-wide. Can we make activation department-scoped for phase one?\" How do you handle it?",
       "options": [
         {
-          "text": "There will inevitably be some changes because Expenses and Payroll are closely related domains. Even if the goal is minimal disruption, we should expect at least some UI and process adjustments for payroll users once the module is enabled, especially as reimbursement data starts moving through the platform.",
+          "text": "Yes, and we should probably go further and allow activation by department, legal entity, and manager hierarchy from day one. That gives Sales maximum flexibility and avoids another round of architecture work when more rollout patterns appear. It also gives Revenue a bolder launch narrative and postpones the awkward entitlement questions until after the conference window.",
           "correct": false,
-          "explanation": "That answer contradicts the stated requirement. The module activation story explicitly says the experience and functionality for Payroll and Payroll Managers should remain the same. Whatever downstream integration work happens later, enablement itself is not meant to alter payroll users' day-one experience."
+          "explanation": "The desire to support pilots is understandable. This is failure mode D — scope explosion: it turns one rollout request into a broad access model without first testing whether the business need truly requires that complexity."
         },
         {
-          "text": "The activation requirement is designed specifically to avoid changing the current payroll experience. Enabling Expenses should make the new module visible to employees, but it should not alter Payroll or Payroll Manager workflows just because the toggle was turned on. If later phases pass data into payroll, that should be introduced through explicit downstream capability, not as a hidden side effect of activation.",
+          "text": "I would separate pilot control from entitlement shape. If the requirement is only to manage exposure during rollout, we can use customer-level activation with internal feature controls or managed onboarding. We should only introduce department-scoped entitlement if there is a durable business need that affects policy, reporting, or support boundaries after launch.",
           "correct": true,
-          "explanation": "This is the correct answer. It reassures Payroll using the exact intent of the requirement: activation should not disrupt existing payroll business-as-usual. It also cleanly separates module visibility from later integration behaviour."
+          "explanation": "This demonstrates resisting scope creep and naming the simpler option. The answer keeps the room focused on the actual requirement — controlled rollout — instead of accepting a permanently heavier entitlement model by reflex."
         },
         {
-          "text": "We can minimise the disruption by adding a new payroll landing page that explains the Expenses module the first time payroll users log in after activation. That way they at least understand why the experience has changed and where to go for guidance.",
+          "text": "Department-scoped activation is too messy, so I would rule it out now. Pilots create edge cases, and phase one should tolerate no exceptions if we want to stay on schedule.",
           "correct": false,
-          "explanation": "This still assumes a change to the payroll experience, which the requirement says should not happen. Adding explanatory onboarding to payroll users may sound helpful, but it is solving a problem the module should not create in the first place."
+          "explanation": "The instinct to protect delivery is reasonable. This is failure mode B — correct instinct, wrong execution: it rejects the request too bluntly and misses the chance to offer a lighter mechanism that could satisfy the rollout concern."
         }
       ]
     },
     {
       "id": "rp-ema-4",
-      "prompt": "The Product Manager says: \"Marketing wants a release point this quarter. Can we ship the on switch early, expose an empty Expenses shell, and then fill in the rest of the functionality over the following sprints? It would still count as progress.\" How should you respond?",
+      "prompt": "The Product Manager says: \"Marketing needs something customer-visible this quarter. Can we release the switch and an empty Expenses shell first, then fill the workflows in later?\" What is your response?",
       "options": [
         {
-          "text": "Yes. The switch is independent enough to release on its own. Even if the rest of the module is not ready, getting customers used to seeing Expenses in the product is a good adoption tactic and gives Marketing something concrete to announce.",
+          "text": "We can release the shell early, tell customers the experience is evolving, and use the live product to build momentum. Seeing the module in place will reassure the market that the launch is real, even if the operational detail lands in later increments.",
           "correct": false,
-          "explanation": "The sequencing notes do not support a customer-facing release of the switch by itself. They say development can start once the switch exists, but the customer will not see a release point until the whole piece of work has been completed. Shipping an empty shell would undermine the 'go live confidently' objective."
+          "explanation": "The pressure to show progress is understandable. This is failure mode A — over-agreement: it accepts a visible product state that weakens trust without first translating what Marketing really needs from the quarter-end milestone."
         },
         {
-          "text": "We can absolutely build and test the activation capability early behind internal controls, but I would not make it a customer-visible release point on its own. The stated plan is that customers do not see a release until the whole piece of work is complete. An empty shell would weaken trust because the switch would signal readiness without delivering the actual module experience.",
+          "text": "I would translate that ask into a requirement for credible launch evidence rather than a literal empty shell. Internal previews, controlled demos, or customer-safe beta access could satisfy the date, but a visible module with no working outcome weakens trust and creates support noise.",
           "correct": true,
-          "explanation": "This is the right response. It preserves internal sequencing flexibility while respecting the requirement that customers should not get a partial external release. The activation control is supposed to represent real readiness, not placeholder progress."
+          "explanation": "This demonstrates translating a business slogan into a requirement. The answer reframes 'something customer-visible' into the underlying need for launch confidence and then offers lighter options that do not damage the product contract."
         },
         {
-          "text": "We should release the switch broadly but mark the module beta and unsupported. That reduces expectation-setting risk while still letting us learn from real customers before the rest of the functionality is done.",
+          "text": "We need a fuller launch workback before answering that. If Marketing, Support, Revenue, and Product each document their threshold for a credible release, we can decide later whether the shell is acceptable.",
           "correct": false,
-          "explanation": "That still creates a customer-visible release point before the module is complete. The requirement is stricter than 'beta at your own risk'; it explicitly says customers will not see a release point until the overall work is completed."
+          "explanation": "The coordination instinct is reasonable. This is failure mode C — unnecessary deferral: the architect can already frame the decision by separating proof of progress from customer-visible emptiness instead of pushing the question into another meeting."
         }
       ]
     },
     {
       "id": "rp-ema-5",
-      "prompt": "Customer Success raises a rollout idea: \"Some customers will want to pilot this with one department before going wider. Can we make the first release enable Expenses for only a subset of employees?\" The commercial team likes the sound of it. How should you respond?",
+      "prompt": "The room looks to you to close. Which summary best moves the meeting forward?",
       "options": [
         {
-          "text": "Yes, departmental rollout should be part of the first release because controlled pilots are a common enterprise expectation. If we already know customers may ask for it, it is safer to design the activation model around employee segments rather than a single customer-level switch.",
-          "correct": false,
-          "explanation": "This goes beyond what the requirement says. The current activation story is simple: once the module is switched on, it is visible for all employees. Adding cohort-based rollout changes the semantics of the switch and adds scope that is not in the PRD."
-        },
-        {
-          "text": "For phase one I would keep activation at the customer level. The current requirement is that once the module is switched on it becomes visible for all employees, which keeps the behaviour predictable and easy for sysadmins to understand. If pilot cohorts become important later, that should be treated as a separate capability rather than hidden inside the initial on-switch design.",
+          "text": "We have agreed to keep the live navigation aligned to bought entitlement, keep Claims and Expenses as separate module controls, treat pilot rollout as a lighter exposure problem unless a durable sub-customer entitlement need appears, and meet the quarter milestone with controlled evidence rather than an empty shell. Product and Revenue can now shape the go-to-market plan inside those boundaries.",
           "correct": true,
-          "explanation": "This is the correct answer because it protects the required post-enable behaviour: once enabled, Expenses appears for all employees as expected. It also keeps the activation model intentionally simple for the first release."
+          "explanation": "This demonstrates meeting closure: it summarises the decision, the criteria behind it, and the bounded follow-up. A good architect closes by confirming what was decided and what did not get coupled into scope."
         },
         {
-          "text": "We can compromise by enabling the module for all employees but showing the navigation only to selected departments. That gives us a pilot without changing the activation semantics in the back end.",
+          "text": "The safest next step is for each function to return with more detailed concerns and proposed mitigations, because there are still too many moving parts for a clean decision today. We can use that material to decide the entitlement and launch shape in the next steering session.",
           "correct": false,
-          "explanation": "That is still a subset rollout, just implemented indirectly. The requirement is not just about technical activation; it is about the user-visible outcome being predictable. Hiding the module from some employees after activation would violate that."
+          "explanation": "The wish to reduce risk is understandable. This is failure mode C — unnecessary deferral: the room already has enough clarity to decide the boundary conditions, so reopening the same debate loses momentum and ownership."
+        },
+        {
+          "text": "We should proceed with the broadest design so we do not corner ourselves later: universal visibility, flexible scoped rollout, and a shared switch model. That keeps every commercial path open while engineering works through the details.",
+          "correct": false,
+          "explanation": "The desire to preserve optionality is understandable. This is failure mode D — scope explosion: it bundles several heavier decisions together in the name of flexibility and turns a focused launch discussion into a platform design problem."
         }
       ]
     }

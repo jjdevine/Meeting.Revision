@@ -10,17 +10,17 @@
         {
           "text": "I agree with the goal, but the work is definition before platform. 'Headcount' and 'attrition' only become single numbers once we pin down grain, effective date, inclusion rules, and ownership. A semantic model can enforce the answer, but it can't invent it. Let's lock the metric definitions and authoritative data sources first, then publish them through one curated reporting model.",
           "correct": true,
-          "explanation": "This is exactly the right frame. The CFO wants consistency, but consistency comes from governed meaning before governed tooling. By naming grain, time, inclusion, and ownership, you've turned a vague 'single source of truth' demand into a concrete reporting design task."
+          "explanation": "This demonstrates the architect's framing pattern. This is exactly the right frame. The CFO wants consistency, but consistency comes from governed meaning before governed tooling. By naming grain, time, inclusion, and ownership, you've turned a vague 'single source of truth' demand into a concrete reporting design task."
         },
         {
-          "text": "I agree, and the fastest route is to accelerate the lakehouse and make it the single source for every executive number. Once all HR and payroll data is landing in one place, we can define the reports centrally and stop the inconsistency. The technical issue is fragmentation, so the answer is to consolidate the data physically and let the reporting platform resolve the differences from there.",
+          "text": "I agree, and the fastest route is to accelerate the lakehouse and make it the single source for every executive number. Once all HR and payroll data is landing in one place, we can define the reports centrally and stop the inconsistency. The technical issue is fragmentation, so the answer is to consolidate the data physically and let the reporting platform resolve the differences from there. It also gives the CFO a clearer explanation of why agreement on definitions matters before anyone funds a larger consolidation move.",
           "correct": false,
-          "explanation": "Physical consolidation does not solve semantic disagreement. Headcount, payroll cost, and attrition still need business definitions, effective dates, inclusion rules, and ownership. A lakehouse can host the answer, but it cannot decide the answer for you. You have jumped to platform before settling meaning."
+          "explanation": "The instinct is understandable in the room. Physical consolidation does not solve semantic disagreement. Headcount, payroll cost, and attrition still need business definitions, effective dates, inclusion rules, and ownership. A lakehouse can host the answer, but it cannot decide the answer for you. You have jumped to platform before settling meaning."
         },
         {
-          "text": "I would push back on the idea of one number. HR, payroll, and finance look at the business through different lenses, so it is natural that they will always have slightly different figures. Trying to force a single answer will create endless debates and likely distort what each team actually needs. We should accept multiple valid views rather than over-centralising reporting.",
+          "text": "I would push back on the idea of one number. HR, payroll, and finance look at the business through different lenses, so it is natural that they will always have slightly different figures. Trying to force a single answer will create endless debates and likely distort what each team needs. We should accept multiple valid views rather than over-centralising reporting.",
           "correct": false,
-          "explanation": "This is too defeatist. Sometimes different views are valid, but the CFO is asking for leadership metrics that should be governed consistently. The architect's job is to help define where one enterprise metric is necessary and how to achieve it, not to normalise the confusion."
+          "explanation": "The instinct is understandable in the room. This is too defeatist. Sometimes different views are valid, but the CFO is asking for leadership metrics that should be governed consistently. The architect's job is to help define where one enterprise metric is necessary and how to achieve it, not to normalise the confusion."
         }
       ]
     },
@@ -31,17 +31,17 @@
         {
           "text": "I would go the other way and avoid a central reporting model entirely. Each domain team should own all of its own dashboards as well as its APIs, and cross-domain leadership views can be assembled manually from whatever each team publishes. That keeps ownership pure and prevents the data team from becoming a bottleneck. Consistency can be handled by better meeting discipline rather than a shared reporting platform.",
           "correct": false,
-          "explanation": "This preserves ownership by abandoning the legitimate need for governed cross-domain analytics. Manual assembly is exactly how the current inconsistency was created. The answer is not no central model; it is a central model for the right class of reporting."
+          "explanation": "The instinct is understandable in the room. This preserves ownership by abandoning the legitimate need for governed cross-domain analytics. Manual assembly is exactly how the current inconsistency was created. The answer is not no central model; it is a central model for the right class of reporting."
         },
         {
-          "text": "That's the wrong boundary. Cross-domain analytics should absolutely come from a curated reporting model. But operational screens that depend on current transactional state should read from service-owned read models or APIs. We shouldn't solve integration and domain ownership by turning the analytics stack into an operational backend.",
+          "text": "That's the wrong boundary. Cross-domain analytics should absolutely come from a curated reporting model. But operational screens that depend on current transactional state should read from service-owned read models or APIs. We shouldn't solve integration and domain ownership by turning the analytics stack into an operational backend. That keeps the conversation on metric definition and ownership before platform choices and prevents the room from treating tooling as a substitute for agreement.",
           "correct": true,
-          "explanation": "Correct. You have separated operational reporting from enterprise analytics. That is one of the most important distinctions in this space. The reporting platform can be the right answer for cross-domain metrics without becoming the source of truth for every operational screen in the product."
+          "explanation": "This demonstrates the architect's framing pattern. Correct. You have separated operational reporting from enterprise analytics. That is one of the most important distinctions in this space. The reporting platform can be the right answer for cross-domain metrics without becoming the source of truth for every operational screen in the product."
         },
         {
           "text": "That is the cleanest approach. If every operational screen and every executive dashboard reads from the same reporting model, there is no risk of drift. Product teams may lose some direct access to their service data, but the gain in consistency is worth it. In the long run, a shared analytical backend will simplify the estate by removing duplicated read paths and duplicated metric logic across teams.",
           "correct": false,
-          "explanation": "This turns the analytics platform into an operational backend, which is the wrong boundary. Analytical models are excellent for governed cross-domain reporting. They are not the right default source for current transactional screens that depend on service-owned state, write models, and operational SLAs. You are solving reporting inconsistency by centralising the wrong thing."
+          "explanation": "The instinct is understandable in the room. This turns the analytics platform into an operational backend, which is the wrong boundary. Analytical models are excellent for governed cross-domain reporting. They are not the right default source for current transactional screens that depend on service-owned state, write models, and operational SLAs. You are solving reporting inconsistency by centralising the wrong thing."
         }
       ]
     },
@@ -50,19 +50,19 @@
       "prompt": "The Payroll Director says: \"Month-end is where we get burned. We need to answer questions like 'what did we believe payroll cost was on the 31st, before the retro correction on the 3rd?' Can the reporting model do that?\" How should you respond?",
       "options": [
         {
-          "text": "Yes. We can simply recalculate prior months from the latest source data whenever someone asks. As long as the reporting platform has all the current HR and payroll records, it can derive what the number should be for a prior period. Retro corrections are just improved data, so using the latest state is actually the most accurate answer for finance and audit purposes.",
+          "text": "Yes. We can recalculate prior months from the latest source data whenever someone asks. As long as the reporting platform has all the current HR and payroll records, it can derive what the number should be for a prior period. Retro corrections are improved data, so using the latest state is the most accurate answer for finance and audit purposes.",
           "correct": false,
-          "explanation": "This misses the distinction between current truth and prior believed truth. Finance and payroll often need to know what was reported or believed at period close, not what the system says now after later corrections. Recalculation from current state destroys that temporal accountability."
+          "explanation": "The instinct is understandable in the room. This misses the distinction between current truth and prior believed truth. Finance and payroll often need to know what was reported or believed at period close, not what the system says now after later corrections. Recalculation from current state destroys that temporal accountability."
         },
         {
-          "text": "The strongest answer is to event-source every HR and payroll service so we can replay the estate to any point in time. Once every domain is fully event-sourced, the reporting platform can reconstruct prior month states precisely and we avoid the limitations of snapshots. It is a larger architectural move, but if accurate historical replay matters, event sourcing is really the only serious long-term answer.",
+          "text": "The strongest answer is to event-source every HR and payroll service so we can replay the estate to any point in time. Once every domain is fully event-sourced, the reporting platform can reconstruct prior month states precisely and we avoid the limitations of snapshots. It is a larger architectural move, but if accurate historical replay matters, event sourcing is really the only serious long-term answer. It also gives finance and HR a shared way to separate operational numbers from cross-domain metrics before choosing a target platform.",
           "correct": false,
-          "explanation": "This is a heavyweight escalation that the requirement does not justify. Temporal reporting needs can often be met with snapshots, periodised facts, effective dating, and closed-period logic. Recommending event sourcing for the entire estate because finance needs month-end accountability is a textbook case of solving a real problem with unnecessary architecture."
+          "explanation": "The instinct is understandable in the room. This is a heavyweight escalation that the requirement does not justify. Temporal reporting needs can often be met with snapshots, periodised facts, effective dating, and closed-period logic. Recommending event sourcing for the entire estate because finance needs month-end accountability is a textbook case of solving a real problem with unnecessary architecture."
         },
         {
-          "text": "Yes, but only if we model time explicitly. For finance and payroll, we need periodised facts or snapshots with effective dating and closed-period handling, not just today's flattened data. The reporting model has to preserve what was known at period close and what changed later. That's a data-modelling discipline question, not just a dashboard question.",
+          "text": "Yes, but only if we model time explicitly. For finance and payroll, we need periodised facts or snapshots with effective dating and closed-period handling, not today's flattened data. The reporting model has to preserve what was known at period close and what changed later. That's a data-modelling discipline question, not a dashboard question.",
           "correct": true,
-          "explanation": "Exactly. You have identified the real requirement: temporal truth, not just present-state reporting. This is where good reporting architecture depends on explicit time modelling rather than assuming the latest source records are enough."
+          "explanation": "This demonstrates the architect's framing pattern. Exactly. You have identified the real requirement: temporal truth, not just present-state reporting. This is where good reporting architecture depends on explicit time modelling rather than assuming the latest source records are enough."
         }
       ]
     },
@@ -73,17 +73,17 @@
         {
           "text": "There is a good split here. Domain teams should own what they publish: curated source datasets, field definitions, data quality rules, and change contracts. But the enterprise metrics that show up in finance, board, and leadership reporting need a centrally governed semantic layer. Otherwise we'll reproduce the same metric fight with better tooling.",
           "correct": true,
-          "explanation": "This is the right balance. Domain ownership of published data preserves accountability close to the source. A centrally governed semantic layer ensures shared executive metrics mean the same thing everywhere they appear. You are standardising meaning at the right layer without centralising every data transformation."
+          "explanation": "This demonstrates the architect's framing pattern. This is the right balance. Domain ownership of published data preserves accountability close to the source. A centrally governed semantic layer ensures shared executive metrics mean the same thing everywhere they appear. You are standardising meaning at the right layer without centralising every data transformation."
         },
         {
-          "text": "I would not let domain teams publish anything directly. The central data team should ingest raw operational tables itself, model the data independently, and own every reporting output end to end. That is the only way to guarantee consistency and avoid the risk of product teams shaping their data in self-serving ways. Central ownership of the entire reporting pipeline is the safest governance model.",
+          "text": "I would not let domain teams publish anything directly. The central data team should ingest raw operational tables itself, model the data independently, and own every reporting output end to end. That is the only way to guarantee consistency and avoid the risk of product teams shaping their data in self-serving ways. Central ownership of the entire reporting pipeline is the safest governance model. It also gives finance and HR a shared way to separate operational numbers from cross-domain metrics before choosing a target platform.",
           "correct": false,
-          "explanation": "This goes too far the other way. Scraping raw operational tables undermines service ownership and creates a data team that is permanently reverse-engineering domain meaning. Governance is needed, but the best model is for domains to publish curated data intentionally, not for the centre to seize ownership of everything."
+          "explanation": "The instinct is understandable in the room. This goes too far the other way. Scraping raw operational tables undermines service ownership and creates a data team that is permanently reverse-engineering domain meaning. Governance is needed, but the best model is for domains to publish curated data intentionally, not for the centre to seize ownership of everything."
         },
         {
-          "text": "Yes. Full federation is the cleanest model. Each domain team should own its own dataset, definitions, and refresh cadence, and the central layer can simply link them together for executives. That keeps teams autonomous and avoids a central semantic bottleneck. As long as everyone uses the same tooling, the consistency problem should be manageable without stronger central governance.",
+          "text": "Yes. Full federation is the cleanest model. Each domain team should own its own dataset, definitions, and refresh cadence, and the central layer can link them together for executives. That keeps teams autonomous and avoids a central semantic bottleneck. As long as everyone uses the same tooling, the consistency problem should be manageable without stronger central governance.",
           "correct": false,
-          "explanation": "This is attractive but weak on semantics. Tooling alignment does not guarantee metric alignment. If every domain publishes its own definitions independently, the same metric will drift again under a thinner central wrapper. You need stronger governance for leadership metrics than this provides."
+          "explanation": "The instinct is understandable in the room. This is attractive but weak on semantics. Tooling alignment does not guarantee metric alignment. If every domain publishes its own definitions independently, the same metric will drift again under a thinner central wrapper. You need stronger governance for leadership metrics than this provides."
         }
       ]
     },
@@ -92,19 +92,19 @@
       "prompt": "The CFO closes with: \"I need something concrete by next quarter, not a multi-year data programme. What do we do first?\" How should you respond?",
       "options": [
         {
-          "text": "We should build the enterprise lakehouse first and ingest every relevant source before we start defining metrics. That avoids having to revisit modelling choices later and gives the finance team confidence that the full platform is finally underway. Once all the data is centralised, we can standardise the reports on top of it properly instead of creating another interim solution that will be thrown away.",
+          "text": "We should build the enterprise lakehouse first and ingest every relevant source before we start defining metrics. That avoids having to revisit modelling choices later and gives the finance team confidence that the full platform is finally underway. Once all the data is centralised, we can standardise the reports on top of it properly instead of creating another interim solution that will be thrown away. It also lets the room describe a harder platform path as optional rather than inevitable.",
           "correct": false,
-          "explanation": "This is a platform-first answer to a metrics-governance problem. It is too broad for the CFO's timeline and does not guarantee a reduction in executive disagreement next quarter. You need a smaller slice that directly resolves the arguments happening now."
+          "explanation": "The instinct is understandable in the room. This is a platform-first answer to a metrics-governance problem. It is too broad for the CFO's timeline and does not guarantee a reduction in executive disagreement next quarter. You need a smaller slice that directly resolves the arguments happening now."
         },
         {
           "text": "Start narrow and high-pain. Pick the ten metrics that trigger the most executive argument — headcount, payroll cost, attrition, vacancy count, absence rate, and similar. For each one, define the business rule, owner, source inputs, refresh SLA, and reconciliation test. Publish those through one semantic model and make every executive dashboard consume it. That solves the argument that matters most without pretending we've governed every field in the estate.",
           "correct": true,
-          "explanation": "This is the strongest answer because it makes governance tangible quickly. The CFO gets a visible reduction in argument, the data team gets a bounded scope, and the organisation learns the right operating model before attempting a broader reporting transformation."
+          "explanation": "This demonstrates the architect's framing pattern. This is the strongest answer because it makes governance tangible quickly. The CFO gets a visible reduction in argument, the data team gets a bounded scope, and the organisation learns the right operating model before attempting a broader reporting transformation."
         },
         {
           "text": "The quickest route is probably procedural rather than technical. We can ask each function to bring its numbers to a monthly reconciliation meeting, align them manually, and only then publish the agreed figures in the board pack. That creates one official answer by next quarter without waiting for the reporting platform work to mature. The architecture can catch up later once the business process is stable.",
           "correct": false,
-          "explanation": "This might create a temporary board-pack answer, but it does not build the reporting discipline the CFO is asking for. Manual monthly reconciliation institutionalises the current failure mode instead of fixing it. The request was for a real architecture and governance improvement, not a meeting-based workaround."
+          "explanation": "The instinct is understandable in the room. This might create a temporary board-pack answer, but it does not build the reporting discipline the CFO is asking for. Manual monthly reconciliation institutionalises the current failure mode instead of fixing it. The request was for a real architecture and governance improvement, not a meeting-based workaround."
         }
       ]
     }

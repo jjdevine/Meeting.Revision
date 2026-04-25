@@ -1,110 +1,110 @@
 {
   "id": "rp-expenses-rules-engine-extraction",
   "title": "From Policy PDF to Enforced Rule",
-  "context": "The architecture group is reviewing how Expenses will move from natural-language policy documents to enforceable rules. Product wants a conference-ready story. Engineering wants to avoid unnecessary components. Procurement has found vendors promising policy extraction out of the box. You are the solution architect for the programme. The CTO is chairing.",
+  "context": "An architecture review is underway for how Expenses should move from uploaded policy documents to enforceable policy logic. The Product Director wants a compelling conference narrative. Procurement has found several rule-engine vendors. Engineering wants to avoid accidental platform sprawl, and Compliance wants strong audit over how policy becomes system behavior. You are expected to keep the conversation on a defensible path.",
   "questions": [
     {
       "id": "rp-ere-1",
-      "prompt": "The Product Manager says: \"Why are we talking about a rules engine at all? If the AI can read the policy, surely it can just decide at claim time whether something is in or out of policy. That would save us months.\" How should you respond?",
+      "prompt": "The Product Director says: \"The story should be simple: upload a policy PDF and the system enforces it automatically.\" How do you respond?",
       "options": [
         {
-          "text": "That is a reasonable simplification. If the model can answer policy questions, it can probably make policy decisions too, so adding a separate rules engine just duplicates capability and creates maintenance overhead we do not need.",
+          "text": "That is a compelling message, so we should design for straight-through automation from the document. If the system can parse the policy and apply it without human involvement, the product story becomes much stronger and we avoid operational bottlenecks. It also gives Product a cleaner conference story and delays the messy review-and-approval design until after the automation promise has already been made.",
           "correct": false,
-          "explanation": "This collapses several distinct capabilities into one opaque runtime decision. The PRDs separate policy guidance, rules engine, extraction, and enforcement for a reason. The rules engine is the precursor that allows extracted policy logic to become explicit, reviewable, and enforceable rather than hidden inside ad hoc model calls."
+          "explanation": "The desire for a clean story is understandable. This is failure mode A — over-agreement: it accepts a slogan before translating it into the real steps of extraction, review, approval, and enforcement."
         },
         {
-          "text": "I would keep those concerns separate. A conversational policy assistant helps users understand the policy, but enforcement needs explicit rules that the product can apply consistently. That is why the rules engine exists as its own capability and why extraction comes after it. If we let an AI make enforcement calls directly from document text at runtime, we lose determinism, reviewability, and a clear admin control point.",
+          "text": "I would translate that slogan into a governed pipeline: extract candidate rules, review them in a structured form, approve them explicitly, and only then enforce them. The magic is not the requirement; trustworthy policy change is. We should not let extraction masquerade as authorisation.",
           "correct": true,
-          "explanation": "This is the correct response. It respects the sequencing in the PRDs and explains the architectural reason for it: guidance is not the same thing as deterministic policy enforcement."
+          "explanation": "This demonstrates translating a slogan into a requirement and separating authoring from enforcement. The answer keeps the room grounded in audit and ownership rather than in a conference soundbite."
         },
         {
-          "text": "We should keep the AI in the loop for final decision-making but use a lightweight rules engine only for straightforward numeric limits. That gives us a hybrid model where the assistant handles the messy cases and the engine only covers the easy ones.",
+          "text": "Automatic extraction is too risky, so I would rule it out entirely and have engineering implement every rule by hand. That keeps the behavior under tight technical control even if policy change stays slower.",
           "correct": false,
-          "explanation": "The PRDs do not frame the engine as a narrow helper for simple limits. The rules engine is the foundation that makes later extraction and enforcement possible. Leaving final decisions to the AI undermines the reason the engine exists."
+          "explanation": "The concern about safety is reasonable. This is failure mode B — correct instinct, wrong execution: it protects control by jumping to a blunt implementation choice instead of framing the safer middle ground."
         }
       ]
     },
     {
       "id": "rp-ere-2",
-      "prompt": "Procurement says: \"A vendor has shown us a platform that claims it can ingest policies, extract the rules, and manage the whole lifecycle. We should decide today whether we are buying or building so we can move quickly.\" The CTO looks to you. How should you respond?",
+      "prompt": "Procurement says: \"If we are doing this at all, let us buy an enterprise rules engine that other domains can use later as well.\" What do you say?",
       "options": [
         {
-          "text": "If the vendor demo looked good, we should commit now. The fastest path is usually the right one for a new module, and we can always revisit the decision if the platform turns out to be too constraining later.",
+          "text": "Yes, because a shared engine gives us leverage beyond Expenses. Even if the first use case is narrow, selecting the enterprise platform now will save the organisation from building separate rule solutions across teams. It also gives Procurement a bigger enterprise-platform justification and postpones the hard ownership questions until vendor selection already has momentum.",
           "correct": false,
-          "explanation": "The rules engine PRD explicitly says a build-versus-buy approach needs a spike. Committing at this stage would skip the piece of work that is already recognised as necessary to make that decision responsibly."
+          "explanation": "The reuse instinct is understandable. This is failure mode D — scope explosion: it turns a bounded Expenses decision into an enterprise platform commitment before the current domain has justified that step."
         },
         {
-          "text": "We should not pretend the decision is already made. The PRD explicitly calls out a build-versus-buy spike, which is the right move here. We need to test whether an external product can represent the kinds of rules we care about, fit our admin review model, and integrate cleanly with the wider Expenses roadmap before we commit the architecture to it.",
+          "text": "I would keep the decision on the Expenses problem first and evaluate the option spectrum from simple configuration through to a specialised rules product. If the volatility, ownership, and audit needs in this domain justify a dedicated engine, we can say that plainly without pretending we have already solved every future policy problem in the company.",
           "correct": true,
-          "explanation": "This is the correct answer because it matches the documented milestone and gives a sound architectural reason for it. The spike is not bureaucracy; it is how you de-risk an important foundation decision."
+          "explanation": "This demonstrates presenting the option spectrum and anchoring on criteria. The answer forces the heavier shared-platform proposal to earn its place instead of arriving under the banner of reuse."
         },
         {
-          "text": "We should build the rules engine ourselves and treat the decision as already settled. Rules are core intellectual property for the module, so buying would create too much dependency on an external vendor regardless of what the spike might show.",
+          "text": "Let us postpone the architecture call until we have surveyed how every other policy-heavy team might use the product. Once that enterprise landscape is clear, we can decide whether the rules engine belongs in Expenses or somewhere broader.",
           "correct": false,
-          "explanation": "This is just the mirror image of overcommitting to buy. The requirement does not pre-decide the outcome. It says the team needs a spike to decide on build versus buy."
+          "explanation": "The desire for strategic alignment is understandable. This is failure mode C — unnecessary deferral: the architect can already frame the current decision without waiting for a whole-enterprise catalogue of hypothetical users."
         }
       ]
     },
     {
       "id": "rp-ere-3",
-      "prompt": "The Engineering Lead says: \"Once the system extracts rules from the uploaded policy, we should apply them automatically. If the AI is good enough to find the rules, it is good enough to activate them. Asking the sysadmin to review them just adds friction.\" How should you respond?",
+      "prompt": "The Engineering Manager says: \"To move faster, we should code the rules directly into the service for phase one and think about configuration later.\" How do you respond?",
       "options": [
         {
-          "text": "I agree. Automatic activation is the only way to make extraction feel genuinely intelligent. If admins still have to review everything, they will see the feature as glorified data entry rather than automation.",
+          "text": "That is probably the safest delivery route. Hard-coded logic keeps the implementation simple now, and if the rules change more often than expected we can externalise them after launch. It also gives Engineering a faster delivery narrative and pushes the change-control discussion into a later phase when the service shape is already fixed.",
           "correct": false,
-          "explanation": "That ignores a specific requirement. The extracted rules and limits are meant to be presented to the admin for review before they are applied, and the sysadmin must be able to edit them. The human review step is part of the safety model, not optional friction."
+          "explanation": "The delivery instinct is understandable. This is failure mode A — over-agreement: it accepts an implementation shortcut before testing how volatile the rules are, who owns them, and how much audit the change process requires."
         },
         {
-          "text": "The review step stays. The extraction feature is supposed to save setup time by proposing rules and limits, but the sysadmin is still the control point before those rules are applied to Expenses. That is why the extracted limits need to be shown in an easy-to-understand format and why editing is required. We are automating discovery, not removing accountability.",
+          "text": "I would test that choice against volatility, ownership, and audit. If policy analysts need to review and adjust the rules regularly, hard-coding them makes the service the bottleneck. If the rules are genuinely stable and engineering-owned, code may be fine. We should let the criteria decide rather than defaulting to the fastest-looking implementation.",
           "correct": true,
-          "explanation": "This is the correct response. It matches the PRD exactly and explains the intent: automation accelerates configuration, but a human still validates what becomes active policy in the system."
+          "explanation": "This demonstrates applying the 5 decision criteria directly in the room. The answer neither romanticises configuration nor defaults to code; it uses ownership and volatility to choose the appropriate weight of solution."
         },
         {
-          "text": "We can make automatic activation the default and let admins opt out if they want review. That keeps the experience fast for most customers while still giving cautious customers a manual mode.",
+          "text": "We should probably do a few more workshops with policy authors before answering that. Until we have a fuller set of examples, it is premature to say whether code or configuration is the better long-term fit.",
           "correct": false,
-          "explanation": "The requirement does not describe admin review as an optional mode. It is the expected flow that extracted rules are reviewed and editable before application."
+          "explanation": "The wish for evidence is understandable. This is failure mode C — unnecessary deferral: the architect can already frame the decision with criteria and ask the workshops to validate, not replace, that framing."
         }
       ]
     },
     {
       "id": "rp-ere-4",
-      "prompt": "The CTO asks a sequencing question: \"Can we have one team start the extraction feature now while another team works on the rules engine, or is there a hard dependency between them?\" Product is pushing for parallelism. How should you respond?",
+      "prompt": "Compliance asks: \"If extraction produces a high-confidence structured rule, can it go live automatically so policy changes move faster?\" What is your response?",
       "options": [
         {
-          "text": "There is no meaningful dependency. Extraction is just document understanding, so one team can build that feature independently and hand off the output later when the rules engine is ready to consume it.",
+          "text": "Yes, if the confidence score is high enough we should trust the automation. That gives the business the fastest change path and proves the extraction investment is delivering meaningful operational value.",
           "correct": false,
-          "explanation": "The extraction PRD is more specific than that. It says the rules engine needs to be built before the extraction work can be carried out. Discovery and design can happen in parallel, but the feature dependency is real because extraction needs a target rule model and review flow."
+          "explanation": "The speed goal is understandable. This is failure mode A — over-agreement: it treats extraction confidence as a substitute for accountable approval and weakens the audit chain for policy change."
         },
         {
-          "text": "There is a real dependency at the feature level. The rules engine needs to exist first because extraction is not useful in the abstract; it needs a defined rule model, a place for those rules to live, and a review-and-edit path for admins. We can parallelise some discovery and design work, but I would not treat extraction as independently shippable ahead of the engine.",
+          "text": "I would keep approval explicit even if extraction confidence is strong. Confidence can prioritise review, but it should not replace business sign-off on what rule is being enforced. The policy change path needs accountable approval, not only a machine score.",
           "correct": true,
-          "explanation": "This is the correct answer. It respects the explicit milestone dependency while still allowing sensible parallel preparatory work. That is the nuanced architectural position, not a simplistic 'no parallelism ever' answer."
+          "explanation": "This demonstrates protecting ownership and audit boundaries. The answer allows automation to assist the flow without letting extraction become the authoriser of live business policy."
         },
         {
-          "text": "We should ignore the dependency and build the extraction UI first because that is what customers will understand. The rules engine can remain a hidden technical service that catches up later once the UI is already validated.",
+          "text": "That question is sensitive enough that we should escalate it to governance and avoid taking a position in this meeting. Once the wider policy board publishes guidance, we can align the workflow to that decision. It also gives the governance board a cleaner escalation story, which is part of why that deferral can sound prudent in the room.",
           "correct": false,
-          "explanation": "This reverses the intended sequence. The dependency matters because the extraction UI only makes sense if the underlying rule representation and enforcement foundation already exist."
+          "explanation": "The caution is understandable. This is failure mode C — unnecessary deferral: the architect can already state the default principle that approval remains explicit and then let governance confirm the same boundary."
         }
       ]
     },
     {
       "id": "rp-ere-5",
-      "prompt": "A senior engineer says: \"Let us keep the extracted output very loose. We can store free-text snippets from the policy and let the enforcement service interpret them at runtime. Structured rule types are premature.\" How should you respond?",
+      "prompt": "The room asks you to close. Which summary is strongest?",
       "options": [
         {
-          "text": "That is a good approach because it keeps the extraction problem simple. The system only needs to capture the relevant wording, and runtime interpretation gives us flexibility if policies vary between customers.",
-          "correct": false,
-          "explanation": "Loose free-text storage would make review, editing, and enforcement far harder. The extraction PRD names specific categories such as maximum amounts, category-specific thresholds, VAT rules, and scenario-based allowances. That implies a structured rule model rather than runtime interpretation of snippets."
-        },
-        {
-          "text": "We need a structured representation of the extracted rules, not just policy snippets. The sysadmin has to review and edit the output in an understandable way, and enforcement later depends on explicit rule types. That means the extraction model needs to capture things like maximum amounts, category thresholds, VAT rules, and scenario-based allowances as first-class concepts, while still preserving a trace back to the source text.",
+          "text": "We are treating document upload as the start of a governed extraction-and-review pipeline, not as automatic enforcement; we will choose any rules technology against the Expenses criteria before widening the scope to an enterprise platform; we will test code versus configuration using volatility, ownership, and audit; and live policy changes will still require explicit approval. That gives the team a clear architecture direction.",
           "correct": true,
-          "explanation": "This is the correct answer. It ties together the extraction scope, the admin review requirement, and the later enforcement need. Structure is not premature here; it is what makes the feature usable and trustworthy."
+          "explanation": "This demonstrates effective meeting closure. The answer summarises the choices, the criteria, and the safe default boundary so the team can proceed without reheating the same slogans."
         },
         {
-          "text": "We should start with free-text snippets for speed and then manually translate them into structured rules during implementation. The extraction feature does not need to solve the full modelling problem itself.",
+          "text": "There are still enough open issues that the better course is to pause and return with a broader vendor study, more policy examples, and a governance view on automation before we commit to any direction.",
           "correct": false,
-          "explanation": "That would shift the hard work back onto the team or the customer and undermine the value of automated extraction. The feature is meant to produce extracted rules and limits that the sysadmin can review and edit directly, not a bag of text fragments requiring manual interpretation."
+          "explanation": "The caution is understandable. This is failure mode C — unnecessary deferral: the architect already has enough to define the governing principles even if vendor selection details remain open."
+        },
+        {
+          "text": "To avoid future redesign, we should choose the broadest path now: enterprise rules engine, automatic activation for high-confidence extraction, and a general policy platform story that other domains can join later. That will make the investment easier to justify.",
+          "correct": false,
+          "explanation": "The desire for strategic justification is understandable. This is failure mode D — scope explosion: it combines several heavier decisions into one package and lets future-proofing outrun the actual requirement."
         }
       ]
     }

@@ -1,110 +1,110 @@
 {
   "id": "rp-expenses-ocr-receipts",
   "title": "Read the Receipt, Not the Tea Leaves",
-  "context": "The team is assessing the OCR receipt-scanning capability for the Expenses module. A vendor has just demoed a polished mobile capture flow. Tax wants HMRC-relevant detail. Security wants to understand how evidence is stored. Product wants the experience to feel almost effortless for employees. You are the solution architect. The Programme Director is chairing.",
+  "context": "A receipt-capture architecture review has been scheduled after a polished vendor demo impressed the leadership team. The Product Director wants a smooth mobile experience for a customer showcase. The Tax Lead cares about evidence quality. Security wants durable controls around stored images, and Finance is already asking whether OCR can also help with duplicate and fraud detection. You are the architect expected to keep the room focused.",
   "questions": [
     {
       "id": "rp-eor-1",
-      "prompt": "The OCR vendor says: \"Our platform handles the full pipeline end to end: capture, extraction, field mapping, and claim creation. You just call our API and we return a completed claim object. Your system does not need its own extraction logic or confidence model.\" Engineering is attracted to the simplicity. How should you respond?",
+      "prompt": "The vendor says: \"If you adopt our suite, you get OCR, tax extraction, duplicate detection, and anomaly scoring in one purchase.\" The Product Director looks interested. How do you respond?",
       "options": [
         {
-          "text": "That is the fastest path to delivery. If the vendor handles capture through to claim creation, we avoid building extraction logic, confidence scoring, and field mapping ourselves. We can treat the vendor as a black box and focus our engineering effort on the rest of the module.",
+          "text": "That sounds efficient, so we should take the full suite while the receipt work is active. Buying one package now avoids later integration work and gives us a stronger conference story than a narrower capture-only decision. It also gives Product a broader showcase story and postpones the harder evidence and control-boundary decisions until after rollout.",
           "correct": false,
-          "explanation": "Delegating the entire pipeline to a vendor creates a black-box dependency at a critical point in the claim journey. The system needs its own confidence model to decide when to highlight fields for user confirmation, its own fallback path when images cannot be interpreted, and its own mapping logic to connect extracted data to internal domain concepts like payslip items and VAT treatment. Outsourcing all of that means the product cannot control the user experience at the point where accuracy matters most."
+          "explanation": "The desire to consolidate vendors is understandable. This is failure mode A — over-agreement: it accepts a bundled heavyweight option before separating capture, evidence, and downstream control problems."
         },
         {
-          "text": "We should own the confidence model and the user intervention logic even if we use a vendor for raw text extraction. The product needs to decide when to highlight low-confidence fields for confirmation, how to prompt the user to retake a photo or enter details manually, and how to map extracted values to our own domain model. Those are product behaviours, not vendor behaviours. The extraction engine is a replaceable input; the decision and mapping layer is ours.",
+          "text": "I would separate receipt capture from the broader control stack before we commit. If the immediate requirement is reliable image capture and field extraction, we should evaluate that on its own merits and only add duplicate or anomaly capabilities when we can justify them with audit, latency, and ownership criteria.",
           "correct": true,
-          "explanation": "This is the correct response because it draws a clean boundary between commodity extraction and domain-specific logic. The vendor can provide OCR and text extraction, but confidence thresholds, user intervention paths, fallback behaviour, and domain mapping must be owned by the product because they determine the quality and reliability of the claim creation experience."
+          "explanation": "This demonstrates naming the domain and applying criteria before selecting a heavier platform. The answer stops a bundle from becoming the architecture by default and keeps the room on the requirement that is live today."
         },
         {
-          "text": "We should avoid the vendor entirely and build the OCR pipeline in-house. Receipt scanning is a core capability of the module, and outsourcing it creates a strategic dependency we will regret as the feature matures and we need more control over accuracy and speed.",
+          "text": "We should not buy any vendor capability here because building everything ourselves keeps the architecture cleaner. External suites always introduce dependency risk, so the only safe route is a fully in-house service.",
           "correct": false,
-          "explanation": "Building raw OCR and text extraction in-house is a significant investment in a commodity capability. The architectural principle is to use external services for commodity extraction while owning the domain logic that sits above it. The decision is not build-everything versus buy-everything; it is about drawing the right boundary between replaceable infrastructure and product-specific behaviour."
+          "explanation": "The concern about dependency risk is reasonable. This is failure mode B — correct instinct, wrong execution: it rejects the proposal categorically instead of framing which capability is commodity and which might deserve internal ownership."
         }
       ]
     },
     {
       "id": "rp-eor-2",
-      "prompt": "The Tax Lead says: \"For VAT compliance, the extracted data needs to include VAT amount, VAT rate, supplier VAT registration number where present, and the split between taxable and non-taxable elements. That is a lot of structure from a receipt photo.\" Engineering asks whether the OCR output schema should be kept minimal and let downstream services infer the tax treatment. How should you respond?",
+      "prompt": "Security asks: \"If OCR extracts the fields we need, can we discard the image and store only structured data?\" What do you say?",
       "options": [
         {
-          "text": "The OCR output should stay minimal. Extracting merchant, date, total, and line items is already challenging enough from receipt images. Tax classification is a business rules problem, not an image processing problem, and should be handled by a downstream tax service that knows the HMRC rules.",
+          "text": "Yes, once the text is extracted the image becomes redundant. Keeping fewer files lowers storage cost and narrows the security surface, while the structured data gives Product and Finance everything they need downstream. It also gives Product a broader showcase story and postpones the harder evidence and control-boundary decisions until after rollout.",
           "correct": false,
-          "explanation": "This separates extraction from VAT detection in a way that loses information. Some VAT-relevant data is only available on the receipt itself, such as the supplier's VAT registration number and the explicit VAT breakdown. If the extraction schema does not capture these fields, a downstream service cannot reconstruct them without re-processing the image."
+          "explanation": "The storage concern is understandable. This is failure mode A — over-agreement: it treats extracted fields as a full substitute for the evidence record without testing audit and dispute requirements."
         },
         {
-          "text": "The extraction schema needs to capture the VAT-relevant fields at scan time because that information is on the receipt and will not be available later unless we store and re-process the image. The OCR output model should include VAT amount, VAT rate, supplier VAT registration number where present, and the taxable versus non-taxable split. A downstream service can then validate and apply HMRC rules, but it needs the raw extracted values to work from.",
+          "text": "I would keep the immutable image as evidence and store extracted fields alongside it for workflow and reporting use. They solve different problems: one preserves what was submitted, and the other supports operational processing. Discarding the source weakens audit and review when OCR confidence is imperfect.",
           "correct": true,
-          "explanation": "This is the correct response because it recognises that the extraction schema must be rich enough to support downstream compliance processing. The architectural point is that the OCR pipeline is the only stage with direct access to the receipt image, so any data that originates from the physical receipt must be captured in the extraction output rather than deferred to a service that only sees structured data."
+          "explanation": "This demonstrates separating evidence from operational data and anchoring on audit. The answer makes the trust boundary explicit instead of collapsing two distinct needs into one record."
         },
         {
-          "text": "We should store the original receipt image and let a specialised tax service re-read it later with its own OCR pass focused specifically on VAT fields. That way the initial extraction stays fast and simple, and the tax service can apply its own purpose-built model to find what it needs.",
+          "text": "Let us ask the vendor what other customers do before we decide. If their common pattern is to keep only structured fields, we can follow that practice and avoid overthinking it.",
           "correct": false,
-          "explanation": "Running two separate OCR passes over the same image adds latency, cost, and complexity without a clear benefit. The extraction pipeline should produce a single rich output that captures all required fields in one pass. The image should be stored as evidence, but it should not be the primary mechanism for tax-relevant data extraction."
+          "explanation": "The wish to learn from peers is understandable. This is failure mode C — unnecessary deferral: the architect can already frame the decision by distinguishing evidence preservation from operational convenience without outsourcing the thinking."
         }
       ]
     },
     {
       "id": "rp-eor-3",
-      "prompt": "The Engineering Lead says: \"OCR extraction should produce a generic key-value output. Mapping to payslip items, expense categories, and VAT treatment should happen in a separate downstream service. That keeps the OCR component clean and reusable.\" The Payroll analyst says they need the mapping to happen before the employee sees the claim. How should you respond?",
+      "prompt": "The Tax Lead says: \"OCR confidence will vary by country and receipt style. Should we run a second OCR service in parallel so we can cross-check every submission?\" How do you respond?",
       "options": [
         {
-          "text": "A generic key-value output is the right first step. If we keep OCR decoupled from domain concepts, we can reuse the extraction component across other modules in future. The mapping service can consume the output and enrich it before claim creation, and the employee will not notice the difference.",
+          "text": "Yes, dual-running two OCR engines from day one gives us the strongest answer. It reduces the chance of missed fields, produces richer data, and lets us compare vendors continuously while the product scales. It also gives Product a broader showcase story and postpones the harder evidence and control-boundary decisions until after rollout.",
           "correct": false,
-          "explanation": "While separation of concerns is generally sound, the timing matters here. The mapping to payslip items and claim type needs to happen before the employee reviews the pre-populated claim, because the goal is to reduce claim creation effort end to end. If the employee has to classify the claim manually after scanning because the mapping has not run yet, the feature loses most of its value."
+          "explanation": "The quality concern is understandable. This is failure mode D — scope explosion: it jumps to a materially heavier operating model before the room has defined acceptable confidence levels or review behaviour."
         },
         {
-          "text": "The extraction and domain mapping need to complete as a single pipeline before the claim is presented to the employee. The employee should see a pre-populated claim with the correct type and category already resolved, not a bag of raw fields they have to classify themselves. We can still separate extraction from mapping internally as distinct responsibilities, but from the user's perspective the pipeline must complete before they review the result.",
+          "text": "I would translate that into a confidence and review requirement first. If the issue is unreliable extraction on low-confidence receipts, a review queue with clear thresholds may solve it without paying for two live OCR paths. We should only dual-run vendors if the confidence target or regulatory risk truly rules the simpler path out.",
           "correct": true,
-          "explanation": "This is the correct response because it recognises that architectural separation does not mean the steps can happen at different lifecycle stages. Extraction and mapping can be distinct services, but they must execute as a synchronous pipeline that completes before the claim is shown to the employee. The system should automatically map OCR output to the relevant payslip item so the employee does not have to select the claim type manually."
+          "explanation": "This demonstrates translating a concern into a requirement and naming the simpler option. The answer keeps the room on thresholds, review, and risk rather than assuming parallel services are automatically the rigorous choice."
         },
         {
-          "text": "We should combine extraction and mapping into a single monolithic service to guarantee they always execute together. Separating them just creates an integration point that can fail and adds latency to the scan experience.",
+          "text": "OCR is always imperfect, so I would avoid promising any structured extraction at all. Employees can upload the image, and finance teams can key the fields manually until we revisit automation later.",
           "correct": false,
-          "explanation": "Collapsing the two concerns into one service trades architectural clarity for a coupling guarantee that can be achieved more cleanly with a synchronous pipeline. Keeping extraction and mapping as distinct responsibilities makes each one independently testable, replaceable, and evolvable, while a pipeline orchestrator ensures they always run in sequence before presenting results."
+          "explanation": "The caution about confidence is reasonable. This is failure mode B — correct instinct, wrong execution: it responds to uncertainty by collapsing the feature instead of offering a bounded, auditable workflow."
         }
       ]
     },
     {
       "id": "rp-eor-4",
-      "prompt": "The Security Architect says: \"To reduce risk, can we process receipt images transiently and discard them once the text has been extracted? Storing images creates another class of sensitive data we need to govern.\" How should you respond?",
+      "prompt": "Finance adds: \"While we are doing receipt OCR, we should also include duplicate detection and spend anomaly scoring in the same release.\" What is your response?",
       "options": [
         {
-          "text": "Yes. If the structured data has already been captured, keeping the image is unnecessary. Throwing images away after OCR is the cleanest security posture and customers are unlikely to miss them.",
+          "text": "That is sensible because the image and extracted data are already flowing through the pipeline. Adding the extra controls now would make the release feel more strategic and avoid another architecture cycle later.",
           "correct": false,
-          "explanation": "That is incompatible with the requirement. All scanned receipts and the extracted data are meant to be stored securely and automatically attached to the expense claim. The evidence itself is part of the claim record."
+          "explanation": "The desire to build on existing work is understandable. This is failure mode D — scope explosion: it accepts a classic 'while we are doing this' move and couples receipt capture to a broader control agenda without separating the decisions."
         },
         {
-          "text": "We should absolutely govern the storage carefully, but secure retention is part of the feature rather than an optional extra. The requirement is that scanned receipts and their extracted data are stored securely and attached to the claim. So the architecture question is how we protect and retain that evidence properly, not whether we keep it at all.",
+          "text": "I would keep receipt capture as the decision in this meeting and treat duplicate or anomaly controls as separate follow-on problems. We can design the capture events so they do not block future controls, but that is different from committing this release to a broader fraud platform scope.",
           "correct": true,
-          "explanation": "This is the correct response. It respects the explicit storage requirement while acknowledging the legitimate security concern and reframing it as a design obligation rather than a reason to discard the evidence."
+          "explanation": "This demonstrates resisting scope creep while still leaving a defensible future path. The answer keeps the current decision bounded and prevents an adjacent capability from hijacking the release."
         },
         {
-          "text": "We can keep the image only for receipts where VAT has been detected, and discard it for simpler claims. That gives Finance the audit evidence they need without forcing us to store every receipt equally.",
+          "text": "We need a larger fraud workshop before we can answer. Once Finance, Risk, and Product align on every control they may want over the next year, we can revisit the receipt design with the full roadmap in view.",
           "correct": false,
-          "explanation": "The requirement is broader than that. It says all scanned receipts and the extracted data are stored securely and attached to the claim, not only the subset that meets a VAT condition."
+          "explanation": "The intent to coordinate is understandable. This is failure mode C — unnecessary deferral: the architect can already protect scope and still leave room for later control design without pausing the current decision."
         }
       ]
     },
     {
       "id": "rp-eor-5",
-      "prompt": "The Data Architect says: \"Duplicate detection should sit in the analytics layer where we have the full claim history and can run sophisticated matching. Putting detection logic inside the OCR pipeline means maintaining duplicate-matching code in two places once anomaly detection arrives.\" How should you respond?",
+      "prompt": "The room asks you to close. Which summary best reflects the meeting?",
       "options": [
         {
-          "text": "That is architecturally cleaner. If anomaly detection will eventually own pattern matching across the claim history, building a separate duplicate check inside OCR creates redundancy. We should accept the short-term gap and wait for the analytics layer to handle it properly.",
-          "correct": false,
-          "explanation": "Deferring duplicate detection to an analytics layer means duplicates enter the system and are only caught after submission, review, or even approval. The OCR requirement is specifically about alerting the user at the point of entry when the receipt appears similar to an existing claim. That is a different concern from post-hoc anomaly detection and serves a different purpose: preventing accidental resubmission before it creates downstream work."
-        },
-        {
-          "text": "These are two different concerns operating at different points in the lifecycle. Submission-time duplicate detection alerts the employee before they complete a claim, which prevents accidental resubmission and reduces noise for managers. Analytics-layer anomaly detection operates after the fact across the full claim population to find suspicious patterns. Both are needed, and they do not duplicate each other because they serve different users at different times with different response models.",
+          "text": "We will evaluate OCR as a bounded capture-and-extraction problem, retain receipt images as evidence alongside structured fields, use confidence thresholds and review before introducing heavier dual-vendor operation, and keep duplicate or anomaly controls out of this release unless a separate requirement justifies them. That gives Product and Security a clear design boundary to work within.",
           "correct": true,
-          "explanation": "This is the correct response because it separates the two concerns by lifecycle stage and purpose. Submission-time detection is a user-facing guard that prevents obvious mistakes. Analytics-layer detection is a back-office capability that identifies statistical anomalies. Conflating them would leave a gap at the point of entry where the user can still be helped."
+          "explanation": "This demonstrates strong meeting closure. It confirms the bounded scope, the criteria used, and the immediate consequences for delivery without reopening adjacent debates."
         },
         {
-          "text": "We should build duplicate detection only at submission time and skip the analytics-layer version entirely. If the OCR pipeline catches duplicates before they enter the system, there is no need for a second check downstream.",
+          "text": "The prudent next step is to wait for more vendor responses and gather additional international receipt samples before deciding anything. That will give us a stronger basis for a more complete architecture recommendation next month.",
           "correct": false,
-          "explanation": "Submission-time detection catches obvious duplicates based on image or field similarity, but it cannot detect the kinds of cross-claim patterns that anomaly detection is designed to find, such as systematic over-claiming or coordinated duplicates across different employees. Both layers serve distinct purposes."
+          "explanation": "The caution is understandable. This is failure mode C — unnecessary deferral: the room already has enough to decide the design principles even if some vendor selection detail remains open."
+        },
+        {
+          "text": "We should pursue the broadest possible receipt platform now so capture, fraud checks, duplicate detection, and analytics all land as one coherent initiative. That keeps the architecture ambitious and avoids redesign later.",
+          "correct": false,
+          "explanation": "The ambition is understandable. This is failure mode D — scope explosion: it treats every adjacent capability as part of the same decision and turns a bounded capture problem into a much larger platform commitment."
         }
       ]
     }

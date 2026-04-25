@@ -8,19 +8,19 @@
       "prompt": "The COO opens with: \"We need a workflow platform for every employee lifecycle process. Onboarding, role changes, maternity leave, internal transfers, offboarding, equipment requests — all of it. I want one standard pattern and one place to see status.\" How should you respond?",
       "options": [
         {
-          "text": "I would avoid introducing any workflow platform. Multi-step processes should just be handled by the owning microservices calling each other directly. Once we bring in orchestration engines, we create another dependency and another operational surface. The better answer is to keep each team fully autonomous and let the services coordinate naturally through APIs and events.",
+          "text": "I would avoid introducing any workflow platform. Multi-step processes should be handled by the owning microservices calling each other directly. Once we bring in orchestration engines, we create another dependency and another operational surface. The better answer is to keep each team fully autonomous and let the services coordinate naturally through APIs and events.",
           "correct": false,
-          "explanation": "This is too dismissive. Some lifecycle processes are genuinely long-running, cross-system, approval-heavy, and operationally visible. Pretending those can all stay as ad hoc service-to-service calls ignores the real need for coordination and observability. The answer is not 'no orchestration ever'; it is right-sizing orchestration to the process."
+          "explanation": "The instinct is understandable in the room. This is too dismissive. Some lifecycle processes are genuinely long-running, cross-system, approval-heavy, and operationally visible. Pretending those can all stay as ad hoc service-to-service calls ignores the real need for coordination and observability. The answer is not 'no orchestration ever'; it is right-sizing orchestration to the process."
         },
         {
           "text": "I agree. The inconsistency today is a sign that we need an enterprise workflow platform rather than more local fixes. My recommendation would be to standardise every lifecycle process on a single BPM engine, model the flows centrally, and make all product teams implement against that platform. Once the common workflow layer exists, Operations gets visibility, Product gets consistency, and engineering teams stop reinventing the same process management concerns in different ways.",
           "correct": false,
-          "explanation": "This accepts the conclusion before classifying the work. Not every multi-step process is the same kind of orchestration problem. Some are connector-heavy approval flows, some are code-owned sagas, and some are simple enough to remain inside a service. A single platform for 'every process' is an overreach, not a diagnosis."
+          "explanation": "The instinct is understandable in the room. This accepts the conclusion before classifying the work. Not every multi-step process is the same kind of orchestration problem. Some are connector-heavy approval flows, some are code-owned sagas, and some are simple enough to remain inside a service. A single platform for 'every process' is an overreach, not a diagnosis."
         },
         {
           "text": "This is definitely a workflow and orchestration conversation, but not one pattern for everything. Some of these are connector-heavy approval flows across SaaS systems. Some are code-owned domain processes with retries and compensation. Some may not need orchestration at all. I'd separate the processes first, then choose the lightest pattern that fits each one rather than declaring a single engine up front.",
           "correct": true,
-          "explanation": "This is the right framing. You have classified the problem domain without collapsing all processes into one technical answer. The critical move is to separate process types before discussing tooling. That keeps the room focused on requirements instead of jumping straight to a platform mandate."
+          "explanation": "This demonstrates the architect's framing pattern. This is the right framing. You have classified the problem domain without collapsing all processes into one technical answer. The critical move is to separate process types before discussing tooling. That keeps the room focused on requirements instead of jumping straight to a platform mandate."
         }
       ]
     },
@@ -29,19 +29,19 @@
       "prompt": "The Head of Operations says: \"I don't want each product team inventing its own process. Let's put all business steps and decision rules into the workflow tool so Operations can see and modify the flows without Engineering every time policy changes.\" How should you respond?",
       "options": [
         {
-          "text": "That makes sense. If the workflow platform is going to be strategic, it should hold the end-to-end logic rather than just the plumbing. We can model the approvals, the branching rules, the eligibility checks, and the notifications all in one place so Operations has full visibility and change control. Engineering teams would then implement the technical adapters, but the actual business behaviour would live in the workflow layer where it is easier for non-developers to manage.",
+          "text": "That makes sense. If the workflow platform is going to be strategic, it should hold the end-to-end logic rather than the plumbing. We can model the approvals, the branching rules, the eligibility checks, and the notifications all in one place so Operations has full visibility and change control. Engineering teams would then implement the technical adapters, but the actual business behaviour would live in the workflow layer where it is easier for non-developers to manage.",
           "correct": false,
-          "explanation": "This hides core domain behaviour inside orchestration. Workflow tools are good at coordinating steps, approvals, waits, and integrations. They are a poor place to bury business policy like payroll rules, leave eligibility, or domain-specific decisions that need strong testing and ownership. You have traded visibility for blurred boundaries and harder domain change."
+          "explanation": "The instinct is understandable in the room. This hides core domain behaviour inside orchestration. Workflow tools are good at coordinating steps, approvals, waits, and integrations. They are a poor place to bury business policy like payroll rules, leave eligibility, or domain-specific decisions that need strong testing and ownership. You have traded visibility for blurred boundaries and harder domain change."
         },
         {
           "text": "Visibility and change control are good goals, but we should not hide core domain policy inside a workflow tool. The workflow should coordinate steps, approvals, notifications, and integrations. Eligibility rules, payroll calculations, and domain decisions still belong in the owning services where they are testable and versioned. Otherwise we turn the workflow platform into a second domain system.",
           "correct": true,
-          "explanation": "Exactly right. You are separating process coordination from business policy. That is the key architectural boundary in workflow discussions. The workflow layer can still give Operations visibility and controlled change over the wrapper around the process without becoming the home of every business rule in the estate."
+          "explanation": "This demonstrates the architect's framing pattern. Exactly right. You are separating process coordination from business policy. That is the key architectural boundary in workflow discussions. The workflow layer can still give Operations visibility and controlled change over the wrapper around the process without becoming the home of every business rule in the estate."
         },
         {
           "text": "I would go the other way. Operations should not be editing or even really inspecting process flows. Process state is an engineering concern, and the safest approach is to keep the flow definitions fully code-owned so no one outside engineering can interfere with runtime behaviour. If Operations needs updates, engineering can provide status reports and make requested changes through the normal release process.",
           "correct": false,
-          "explanation": "This overcorrects and ignores legitimate operational needs. Visibility into progress, bottlenecks, and approvals is often essential for business operations. The right answer is not to exclude Operations; it is to give them visibility and carefully bounded change capability without dumping core domain logic into the workflow tool."
+          "explanation": "The instinct is understandable in the room. This overcorrects and ignores legitimate operational needs. Visibility into progress, bottlenecks, and approvals is often essential for business operations. The right answer is not to exclude Operations; it is to give them visibility and carefully bounded change capability without dumping core domain logic into the workflow tool."
         }
       ]
     },
@@ -50,19 +50,19 @@
       "prompt": "The VP of Engineering says: \"If we standardise, we should use Temporal for everything. Code-first, durable, powerful retries, full control. Logic Apps will box us in.\" The Integration Lead looks unconvinced. How should you respond?",
       "options": [
         {
-          "text": "Temporal is strong for code-owned long-running sagas, but 'powerful' is not the same as 'default'. For connector-heavy processes with Microsoft and SaaS integrations and human approvals, Logic Apps is usually the lower-friction choice. The question is what requirement eliminates the simpler option. If a process is mostly provisioning, waiting, and calling external systems, I'd avoid buying saga complexity just because it exists.",
+          "text": "Temporal is strong for code-owned long-running sagas, but 'powerful' is not the same as 'default'. For connector-heavy processes with Microsoft and SaaS integrations and human approvals, Logic Apps is usually the lower-friction choice. The question is what requirement eliminates the simpler option. If a process is mostly provisioning, waiting, and calling external systems, I'd avoid buying saga complexity because the engine exists.",
           "correct": true,
-          "explanation": "This is the right answer because it reframes the argument around fit, not capability. Temporal may be exactly right for some processes. It is not right merely because it is more powerful. By explicitly naming the simpler option and asking what disqualifies it, you've brought the room back to architectural judgment."
+          "explanation": "This demonstrates the architect's framing pattern. This is the right answer because it reframes the argument around fit, not capability. Temporal may be exactly right for some processes. It is not right merely because it is more powerful. By explicitly naming the simpler option and asking what disqualifies it, you've brought the room back to architectural judgment."
         },
         {
-          "text": "I agree with the VP. If we are going to standardise, we may as well standardise on the most capable option. Temporal can do everything Logic Apps can do and more, and it keeps the logic in code where engineers are comfortable. That gives us one runtime, one programming model, and maximum flexibility as process complexity grows over time. It is better to adopt the stronger tool now than discover later that the lighter option cannot scale with us.",
+          "text": "I agree with the VP. If we are going to standardise, we may as well standardise on the most capable option. Temporal can do everything Logic Apps can do and more, and it keeps the logic in code where engineers are comfortable. That gives us one runtime, one programming model, and maximum flexibility as process complexity grows over time. It is better to adopt the stronger tool now than discover later that the lighter option cannot scale with us. It also lets the COO see that process standardisation and engine standardisation are related but not identical decisions.",
           "correct": false,
-          "explanation": "This is a classic 'heavier because stronger' mistake. Capability is not free. Temporal introduces code-owned orchestration complexity that is often unnecessary for connector-heavy, approval-driven processes. You have standardised on the most powerful tool rather than the most appropriate default."
+          "explanation": "The instinct is understandable in the room. This is a classic 'heavier because stronger' mistake. Capability is not free. Temporal introduces code-owned orchestration complexity that is often unnecessary for connector-heavy, approval-driven processes. You have standardised on the most powerful tool rather than the most appropriate default."
         },
         {
           "text": "I think the Integration Lead is right and we should do the opposite: Logic Apps for everything. It's managed, visual, and integrates cleanly with the rest of Azure. Once we let teams use code-first orchestrators, we lose consistency and create too much custom behaviour. Standardising on the simpler low-code option is the cleanest way to stop architecture drift across the lifecycle estate.",
           "correct": false,
-          "explanation": "This just flips the same mistake in the other direction. Logic Apps is not the right answer for every process either. Some long-running, code-owned sagas with complex compensation, retries, or deterministic behaviour genuinely fit a code-first orchestrator better. The architect's job is to define the split, not to force one tool everywhere."
+          "explanation": "The instinct is understandable in the room. This just flips the same mistake in the other direction. Logic Apps is not the right answer for every process either. Some long-running, code-owned sagas with complex compensation, retries, or deterministic behaviour genuinely fit a code-first orchestrator better. The architect's job is to define the split, not to force one tool everywhere."
         }
       ]
     },
@@ -73,7 +73,7 @@
         {
           "text": "I agree. A single user timeline only really works if one workflow engine owns the process state. Otherwise we'll be stitching together fragmented status from multiple systems, which will be slow and unreliable. If the experience matters, the architecture should follow it and we should consolidate execution into one central workflow layer. The source of truth for the process should be the same thing that powers the UI.",
           "correct": false,
-          "explanation": "This lets a read requirement dictate the write architecture. A single timeline does not prove that a single engine should control every process. You can project status from multiple process owners into a consolidated read model without centralising execution. The user experience is real, but the proposed architectural consequence is unnecessary."
+          "explanation": "The instinct is understandable in the room. This lets a read requirement dictate the write architecture. A single timeline does not prove that a single engine should control every process. You can project status from multiple process owners into a consolidated read model without centralising execution. The user experience is real, but the proposed architectural consequence is unnecessary."
         },
         {
           "text": "I think we should lower the UX ambition. These are internal enterprise processes, and most users can tolerate checking two or three systems if they need to understand where something is stuck. Forcing a single timeline creates a lot of integration effort for a cosmetic benefit. I'd rather keep the architecture simpler and let each domain expose its own status independently.",
@@ -81,9 +81,9 @@
           "explanation": "This is tone-deaf to a reasonable product need. A unified progress view is not merely cosmetic in long-running business processes; it reduces confusion and support load. The correct move is to satisfy the read need without letting it drag the write model into centralisation."
         },
         {
-          "text": "A single status view is a reporting and read-model requirement, not proof that one engine should own every process. We can project workflow status from whichever systems own the steps into a consolidated timeline view. The read model can be central even when process execution is not. We shouldn't let a UI requirement force unnecessary centralisation of control.",
+          "text": "A single status view is a reporting and read-model requirement, not proof that one engine should own every process. We can project workflow status from whichever systems own the steps into a consolidated timeline view. The read model can be central even when process execution is not. We shouldn't let a UI requirement force unnecessary centralisation of control. That keeps the tooling decision anchored on process type and delivery risk instead of collapsing unlike workflows into one answer.",
           "correct": true,
-          "explanation": "Exactly. You have separated the experience problem from the control-plane problem. A central status projection gives Product what it wants while preserving the freedom to execute different classes of process in the right place. That is a high-value architectural distinction."
+          "explanation": "This demonstrates the architect's framing pattern. Exactly. You have separated the experience problem from the control-plane problem. A central status projection gives Product what it wants while preserving the freedom to execute different classes of process in the right place. That is a high-value architectural distinction."
         }
       ]
     },
@@ -94,17 +94,17 @@
         {
           "text": "Honestly, the cleanest route is to avoid standardisation. Lifecycle processes differ too much, and any attempt to create common patterns will be constraining. I would let each domain team choose whatever orchestration approach it prefers and focus only on making sure the APIs between systems are robust. That preserves autonomy and avoids a central architecture battle entirely.",
           "correct": false,
-          "explanation": "This dodges the legitimate consistency problem the COO is raising. Total autonomy sounds appealing, but it guarantees repeated reinvention and no coherent way to reason about workflow choices across the estate. The right answer is selective standardisation based on process type, not no standardisation at all."
+          "explanation": "The instinct is understandable in the room. This dodges the legitimate consistency problem the COO is raising. Total autonomy sounds appealing, but it guarantees repeated reinvention and no coherent way to reason about workflow choices across the estate. The right answer is selective standardisation based on process type, not no standardisation at all."
         },
         {
           "text": "Define a decision matrix and prove it on two representative flows. For example: onboarding as a connector-heavy approval flow, and payroll exception handling as a code-owned saga. Use those to set the standards: when Logic Apps is the default, when Durable or Temporal is justified, what state each domain owns, and how status is published into a shared timeline. That gives us consistency through criteria and exemplars rather than a universal tool mandate.",
           "correct": true,
-          "explanation": "This is the best answer because it gives the COO an operating model, not a philosophy. The decision matrix prevents repeated debates. The exemplar flows make the standard concrete. And you still avoid the trap of pretending one tool should own every kind of workflow."
+          "explanation": "This demonstrates the architect's framing pattern. This is the best answer because it gives the COO an operating model, not a philosophy. The decision matrix prevents repeated debates. The exemplar flows make the standard concrete. And you still avoid the trap of pretending one tool should own every kind of workflow."
         },
         {
           "text": "We should set up a central Workflow Centre of Excellence and require every team to bring proposed processes to it for review. The group can approve modelling standards, tool usage, state management, and visibility requirements before implementation starts. That ensures consistency and stops teams from making local decisions that increase sprawl. Over time the centre becomes the organisation's authority on process design and tooling.",
           "correct": false,
-          "explanation": "This creates a queue, not a strategy. A review board without a crisp decision framework just centralises delay. The COO asked for a pragmatic plan, not another approval function. You need criteria and exemplars, not a permanent committee as the main control mechanism."
+          "explanation": "The instinct is understandable in the room. This creates a queue, not a strategy. A review board without a crisp decision framework just centralises delay. The COO asked for a pragmatic plan, not another approval function. You need criteria and exemplars, not a permanent committee as the main control mechanism."
         }
       ]
     }
