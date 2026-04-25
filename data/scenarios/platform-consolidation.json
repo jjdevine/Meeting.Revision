@@ -113,7 +113,7 @@
       "prompt": "As the meeting wraps up, the project manager asks: \"So what's the plan? Can someone summarize what we agreed?\" The room looks to you. How should you respond?",
       "options": [
         {
-          "text": "I'll write up a comprehensive technical design document covering the federated approach, the API gateway architecture, the vendor consolidation strategy, and the evaluation criteria for future decisions. I want to make sure we capture not what we decided but the reasoning behind each choice, so the document serves as a lasting reference for the team. I'll aim to have it ready for review in two weeks — I want to get the details right rather than rush something out that needs heavy revision.",
+          "text": "I'll write up a comprehensive technical design document covering the federated approach, the API gateway architecture, the vendor consolidation strategy, and the evaluation criteria for future decisions. I want to make sure we capture what we decided and the reasoning behind each choice, so the document serves as a lasting reference for the team. I'll aim to have it ready for review in two weeks — I want to get the details right rather than rush something out that needs heavy revision.",
           "correct": false,
           "explanation": "The instinct is understandable in the room. A two-week design document loses the momentum you've built. The room has consensus now — capture it before people reinterpret the discussion. You should summarize the decisions and next steps verbally right now, then follow up with a lightweight written record. Don't let a document become a bottleneck."
         },

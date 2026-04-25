@@ -50,7 +50,7 @@
       "prompt": "The VP of Engineering says: \"If we standardise, we should use Temporal for everything. Code-first, durable, powerful retries, full control. Logic Apps will box us in.\" The Integration Lead looks unconvinced. How should you respond?",
       "options": [
         {
-          "text": "Temporal is strong for code-owned long-running sagas, but 'powerful' is not the same as 'default'. For connector-heavy processes with Microsoft and SaaS integrations and human approvals, Logic Apps is usually the lower-friction choice. The question is what requirement eliminates the simpler option. If a process is mostly provisioning, waiting, and calling external systems, I'd avoid buying saga complexity because it exists.",
+          "text": "Temporal is strong for code-owned long-running sagas, but 'powerful' is not the same as 'default'. For connector-heavy processes with Microsoft and SaaS integrations and human approvals, Logic Apps is usually the lower-friction choice. The question is what requirement eliminates the simpler option. If a process is mostly provisioning, waiting, and calling external systems, I'd avoid buying saga complexity because the engine exists.",
           "correct": true,
           "explanation": "This demonstrates the architect's framing pattern. This is the right answer because it reframes the argument around fit, not capability. Temporal may be exactly right for some processes. It is not right merely because it is more powerful. By explicitly naming the simpler option and asking what disqualifies it, you've brought the room back to architectural judgment."
         },
