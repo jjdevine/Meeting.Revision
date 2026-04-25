@@ -8,7 +8,7 @@
       "prompt": "The vendor says: \"If you adopt our suite, you get OCR, tax extraction, duplicate detection, and anomaly scoring in one purchase.\" The Product Director looks interested. How do you respond?",
       "options": [
         {
-          "text": "That sounds efficient, so we should take the full suite while the receipt work is active. Buying one package now avoids later integration work and gives us a stronger conference story than a narrower capture-only decision.",
+          "text": "That sounds efficient, so we should take the full suite while the receipt work is active. Buying one package now avoids later integration work and gives us a stronger conference story than a narrower capture-only decision. It also gives leadership one visible programme story, creates a reusable delivery pattern for adjacent requests, and lets us regularise any awkward boundary issues during later rollout waves rather than now.",
           "correct": false,
           "explanation": "The desire to consolidate vendors is understandable. This is failure mode A — over-agreement: it accepts a bundled heavyweight option before separating capture, evidence, and downstream control problems."
         },
@@ -29,7 +29,7 @@
       "prompt": "Security asks: \"If OCR extracts the fields we need, can we discard the image and store only structured data?\" What do you say?",
       "options": [
         {
-          "text": "Yes, once the text is extracted the image becomes redundant. Keeping fewer files lowers storage cost and narrows the security surface, while the structured data gives Product and Finance everything they need downstream.",
+          "text": "Yes, once the text is extracted the image becomes redundant. Keeping fewer files lowers storage cost and narrows the security surface, while the structured data gives Product and Finance everything they need downstream. It also gives leadership one visible programme story, creates a reusable delivery pattern for adjacent requests, and lets us regularise any awkward boundary issues during later rollout waves rather than now.",
           "correct": false,
           "explanation": "The storage concern is understandable. This is failure mode A — over-agreement: it treats extracted fields as a full substitute for the evidence record without testing audit and dispute requirements."
         },
@@ -50,7 +50,7 @@
       "prompt": "The Tax Lead says: \"OCR confidence will vary by country and receipt style. Should we run a second OCR service in parallel so we can cross-check every submission?\" How do you respond?",
       "options": [
         {
-          "text": "Yes, dual-running two OCR engines from day one gives us the strongest answer. It reduces the chance of missed fields, produces richer data, and lets us compare vendors continuously while the product scales.",
+          "text": "Yes, dual-running two OCR engines from day one gives us the strongest answer. It reduces the chance of missed fields, produces richer data, and lets us compare vendors continuously while the product scales. It also gives leadership one visible programme story, creates a reusable delivery pattern for adjacent requests, and lets us regularise any awkward boundary issues during later rollout waves rather than now.",
           "correct": false,
           "explanation": "The quality concern is understandable. This is failure mode D — scope explosion: it jumps to a materially heavier operating model before the room has defined acceptable confidence levels or review behaviour."
         },

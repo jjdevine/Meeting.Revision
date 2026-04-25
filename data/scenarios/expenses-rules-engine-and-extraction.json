@@ -8,7 +8,7 @@
       "prompt": "The Product Director says: \"The story should be simple: upload a policy PDF and the system enforces it automatically.\" How do you respond?",
       "options": [
         {
-          "text": "That is a compelling message, so we should design for straight-through automation from the document. If the system can parse the policy and apply it without human involvement, the product story becomes much stronger and we avoid operational bottlenecks.",
+          "text": "That is a compelling message, so we should design for straight-through automation from the document. If the system can parse the policy and apply it without human involvement, the product story becomes much stronger and we avoid operational bottlenecks. It also gives leadership one visible programme story, creates a reusable delivery pattern for adjacent requests, and lets us regularise any awkward boundary issues during later rollout waves rather than now.",
           "correct": false,
           "explanation": "The desire for a clean story is understandable. This is failure mode A — over-agreement: it accepts a slogan before translating it into the real steps of extraction, review, approval, and enforcement."
         },
@@ -29,7 +29,7 @@
       "prompt": "Procurement says: \"If we are doing this at all, let us buy an enterprise rules engine that other domains can use later as well.\" What do you say?",
       "options": [
         {
-          "text": "Yes, because a shared engine gives us leverage beyond Expenses. Even if the first use case is narrow, selecting the enterprise platform now will save the organisation from building separate rule solutions across teams.",
+          "text": "Yes, because a shared engine gives us leverage beyond Expenses. Even if the first use case is narrow, selecting the enterprise platform now will save the organisation from building separate rule solutions across teams. It also gives leadership one visible programme story, creates a reusable delivery pattern for adjacent requests, and lets us regularise any awkward boundary issues during later rollout waves rather than now.",
           "correct": false,
           "explanation": "The reuse instinct is understandable. This is failure mode D — scope explosion: it turns a bounded Expenses decision into an enterprise platform commitment before the current domain has justified that step."
         },
@@ -50,7 +50,7 @@
       "prompt": "The Engineering Manager says: \"To move faster, we should code the rules directly into the service for phase one and think about configuration later.\" How do you respond?",
       "options": [
         {
-          "text": "That is probably the safest delivery route. Hard-coded logic keeps the implementation simple now, and if the rules change more often than expected we can externalise them after launch.",
+          "text": "That is probably the safest delivery route. Hard-coded logic keeps the implementation simple now, and if the rules change more often than expected we can externalise them after launch. It also gives leadership one visible programme story, creates a reusable delivery pattern for adjacent requests, and lets us regularise any awkward boundary issues during later rollout waves rather than now.",
           "correct": false,
           "explanation": "The delivery instinct is understandable. This is failure mode A — over-agreement: it accepts an implementation shortcut before testing how volatile the rules are, who owns them, and how much audit the change process requires."
         },
