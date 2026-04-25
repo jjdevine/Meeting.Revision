@@ -8,7 +8,7 @@
       "prompt": "The Product Director says: \"Let the assistant answer any employee travel question using both company policy and general web knowledge so it feels more intelligent.\" How do you respond?",
       "options": [
         {
-          "text": "That would create the strongest user experience because employees could ask anything and still get a useful answer. If we blend policy text with broader web knowledge, the assistant will feel more capable and reduce the need for people to search elsewhere. It also gives Product a more ambitious AI narrative and postpones the governance questions until the assistant has already grown in scope.",
+          "text": "That would create the strongest user experience because employees could ask anything and still get a useful answer. If we blend policy text with broader web knowledge, the assistant will feel more capable and reduce the need for people to search elsewhere. It also gives Product a more ambitious assistant story and pushes the traceability discussion behind the launch narrative.",
           "correct": false,
           "explanation": "The product ambition is understandable. This is failure mode A — over-agreement: it accepts a broader answer scope before checking whether the feature is guidance grounded in company policy or a general-purpose assistant."
         },
@@ -29,7 +29,7 @@
       "prompt": "Compliance asks: \"Can the assistant also tell managers whether a borderline claim should be approved?\" What do you say?",
       "options": [
         {
-          "text": "Yes, that is the logical next step. If the assistant already knows the policy, it can recommend approval outcomes as well and save managers time on routine decisions. It also gives Product a more ambitious AI narrative and postpones the governance questions until the assistant has already grown in scope.",
+          "text": "Yes, that is the logical next step. If the assistant already knows the policy, it can recommend approval outcomes as well and save managers time on routine decisions. It also gives managers a faster decision-support story and postpones the audit boundary until the assistant is already influencing approvals.",
           "correct": false,
           "explanation": "The desire to improve efficiency is understandable. This is failure mode A — over-agreement: it collapses policy guidance and business authorisation into one feature without respecting the decision boundary."
         },
@@ -50,7 +50,7 @@
       "prompt": "Customer Success says: \"Admins should be able to type quick clarifications straight into the assistant so we do not slow them down with policy publishing steps.\" How do you respond?",
       "options": [
         {
-          "text": "We should allow that because speed matters more than ceremony. If an administrator knows the answer, the assistant should surface it immediately and we can tidy the content model later. It also gives Product a more ambitious AI narrative and postpones the governance questions until the assistant has already grown in scope.",
+          "text": "We should allow that because speed matters more than ceremony. If an administrator knows the answer, the assistant should surface it immediately and we can tidy the content model later. It also gives Customer Success a speed story for admins and delays the governance debate until informal content paths already exist.",
           "correct": false,
           "explanation": "The desire for responsiveness is understandable. This is failure mode A — over-agreement: it accepts an ungoverned content path that weakens source control and traceability."
         },
