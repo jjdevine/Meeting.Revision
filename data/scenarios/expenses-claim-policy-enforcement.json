@@ -8,14 +8,14 @@
       "prompt": "The Finance Controller says: \"Any claim outside policy should be blocked automatically. If we allow submission, people will assume the rule does not matter.\" How do you respond?",
       "options": [
         {
-          "text": "That is the cleanest control model, so we should make every policy breach a hard stop. It gives Finance consistency, removes manager subjectivity, and keeps the product message simple for employees from the first release onward. It also gives leadership one visible programme story, creates a reusable delivery pattern for adjacent requests, and lets us regularise any awkward boundary issues during later rollout waves rather than now.",
+          "text": "That is the cleanest control model, so we should make every policy breach a hard stop. It gives Finance consistency, removes manager subjectivity, and keeps the product message simple for employees from the first release onward. It also gives Finance a stronger control message and postpones the harder operating-model trade-offs until the workflow is already live.",
           "correct": false,
           "explanation": "The desire for consistency is understandable. This is failure mode A — over-agreement: it jumps straight to the heaviest control outcome without first separating advisory rules from decision rules."
         },
         {
           "text": "I would separate warning policies from decision policies before we choose the mechanism. Some breaches may justify a hard stop, but others belong as auditable warnings with manager review. The right split depends on ownership, audit need, and the cost of false negatives versus false positives.",
           "correct": true,
-          "explanation": "This demonstrates the framing pattern and the 5 decision criteria. The answer separates the problem before choosing technology and anchors the room on ownership and audit rather than treating every rule as the same kind of control."
+          "explanation": "This demonstrates the framing pattern and the 5 decision criteria — volatility, ownership, audit, latency, and reuse. The answer separates the problem before choosing technology and anchors the room on ownership and audit rather than treating every rule as the same kind of control."
         },
         {
           "text": "Blocking everything would create too much friction, so I would avoid it. Managers need room to use judgment, and Finance will have to accept that some policy breaches are part of business reality.",
@@ -29,7 +29,7 @@
       "prompt": "The Engineering Manager adds: \"If exceptions need routing, we should stand up a workflow engine now so policy breaches can take different paths later.\" What do you say?",
       "options": [
         {
-          "text": "Yes, we should establish the engine now. Once policy breaches exist, different paths, escalations, and timers will follow, so it is more efficient to invest in the general platform than to revisit workflow architecture after launch. It also gives leadership one visible programme story, creates a reusable delivery pattern for adjacent requests, and lets us regularise any awkward boundary issues during later rollout waves rather than now.",
+          "text": "Yes, we should establish the engine now. Once policy breaches exist, different paths, escalations, and timers will follow, so it is more efficient to invest in the general platform than to revisit workflow architecture after launch. It also gives Finance a stronger control message and postpones the harder operating-model trade-offs until the workflow is already live.",
           "correct": false,
           "explanation": "The wish to avoid rework is understandable. This is failure mode D — scope explosion: it uses a plausible future need to justify a heavier platform decision before the current workflow shape has been bounded."
         },
@@ -50,7 +50,7 @@
       "prompt": "The Payroll Lead asks: \"Employees with multiple assignments often create ambiguity over which cost centre should absorb an out-of-policy claim. Can we infer the most likely one to keep the flow moving?\" How do you respond?",
       "options": [
         {
-          "text": "We should infer it automatically from the employee's primary assignment and only correct it later if someone spots a problem. That keeps the submission flow smooth and avoids asking employees to make finance decisions they may not understand. It also gives leadership one visible programme story, creates a reusable delivery pattern for adjacent requests, and lets us regularise any awkward boundary issues during later rollout waves rather than now.",
+          "text": "We should infer it automatically from the employee's primary assignment and only correct it later if someone spots a problem. That keeps the submission flow smooth and avoids asking employees to make finance decisions they may not understand. It also gives Finance a stronger control message and postpones the harder operating-model trade-offs until the workflow is already live.",
           "correct": false,
           "explanation": "The desire to reduce effort is understandable. This is failure mode A — over-agreement: it turns an ambiguous finance choice into silent system behaviour without testing ownership or audit implications."
         },

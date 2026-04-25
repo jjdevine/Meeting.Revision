@@ -8,7 +8,7 @@
       "prompt": "The VP of Revenue opens: \"Show the Expenses tab to every admin account now, grey it out for customers who have not bought it, and let Sales use the clicks as pipeline data.\" How do you respond?",
       "options": [
         {
-          "text": "We can do that and treat the product navigation as a marketing surface. A greyed-out tab keeps the module visible, gives Revenue a clean upsell story, and lets us measure interest before the launch lands. We can work through any entitlement edge cases during delivery. It also gives leadership one visible programme story, creates a reusable delivery pattern for adjacent requests, and lets us regularise any awkward boundary issues during later rollout waves rather than now.",
+          "text": "We can do that and treat the product navigation as a marketing surface. A greyed-out tab keeps the module visible, gives Revenue a clean upsell story, and lets us measure interest before the launch lands. We can work through any entitlement edge cases during delivery. It also gives Revenue a bolder launch narrative and postpones the awkward entitlement questions until after the conference window.",
           "correct": false,
           "explanation": "The commercial instinct is understandable in the room. This is failure mode A — over-agreement: it accepts the proposal before testing whether live navigation should represent entitlement, discovery, or both. Mixing those concerns creates avoidable confusion for admins and support teams."
         },
@@ -29,7 +29,7 @@
       "prompt": "The Engineering Manager says: \"Claims already has a switch, so the fastest route is to reuse it, relabel the navigation, and sort the model separation out later.\" What do you say?",
       "options": [
         {
-          "text": "That is probably the quickest implementation, so we should take it. Users already associate Claims with spending, and reusing the switch means less engineering effort now. We can unwind the coupling after launch if customers push back. It also gives leadership one visible programme story, creates a reusable delivery pattern for adjacent requests, and lets us regularise any awkward boundary issues during later rollout waves rather than now.",
+          "text": "That is probably the quickest implementation, so we should take it. Users already associate Claims with spending, and reusing the switch means less engineering effort now. We can unwind the coupling after launch if customers push back. It also gives Revenue a bolder launch narrative and postpones the awkward entitlement questions until after the conference window.",
           "correct": false,
           "explanation": "The instinct is understandable in the room. The delivery pressure is real. This is failure mode D — scope explosion through hidden coupling: it trades a short-term shortcut for a muddled domain boundary and assumes the cleanup will be cheap later."
         },
@@ -50,7 +50,7 @@
       "prompt": "Customer Success adds: \"Several design partners want to pilot Expenses in one department before going company-wide. Can we make activation department-scoped for phase one?\" How do you handle it?",
       "options": [
         {
-          "text": "Yes, and we should probably go further and allow activation by department, legal entity, and manager hierarchy from day one. That gives Sales maximum flexibility and avoids another round of architecture work when more rollout patterns appear. It also gives leadership one visible programme story, creates a reusable delivery pattern for adjacent requests, and lets us regularise any awkward boundary issues during later rollout waves rather than now.",
+          "text": "Yes, and we should probably go further and allow activation by department, legal entity, and manager hierarchy from day one. That gives Sales maximum flexibility and avoids another round of architecture work when more rollout patterns appear. It also gives Revenue a bolder launch narrative and postpones the awkward entitlement questions until after the conference window.",
           "correct": false,
           "explanation": "The desire to support pilots is understandable. This is failure mode D — scope explosion: it turns one rollout request into a broad access model without first testing whether the business need truly requires that complexity."
         },

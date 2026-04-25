@@ -8,7 +8,7 @@
       "prompt": "The Payroll Director says: \"Mileage rates already change in Payroll. Expenses should consume them rather than own a second rate table.\" How do you respond?",
       "options": [
         {
-          "text": "We should mirror the rates into Expenses and let the team manage them there for speed. A local copy gives the module more autonomy, removes a dependency on Payroll, and makes it easier to change the experience later. It also gives leadership one visible programme story, creates a reusable delivery pattern for adjacent requests, and lets us regularise any awkward boundary issues during later rollout waves rather than now.",
+          "text": "We should mirror the rates into Expenses and let the team manage them there for speed. A local copy gives the module more autonomy, removes a dependency on Payroll, and makes it easier to change the experience later. It also gives leadership a bigger integration-and-insight story and postpones the ownership trade-offs until downstream commitments already exist.",
           "correct": false,
           "explanation": "The autonomy concern is understandable. This is failure mode A — over-agreement: it creates duplicate ownership before testing whether the business really wants a second source for the same commercial rule."
         },
@@ -39,7 +39,7 @@
           "explanation": "This demonstrates separating operational reporting needs from later cross-domain analytics choices. The answer protects future reuse without letting the data platform debate take over the meeting."
         },
         {
-          "text": "If analytics matters at all, we should probably design the full pipeline now, including the lakehouse model, anomaly engine inputs, and downstream reporting semantics. That avoids redesign once the fraud use case arrives. It also gives leadership one visible programme story, creates a reusable delivery pattern for adjacent requests, and lets us regularise any awkward boundary issues during later rollout waves rather than now.",
+          "text": "If analytics matters at all, we should probably design the full pipeline now, including the lakehouse model, anomaly engine inputs, and downstream reporting semantics. That avoids redesign once the fraud use case arrives. It also gives leadership a bigger integration-and-insight story and postpones the ownership trade-offs until downstream commitments already exist.",
           "correct": false,
           "explanation": "The wish to avoid rework is understandable. This is failure mode D — scope explosion: it uses a plausible future use case to justify a much heavier programme than the current question requires."
         }
@@ -50,7 +50,7 @@
       "prompt": "The Integrations Manager says: \"Customers will expect approved mileage claims to flow straight into every finance and payroll package we support. Let us plan direct connectors to all major vendors now.\" How do you respond?",
       "options": [
         {
-          "text": "That is the right ambition, and we should commit to the connector roadmap now. The fastest way to satisfy the market is to begin building direct integrations for the full vendor set rather than inserting another layer in the middle. It also gives leadership one visible programme story, creates a reusable delivery pattern for adjacent requests, and lets us regularise any awkward boundary issues during later rollout waves rather than now.",
+          "text": "That is the right ambition, and we should commit to the connector roadmap now. The fastest way to satisfy the market is to begin building direct integrations for the full vendor set rather than inserting another layer in the middle. It also gives leadership a bigger integration-and-insight story and postpones the ownership trade-offs until downstream commitments already exist.",
           "correct": false,
           "explanation": "The market pressure is understandable. This is failure mode A — over-agreement: it accepts a broad connector commitment before separating internal handoff architecture from external partner delivery choices."
         },
