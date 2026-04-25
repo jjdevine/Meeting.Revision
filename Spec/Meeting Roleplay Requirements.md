@@ -117,15 +117,19 @@ The difficulty bar to aim for: a user who has read and understood the playbook m
 
 ## Scope and domain alignment
 
-Scenarios must stay within the domain covered by the rest of the app: Azure-based HR, payroll, talent, and absence platforms. The meeting problems must be realistic for this context — architecture decisions an architect at a mid-to-large organisation would genuinely face when working on these systems.
+Scenarios should generally stay within the domain covered by the rest of the app: Azure-based HR, payroll, talent, and absence platforms. This is the natural home for most scenarios and keeps the content aligned with the skills practised elsewhere.
 
-Each new scenario must test a distinct primary skill from the playbook. Before writing a scenario, identify:
+However, the primary goal is professional development. A scenario set in a related domain — finance systems, enterprise integration programmes, platform modernisation, or any context where an architect faces equivalent pressures — is acceptable if it exercises the same core skills. The domain is a setting, not a constraint.
+
+The meeting problems should be realistic for the context chosen — architecture decisions an architect at a mid-to-large organisation would genuinely face.
+
+Before writing a scenario, identify:
 
 1. The primary architectural skill being tested (e.g., separating integration from domain orchestration)
 2. The secondary skill tested by at least two questions (e.g., handling overreach, closing correctly)
 3. The stakeholder combination and business pressure that makes the scenario feel real
 
-Do not write a scenario that tests the same primary skill as an existing scenario unless it approaches it from a meaningfully different angle (different domain, different stakeholder dynamics, different overreach pattern).
+Prefer scenarios that test a distinct primary skill from the playbook not already well covered. If a scenario revisits a skill covered elsewhere, it should approach it from a meaningfully different angle — different domain, different stakeholder dynamics, or a different overreach pattern — so that the user gains something new from completing it.
 
 ---
 
