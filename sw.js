@@ -74,10 +74,12 @@ self.addEventListener("fetch", (event) => {
           return response;
         })
         .catch(() => {
-          // Return a simple offline fallback for navigation requests
+          // For navigation requests, serve the cached shell so the app loads offline
           if (event.request.mode === "navigate") {
             return caches.match("/index.html");
           }
+          // For other requests (assets, API calls), signal a network failure
+          return Response.error();
         });
     })
   );
