@@ -2,7 +2,9 @@
   "use strict";
 
   // ── Supabase client ────────────────────────────────────────────
-  const supabase = (typeof SUPABASE_URL !== "undefined" && SUPABASE_URL !== "https://YOUR_PROJECT_REF.supabase.co")
+  const supabase = (typeof SUPABASE_URL !== "undefined" &&
+    SUPABASE_URL !== "https://YOUR_PROJECT_REF.supabase.co" &&
+    typeof window.supabase !== "undefined")
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     : null;
   let currentUser = null;
